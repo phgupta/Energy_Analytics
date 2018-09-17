@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Energy_Analytics.Clean_Data &mdash; Energy Analytics 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Energy Analytics
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">Energy_Analytics</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Energy Analytics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>Energy_Analytics.Clean_Data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Energy_Analytics.Clean_Data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; This script cleans a dataframe according to user specifications.</span>
+
+<span class="sd">To Do,</span>
+<span class="sd">1. For remove_outliers() - may need a different boundary for each column.</span>
+
+<span class="sd">Authors,</span>
+<span class="sd">Last modified: September 15 2018</span>
+<span class="sd">@author Marco Pritoni &lt;marco.pritoni@gmail.com&gt;</span>
+<span class="sd">@author Pranav Gupta &lt;phgupta@ucdavis.edu&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+
+
+<div class="viewcode-block" id="Clean_Data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data">[docs]</a><span class="k">class</span> <span class="nc">Clean_Data</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot; This class cleans a dataframe according to user specification &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructor.</span>
+<span class="sd">        </span>
+<span class="sd">        This class stores the original data (passed in through the constructor) and the cleaned data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df  : pd.DataFrame()</span>
+<span class="sd">            Dataframe to clean.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Clean_Data.drop_columns"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.drop_columns">[docs]</a>    <span class="k">def</span> <span class="nf">drop_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Drop columns in dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col     : str</span>
+<span class="sd">            Column to drop.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.rename_columns"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.rename_columns">[docs]</a>    <span class="k">def</span> <span class="nf">rename_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Rename columns of dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col     : list(str)</span>
+<span class="sd">            List of columns to rename.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">col</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.resample_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.resample_data">[docs]</a>    <span class="k">def</span> <span class="nf">resample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">freq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Resample dataframe.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        1. Also need to deal with energy quantities where resampling is .sum()</span>
+<span class="sd">        2. Figure out how to apply different functions to different columns .apply()</span>
+<span class="sd">        3. This theoretically work in upsampling too, check docs</span>
+<span class="sd">            http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.resample.html </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data    : pd.DataFrame()</span>
+<span class="sd">            Dataframe to resample</span>
+<span class="sd">        freq    : str</span>
+<span class="sd">            Resampling frequency i.e. d, h, 15T... </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame()</span>
+<span class="sd">            Dataframe containing resampled data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.interpolate_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.interpolate_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Interpolate dataframe.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data    : pd.DataFrame()</span>
+<span class="sd">            Dataframe to interpolate</span>
+<span class="sd">        limit   : int</span>
+<span class="sd">            Interpolation limit.</span>
+<span class="sd">        method  : str</span>
+<span class="sd">            Interpolation method.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame()</span>
+<span class="sd">            Dataframe containing interpolated data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>        
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.remove_na"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.remove_na">[docs]</a>    <span class="k">def</span> <span class="nf">remove_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">remove_na_how</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove NAs from dataframe.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data            : pd.DataFrame()</span>
+<span class="sd">            Dataframe to remove NAs from.</span>
+<span class="sd">        remove_na_how   : str</span>
+<span class="sd">            Specificies how to remove NA i.e. all, any...</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame()</span>
+<span class="sd">            Dataframe with NAs removed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="n">remove_na_how</span><span class="p">)</span>        
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.remove_outliers"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.remove_outliers">[docs]</a>    <span class="k">def</span> <span class="nf">remove_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sd_val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove outliers from dataframe.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        1. This function excludes all lines with NA in all columns.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data    : pd.DataFrame()</span>
+<span class="sd">            Dataframe to remove outliers from.</span>
+<span class="sd">        sd_val  : int</span>
+<span class="sd">            Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame()</span>
+<span class="sd">            Dataframe with outliers removed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">sd_val</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.remove_out_of_bounds"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.remove_out_of_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">remove_out_of_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">low_bound</span><span class="p">,</span> <span class="n">high_bound</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove out of bound datapoints from dataframe.</span>
+
+<span class="sd">        This function removes all points &lt; low_bound and &gt; high_bound.</span>
+
+<span class="sd">        To Do,</span>
+<span class="sd">        1. Add a different boundary for each column.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data        : pd.DataFrame()</span>
+<span class="sd">            Dataframe to remove bounds from.</span>
+<span class="sd">        low_bound   : int</span>
+<span class="sd">            Low bound of the data.</span>
+<span class="sd">        high_bound  : int</span>
+<span class="sd">            High bound of the data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame()</span>
+<span class="sd">            Dataframe with out of bounds removed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="n">data</span> <span class="o">&gt;</span> <span class="n">low_bound</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">high_bound</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>        
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Clean_Data.clean_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Clean_Data.Clean_Data.clean_data">[docs]</a>    <span class="k">def</span> <span class="nf">clean_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                    <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                    <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_na_how</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">,</span> 
+                    <span class="n">remove_outliers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sd_val</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                    <span class="n">remove_out_of_bounds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">low_bound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high_bound</span><span class="o">=</span><span class="mi">9998</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Clean dataframe.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resample                : bool</span>
+<span class="sd">            Indicates whether to resample data or not.</span>
+<span class="sd">        freq                    : str</span>
+<span class="sd">            Resampling frequency i.e. d, h, 15T... </span>
+<span class="sd">        interpolate             : bool</span>
+<span class="sd">            Indicates whether to interpolate data or not.</span>
+<span class="sd">        limit                   : int</span>
+<span class="sd">            Interpolation limit.</span>
+<span class="sd">        method                  : str</span>
+<span class="sd">            Interpolation method.</span>
+<span class="sd">        remove_na               : bool</span>
+<span class="sd">            Indicates whether to remove NAs or not.</span>
+<span class="sd">        remove_na_how           : str</span>
+<span class="sd">            Specificies how to remove NA i.e. all, any...</span>
+<span class="sd">        remove_outliers         : bool</span>
+<span class="sd">            Indicates whether to remove outliers or not.</span>
+<span class="sd">        sd_val                  : int</span>
+<span class="sd">            Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</span>
+<span class="sd">        remove_out_of_bounds    : bool</span>
+<span class="sd">            Indicates whether to remove out of bounds datapoints or not.</span>
+<span class="sd">        low_bound               : int</span>
+<span class="sd">            Low bound of the data.</span>
+<span class="sd">        high_bound              : int</span>
+<span class="sd">            High bound of the data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Store copy of the original data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span>
+
+        <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">freq</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">if</span> <span class="n">interpolate</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+        
+        <span class="k">if</span> <span class="n">remove_na</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_na</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">remove_na_how</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">if</span> <span class="n">remove_outliers</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_outliers</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sd_val</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">if</span> <span class="n">remove_out_of_bounds</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_out_of_bounds</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">low_bound</span><span class="p">,</span> <span class="n">high_bound</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">data</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pranav Gupta.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

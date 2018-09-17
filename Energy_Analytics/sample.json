@@ -1,0 +1,75 @@
+{
+	"Time (UTC)": "2018-08-26 05:53:21",
+
+	"Import": {
+		"Source": "CSV",
+		"File Name": "*",
+		"Folder Name": "../../../../Desktop/LBNL/Data/",
+		"Head Row": [5, 5, 0],
+		"Index Col": 0,
+		"Convert Col": true,
+		"Concat Files": false,
+		"Saved File": "results/imported_data.csv"
+	},
+
+	"Clean": {
+		"Rename Col": ["OAT", "RelHum_Avg", "CHW_Elec", "Elec", "Gas", "HW_Heat"],
+		"Drop Col": "Elec",
+		"Resample": true,
+		"Frequency": "h",
+		"Interpolate": true,
+		"Limit": 1,
+		"Method": "linear",
+		"Remove NA": true,
+		"Remove NA How": "any",
+		"Remove Outliers": true,
+		"SD Val": 3,
+		"Remove Out of Bounds": true,
+		"Low Bound": 0,
+		"High Bound": 9998,
+		"Source": "results/imported_data.csv",
+		"Saved File": "results/cleaned_data.csv"
+	},
+
+	"Preprocess": {
+		"HDH CPoint": 65,
+		"CDH CPoint": 65,
+		"HDH CDH Calc Col": "OAT",
+		"Col Degree": null,
+		"Degree": null,
+		"Year": false,
+		"Month": false,
+		"Week": true,
+		"Time of Day": true,
+		"Day of Week": false,
+		"Day of Year": false,
+		"Variables to Expand": ["tod", "week"],
+		"Source": "results/cleaned_data.csv",
+		"Saved File": "results/preprocessed_data.csv"
+	},
+
+	"Model": {
+		"Independent Col": null,
+		"Dependent Col": "HW_Heat",
+		"Time Period": ["2014-01", "2014-12", "2015-01", "2015-12", "2016-01", "2016-12"],
+		"Exclude Time Period": ["2014-06", "2014-07"],
+		"Alphas": [0.0001, 0.0017782794100389228, 0.03162277660168379, 0.5623413251903491, 10.0],
+		"CV": 5,
+		"Plot": true,
+		"Fig Size": [18, 5],
+		"Optimal Model": "ElasticNet Regression",
+		"Custom Model's Metrics": {
+			"r2": 0.7258781024535248,
+			"mse": 132.3675245307956,
+			"rmse": 11.50510862750959,
+			"adj_r2": 0.7197596473140195
+		},
+		"Optimal Model's Metrics": {
+			"r2": 0.7450743095285816,
+			"mse": 138.17286119453044,
+			"rmse": 11.75469528292973,
+			"adj_r2": 0.72506560707879
+		},
+		"Source": "results/preprocessed_data.csv"
+	}
+}

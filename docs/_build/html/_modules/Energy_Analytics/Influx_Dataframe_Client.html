@@ -1,0 +1,699 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Energy_Analytics.Influx_Dataframe_Client &mdash; Energy Analytics 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Energy Analytics
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">Energy_Analytics</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Energy Analytics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>Energy_Analytics.Influx_Dataframe_Client</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Energy_Analytics.Influx_Dataframe_Client</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">influxdb</span> <span class="k">import</span> <span class="n">InfluxDBClient</span>
+<span class="kn">from</span> <span class="nn">influxdb</span> <span class="k">import</span> <span class="n">DataFrameClient</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Two dataframe formats are accepted both are shown below:</span>
+<span class="sd">                       time              ap_name  AP_count             parse_ap_name building_number floor room  test_field</span>
+<span class="sd">0 2016-04-01 07:00:00+00:00  ap135-100-103d-r177       1.0  [ap135, 100, 103d, r177]             100     1  03d         1.0</span>
+<span class="sd">1 2016-04-01 07:00:00+00:00   ap135-100-121-r177       3.0   [ap135, 100, 121, r177]             100     1  121         1.0</span>
+<span class="sd">2 2016-04-01 07:00:00+00:00   ap135-100-139-r177       6.0   [ap135, 100, 139, r177]             100     1  139         1.0</span>
+<span class="sd">3 2016-04-01 07:00:00+00:00   ap135-100-140-r177       5.0   [ap135, 100, 140, r177]             100     1  140         1.0</span>
+<span class="sd">4 2016-04-01 07:00:00+00:00  ap135-100-149b-r177       1.0  [ap135, 100, 149b, r177]             100     1  49b         1.0</span>
+
+<span class="sd">The same dataframe can also be given as where the index is the time:</span>
+<span class="sd">                           AP_count              ap_name building_number floor room  test_field</span>
+<span class="sd">2016-04-01 07:00:00+00:00         1  ap135-100-103d-r177             100     1  03d           1</span>
+<span class="sd">2016-04-01 07:00:00+00:00         5   ap135-100-150-r177             100     1  150           1</span>
+<span class="sd">2016-04-01 07:00:00+00:00         3   ap135-100-121-r177             100     1  121           1</span>
+<span class="sd">2016-04-01 07:00:00+00:00         5   ap135-100-140-r177             100     1  140           1</span>
+<span class="sd">2016-04-01 07:00:00+00:00         1  ap135-100-149b-r177             100     1  49b           1</span>
+
+<span class="sd">This is converted to the following json before being given to DataFrameClient during write</span>
+<span class="sd">[</span>
+<span class="sd">  {</span>
+<span class="sd">    &#39;fields&#39;: {</span>
+<span class="sd">        &#39;AP_count&#39;: 1.0,</span>
+<span class="sd">        &#39;test_field&#39;: 1.0</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;time&#39;: Timestamp(&#39;2016-04-01 07:00:00+0000&#39;, tz=&#39;UTC&#39;),</span>
+<span class="sd">    &#39;tags&#39;: {</span>
+<span class="sd">        &#39;floor&#39;: &#39;1&#39;,</span>
+<span class="sd">        &#39;building_number&#39;: &#39;100&#39;,</span>
+<span class="sd">        &#39;ap_name&#39;: &#39;ap135-100-103d-r177&#39;,</span>
+<span class="sd">        &#39;room&#39;: &#39;03d&#39;</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;measurement&#39;: &#39;wifi_data9&#39;</span>
+<span class="sd">    },</span>
+<span class="sd">  {</span>
+<span class="sd">    &#39;fields&#39;: {</span>
+<span class="sd">        &#39;AP_count&#39;: 3.0,</span>
+<span class="sd">        &#39;test_field&#39;: 1.0</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;time&#39;: Timestamp(&#39;2016-04-01 07:00:00+0000&#39;, tz=&#39;UTC&#39;),</span>
+<span class="sd">    &#39;tags&#39;: {</span>
+<span class="sd">        &#39;floor&#39;: 1,</span>
+<span class="sd">        &#39;building_number&#39;: &#39;100&#39;,</span>
+<span class="sd">        &#39;ap_name&#39;: &#39;ap135-100-121-r177&#39;,</span>
+<span class="sd">        &#39;room&#39;: &#39;121&#39;</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;measurement&#39;: &#39;wifi_data9&#39;</span>
+<span class="sd">    },</span>
+<span class="sd">  {</span>
+<span class="sd">    &#39;fields&#39;: {</span>
+<span class="sd">        &#39;AP_count&#39;: 6.0,</span>
+<span class="sd">        &#39;test_field&#39;: 1.0</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;time&#39;: Timestamp(&#39;2016-04-01 07:00:00+0000&#39;, tz=&#39;UTC&#39;),</span>
+<span class="sd">    &#39;tags&#39;: {</span>
+<span class="sd">        &#39;floor&#39;: 1,</span>
+<span class="sd">        &#39;building_number&#39;: &#39;100&#39;,</span>
+<span class="sd">        &#39;ap_name&#39;: &#39;ap135-100-139-r177&#39;,</span>
+<span class="sd">        &#39;room&#39;: &#39;139&#39;</span>
+<span class="sd">        },</span>
+<span class="sd">  &#39;measurement&#39;: &#39;wifi_data9&#39;</span>
+<span class="sd">    },</span>
+<span class="sd">  {</span>
+<span class="sd">    &#39;fields&#39;: {</span>
+<span class="sd">        &#39;AP_count&#39;: 5.0,</span>
+<span class="sd">        &#39;test_field&#39;: 1.0</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;time&#39;: Timestamp(&#39;2016-04-01 07:00:00+0000&#39;, tz=&#39;UTC&#39;),</span>
+<span class="sd">    &#39;tags&#39;: {</span>
+<span class="sd">        &#39;floor&#39;: 1,</span>
+<span class="sd">        &#39;building_number&#39;: &#39;100&#39;,</span>
+<span class="sd">        &#39;ap_name&#39;: &#39;ap135-100-140-r177&#39;,</span>
+<span class="sd">        &#39;room&#39;: &#39;140&#39;</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;measurement&#39;: &#39;wifi_data9&#39;},</span>
+<span class="sd">  {</span>
+<span class="sd">    &#39;fields&#39;: {</span>
+<span class="sd">        &#39;AP_count&#39;: 1.0,</span>
+<span class="sd">        &#39;test_field&#39;: 1.0</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;time&#39;: Timestamp(&#39;2016-04-01 07:00:00+0000&#39;, tz=&#39;UTC&#39;),</span>
+<span class="sd">    &#39;tags&#39;: {</span>
+<span class="sd">        &#39;floor&#39;: &#39;1&#39;,</span>
+<span class="sd">        &#39;building_number&#39;: &#39;100&#39;,</span>
+<span class="sd">        &#39;ap_name&#39;: &#39;ap135-100-149b-r177&#39;,</span>
+<span class="sd">        &#39;room&#39;: &#39;49b&#39;</span>
+<span class="sd">        },</span>
+<span class="sd">    &#39;measurement&#39;: &#39;wifi_data9&#39;</span>
+<span class="sd">    }</span>
+<span class="sd"> ]</span>
+<span class="sd">Time can be specified in epoch time or Influx format</span>
+
+<span class="sd">When making queries, identifiers may be put into Double quotes depending on the</span>
+<span class="sd">characters they contain. String literals i.e. tag values must be in single quotes!</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="transform_to_dict"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.transform_to_dict">[docs]</a><span class="k">def</span> <span class="nf">transform_to_dict</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns a dictionary where the keys are passed in as a list and the values</span>
+<span class="sd">    are obtained from the apply function as a row</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">dic</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dic</span></div>
+
+
+<div class="viewcode-block" id="Influx_Dataframe_Client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client">[docs]</a><span class="k">class</span> <span class="nc">Influx_Dataframe_Client</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c1">#Connection details</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">use_ssl</span><span class="o">=</span> <span class="kc">False</span>
+    <span class="n">verify_ssl_is_on</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#clients for influxDB both DataFrameClient and the InfluxDBClient</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">df_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">db_section</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Constructor reads credentials from config file and establishes a connection</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># read from config file</span>
+        <span class="n">Config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">Config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">db_section</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">[</span><span class="n">db_section</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">[</span><span class="s2">&quot;DB_config&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;database&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;protocol&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;port&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_ssl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span><span class="s2">&quot;use_ssl&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verify_ssl_is_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_config</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span><span class="s2">&quot;verify_ssl_is_on&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__make_client</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">__make_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This function is not necessary for the user.</span>
+
+<span class="sd">        Setup client both InfluxDBClient and DataFrameClient</span>
+<span class="sd">        DataFrameClient is for queries and InfluxDBClient is for writes</span>
+<span class="sd">        Not needed by user</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">InfluxDBClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+                    <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                    <span class="n">database</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span><span class="n">ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ssl</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify_ssl_is_on</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span> <span class="o">=</span> <span class="n">DataFrameClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+                    <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                    <span class="n">database</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span><span class="n">ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ssl</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify_ssl_is_on</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__build_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This function is not necessary for the user.</span>
+
+<span class="sd">        Builds json dictionary list out of dataframe given in the format expected</span>
+<span class="sd">        by InfluxDBClient. Both tags and fields need to be lists which include</span>
+<span class="sd">        the columns in the dataframe that are going to be included in the tags</span>
+<span class="sd">        and fields dictionary</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;measurement&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">tags</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transform_to_dict</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">fields</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transform_to_dict</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">json</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s2">&quot;measurement&quot;</span><span class="p">,</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="s2">&quot;fields&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">json</span>
+
+    <span class="k">def</span> <span class="nf">__post_to_DB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This function is necessary for the user.</span>
+
+<span class="sd">        Sends json dictionary list to specified database to InfluxDBClient</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">write_points</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">16384</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.expose_influx_client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_influx_client">[docs]</a>    <span class="k">def</span> <span class="nf">expose_influx_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Expose InfluxDBClient to user so they can utilize all functions of</span>
+<span class="sd">        InfluxDBClient if functionality is not provided by</span>
+<span class="sd">        Influx_Dataframe_Client module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.expose_data_client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_data_client">[docs]</a>    <span class="k">def</span> <span class="nf">expose_data_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Expose DataFrameClient to user so they can utilize all functions of</span>
+<span class="sd">        DataFrameClient if functionality is not provided by</span>
+<span class="sd">        Influx_Dataframe_Client module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span></div>
+
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.write_dataframe"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">write_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Write a dataframe to the specified measurement, the user needs to</span>
+<span class="sd">        specify the tags and fields that are to be included in the measurement</span>
+<span class="sd">        as lists</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1">#set default database</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">database</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
+
+
+        <span class="k">if</span> <span class="s1">&#39;time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> <span class="c1">#check to see if the time column is present</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span> <span class="c1">#change the index to name to time</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span> <span class="c1"># give seqeuential index to dataframe</span>
+
+        <span class="c1">#Turn dataframe into correct json format as described in beginning comments</span>
+        <span class="n">json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__build_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__post_to_DB</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.write_csv"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_csv">[docs]</a>    <span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">csv_fileName</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Take in csv file and upload to database. User must specify list of tags</span>
+<span class="sd">        and a list of fields as well as the csv file name. Database is optional</span>
+<span class="sd">        by default the database specified by the client will be used</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1">#set default database</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">database</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_fileName</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">database</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.write_json"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_json">[docs]</a>    <span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Take in json in the form of a list of dictionaries or a single dictionary</span>
+<span class="sd">        and upload to database. User must specify list of tags and a list of fields as well as the csv file name. Database is optional</span>
+<span class="sd">        by default the database specified by the client will be used</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1">#set default database</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">database</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
+
+        <span class="c1">#check to see if json is a list of dictionaries or a single dictionary</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__post_to_DB</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">json</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="p">]</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__post_to_DB</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.list_DB"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_DB">[docs]</a>    <span class="k">def</span> <span class="nf">list_DB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of all the names of the databases on the influxDB server</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">list_to_return</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">DB_dict_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_list_database</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">DB_dict_list</span><span class="p">)):</span>
+            <span class="n">list_to_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DB_dict_list</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">list_to_return</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.list_retention_policies"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_retention_policies">[docs]</a>    <span class="k">def</span> <span class="nf">list_retention_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of dictionaries with all the databases</span>
+<span class="sd">        on the influxDB server and their associated retention policies</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">DB_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_DB</span><span class="p">()</span>
+        <span class="n">dict_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">DB_list</span><span class="p">)):</span>
+            <span class="n">temp_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">temp_dict</span><span class="p">[</span><span class="n">DB_list</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_list_retention_policies</span><span class="p">(</span><span class="n">DB_list</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+            <span class="n">dict_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_list</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.query_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.query_data">[docs]</a>    <span class="k">def</span> <span class="nf">query_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">query</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sends the specified query string to the specified database using</span>
+<span class="sd">        InfluxDBClient the query must be in Influx Query Language</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;wifi_data8&#39;</span><span class="p">,</span><span class="n">chunked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.query"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">use_database</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sends the specified query string to the specified database using the</span>
+<span class="sd">        DataframeClient the query must be in Influx Query Language returns a</span>
+<span class="sd">        dataframe</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">use_database</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">query_result</span><span class="o">.</span><span class="n">raw</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.show_meta_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.show_meta_data">[docs]</a>    <span class="k">def</span> <span class="nf">show_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of TAG KEYS for specified measurement in specified database</span>
+<span class="sd">        Equivalent query is below</span>
+<span class="sd">        SHOW TAG KEYS FROM &quot;MEASUREMENT_ARGUMENT&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#generate query string and make query</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SHOW TAG KEYS FROM &#39;</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">measurement</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+        <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
+        <span class="c1">#add all of the tag values into a list to be returned</span>
+        <span class="c1">#query result is a generator</span>
+        <span class="k">for</span> <span class="n">temp_dict</span> <span class="ow">in</span> <span class="n">query_result</span><span class="o">.</span><span class="n">get_points</span><span class="p">():</span>
+            <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_dict</span><span class="p">[</span><span class="s1">&#39;tagKey&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">result_list</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.get_meta_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.get_meta_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of TAG VALUES for specified measurement in specified database</span>
+<span class="sd">        Equivalent query is below</span>
+<span class="sd">        SHOW TAG VALUES FROM &quot;MEASUREMENT_ARGUMENT&quot; WITH KEY IN = &quot;TAG_ARGUMENT&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#generate query string and make query</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SHOW TAG VALUES FROM &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">measurement</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;WITH KEY = </span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span>
+        <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
+
+        <span class="c1">#add all of the tag values into a list to be returned</span>
+        <span class="c1">#query result is a generator</span>
+        <span class="k">for</span> <span class="n">temp_dict</span> <span class="ow">in</span> <span class="n">query_result</span><span class="o">.</span><span class="n">get_points</span><span class="p">():</span>
+            <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_dict</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">result_list</span></div>
+<div class="viewcode-block" id="Influx_Dataframe_Client.get_meta_data_time_series"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.get_meta_data_time_series">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_data_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns tags along with the time stamps</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1">#get all data with from measurement</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">specific_query</span><span class="p">(</span><span class="n">database</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">tags</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.specific_query"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.specific_query">[docs]</a>    <span class="k">def</span> <span class="nf">specific_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">groupList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">groupTime</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This function returns a dataframe with the results of the specified query</span>
+<span class="sd">        the query is built using the parameters provided by the user and</span>
+<span class="sd">        formatted into Influx Query Language. All fields are optional except the</span>
+<span class="sd">        database and measurement parameter. This function always returns a</span>
+<span class="sd">        dataframe even if the response has no results</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">tag_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">time_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">group_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1">#Create base query with fields and measurement</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s2">&quot;SELECT &quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fields</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s1">&#39;* &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot; ,&quot;</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">fields</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot; FROM </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">measurement</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+
+        <span class="c1">#Create time portion of query if it is specified</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">!=</span> <span class="kc">None</span> <span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="c1">#Must have a start_time for our query</span>
+                <span class="c1">#Check to see format of time that was specified</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;time &gt; &quot;</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                    <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">start_time</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span>
+                <span class="k">if</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">end_time</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="c1">#Must have a end_time for our query</span>
+                <span class="c1">#Check to see format of time that was specified</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                    <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot; AND &quot;</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;time &lt; &quot;</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                    <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">end_time</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+                    <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span>
+
+
+        <span class="c1">#Create tag portion of query if it is specified</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tags</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">values</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tags and values do not match raise exception later!&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">BaseException</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tag_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">tag_string</span> <span class="o">=</span> <span class="n">tag_string</span> <span class="o">+</span> <span class="s1">&#39; AND &#39;</span>
+                        <span class="n">tag_string</span> <span class="o">=</span> <span class="n">tag_string</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">tags</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> = </span><span class="se">\&#39;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">&quot;</span>
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tags and values do not match&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">groupList</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot;GROUP BY&quot;</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">groupList</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">groupList</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">):</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot;time(&quot;</span> <span class="o">+</span> <span class="n">groupTime</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">+</span><span class="n">groupList</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+
+        <span class="c1">#Add optional parts of query</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">tag_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot; WHERE &quot;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="n">time_string</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">tag_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot; AND &quot;</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="n">tag_string</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">group_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="n">group_string</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span><span class="n">chunked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">measurement</span> <span class="ow">in</span> <span class="n">df</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">measurement</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#Must have an empty result make empty dataframe</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Influx_Dataframe_Client.delete_based_on_time"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.delete_based_on_time">[docs]</a>    <span class="k">def</span> <span class="nf">delete_based_on_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Delete data from measurement. If no time is specified then all data will</span>
+<span class="sd">        be deleted from the measurement.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">time_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s2">&quot;DELETE FROM </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="o">%</span><span class="n">measurement</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1">#Must have a start_time for our query</span>
+            <span class="c1">#Check to see format of time that was specified</span>
+            <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;time &gt; &quot;</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">start_time</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">end_time</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1">#Must have a end_time for our query</span>
+            <span class="c1">#Check to see format of time that was specified</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot; AND &quot;</span>
+            <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;time &lt; &quot;</span>
+
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">end_time</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span>
+
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+                <span class="n">time_string</span> <span class="o">=</span> <span class="n">time_string</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="s2">&quot; WHERE &quot;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">time_string</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="n">time_string</span>
+
+        <span class="c1"># print(query_string)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span><span class="n">chunked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pranav Gupta.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

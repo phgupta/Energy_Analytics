@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Energy_Analytics.Preprocess_Data &mdash; Energy Analytics 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Energy Analytics
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">Energy_Analytics</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Energy Analytics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>Energy_Analytics.Preprocess_Data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Energy_Analytics.Preprocess_Data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; This script preprocesses a dataframe according to user specifications.</span>
+
+<span class="sd">Authors,</span>
+<span class="sd">Last modified: September 15 2018</span>
+<span class="sd">@author Marco Pritoni &lt;marco.pritoni@gmail.com&gt;</span>
+<span class="sd">@author Pranav Gupta &lt;phgupta@ucdavis.edu&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<div class="viewcode-block" id="Preprocess_Data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data">[docs]</a><span class="k">class</span> <span class="nc">Preprocess_Data</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot; This class preprocesses a dataframe according to user specification &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructor.</span>
+
+<span class="sd">        This class stores the original data (passed in through the constructor) and the preprocessed data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df  : pd.DataFrame()</span>
+<span class="sd">            Dataframe to preprocess.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Preprocess_Data.add_degree_days"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_degree_days">[docs]</a>    <span class="k">def</span> <span class="nf">add_degree_days</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s1">&#39;OAT&#39;</span><span class="p">,</span> <span class="n">hdh_cpoint</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">cdh_cpoint</span><span class="o">=</span><span class="mi">65</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Adds Heating &amp; Cooling Degree Hours.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col         : str</span>
+<span class="sd">            Column name which contains the outdoor air temperature.</span>
+<span class="sd">        hdh_cpoint  : int</span>
+<span class="sd">            Heating degree hours. Defaults to 65.</span>
+<span class="sd">        cdh_cpoint  : int</span>
+<span class="sd">            Cooling degree hours. Defaults to 65.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span>
+
+        <span class="c1"># Calculate hdh</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;hdh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">over_hdh</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">hdh_cpoint</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">over_hdh</span><span class="p">,</span> <span class="s1">&#39;hdh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">over_hdh</span><span class="p">,</span> <span class="s1">&#39;hdh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdh_cpoint</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">over_hdh</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+
+        <span class="c1"># Calculate cdh</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;cdh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">under_cdh</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">cdh_cpoint</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">under_cdh</span><span class="p">,</span> <span class="s1">&#39;cdh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">under_cdh</span><span class="p">,</span> <span class="s1">&#39;cdh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">under_cdh</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">-</span> <span class="n">cdh_cpoint</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Preprocess_Data.add_col_features"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_col_features">[docs]</a>    <span class="k">def</span> <span class="nf">add_col_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Exponentiate columns of dataframe.</span>
+
+<span class="sd">        Basically this function squares/cubes a column. </span>
+<span class="sd">        e.g. df[col^2] = pow(df[col], degree) where degree=2.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col     : list(str)</span>
+<span class="sd">            Column to exponentiate.</span>
+<span class="sd">        degree  : list(str)</span>
+<span class="sd">            Exponentiation degree.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">col</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">degree</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">degree</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;col and degree should have equal length.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span>
+
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">col</span><span class="p">)):</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">col</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">degree</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">col</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">degree</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">degree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    
+                    <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;col and degree should be lists.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Preprocess_Data.add_time_features"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_time_features">[docs]</a>    <span class="k">def</span> <span class="nf">add_time_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">doy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add time features to dataframe.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        year    : bool</span>
+<span class="sd">            Year.</span>
+<span class="sd">        month   : bool</span>
+<span class="sd">            Month.</span>
+<span class="sd">        week    : bool</span>
+<span class="sd">            Week.</span>
+<span class="sd">        tod    : bool</span>
+<span class="sd">            Time of Day.</span>
+<span class="sd">        dow    : bool</span>
+<span class="sd">            Day of Week.</span>
+<span class="sd">        doy    : bool</span>
+<span class="sd">            Day of Year.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span>
+
+        <span class="k">if</span> <span class="n">year</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span>
+        <span class="k">if</span> <span class="n">month</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span>
+        <span class="k">if</span> <span class="n">week</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;week&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">week</span>
+        <span class="k">if</span> <span class="n">tod</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tod&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span>
+        <span class="k">if</span> <span class="n">dow</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;dow&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span>
+        <span class="k">if</span> <span class="n">doy</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;doy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">dayofyear</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Preprocess_Data.create_dummies"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data.create_dummies">[docs]</a>    <span class="k">def</span> <span class="nf">create_dummies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_to_expand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; One-hot encode time features.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        var_to_expand   : list(str)</span>
+<span class="sd">            Variables to one-hot encode, e.g. var_to_expand=[&#39;tod&#39;, &#39;dow&#39;, &#39;year&#39;].</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_to_expand</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">var_to_expand</span><span class="p">:</span>
+                
+                <span class="n">add_var</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">prefix</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
+                
+                <span class="c1"># Add all the columns to the model data</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">add_var</span><span class="p">)</span>
+
+                <span class="c1"># Drop the original column that was expanded</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># Drop last column to remove multi-collinearity</span>
+                <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">col</span><span class="p">]</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">cols</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">data</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pranav Gupta.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

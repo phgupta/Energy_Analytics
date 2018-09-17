@@ -1,0 +1,665 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Energy_Analytics.Model_Data &mdash; Energy Analytics 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Energy Analytics
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">Energy_Analytics</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Energy Analytics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>Energy_Analytics.Model_Data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Energy_Analytics.Model_Data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; This script splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots.</span>
+
+<span class="sd">To Do,</span>
+<span class="sd">1. Break down time_period into baseline_period and projection_period.</span>
+<span class="sd">2. Extend exlude_time_period to allow multiple periods.</span>
+
+<span class="sd">Authors,</span>
+<span class="sd">Last modified: September 15 2018</span>
+<span class="sd">@author Pranav Gupta &lt;phgupta@ucdavis.edu&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LinearRegression</span><span class="p">,</span> <span class="n">LassoCV</span><span class="p">,</span> <span class="n">RidgeCV</span><span class="p">,</span> <span class="n">ElasticNetCV</span><span class="p">,</span> <span class="n">Lasso</span><span class="p">,</span> <span class="n">Ridge</span><span class="p">,</span> <span class="n">ElasticNet</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span><span class="p">,</span> <span class="n">cross_val_score</span><span class="p">,</span> <span class="n">train_test_split</span>
+
+
+<div class="viewcode-block" id="Model_Data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data">[docs]</a><span class="k">class</span> <span class="nc">Model_Data</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot; This script splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots. </span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    figure_count    : int</span>
+<span class="sd">        Keeps track of the number of figures. Primarily useful when using the search function in Wrapper.py.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Static variable to keep count of number of figures</span>
+    <span class="n">figure_count</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">input_col</span><span class="p">,</span> <span class="n">output_col</span><span class="p">,</span> <span class="n">time_period</span><span class="p">,</span> <span class="n">exclude_time_period</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">cv</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructor.</span>
+
+<span class="sd">        To Do</span>
+<span class="sd">        -----</span>
+<span class="sd">        1. Remove alphas as a parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df                      : pd.DataFrame()</span>
+<span class="sd">            Dataframe to model.</span>
+<span class="sd">        input_col               : list(str)</span>
+<span class="sd">            Independent column(s) of dataframe. Defaults to all columns except the last.</span>
+<span class="sd">        output_col              : str</span>
+<span class="sd">            Dependent column of dataframe.</span>
+<span class="sd">        time_period             : list(str)</span>
+<span class="sd">            List of time periods to split the data into baseline and projection periods. It needs to have a start and an end date.</span>
+<span class="sd">        exclude_time_period     : list(str)</span>
+<span class="sd">            List of time periods to exclude for modeling.</span>
+<span class="sd">        alphas                  : list(int)</span>
+<span class="sd">            List of alphas to run regression on.</span>
+<span class="sd">        cv                      : int</span>
+<span class="sd">            Number of folds for cross-validation. </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">input_col</span><span class="p">:</span> <span class="c1"># Using all columns except the last as input_col</span>
+            <span class="n">input_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="n">input_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_col</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_col</span> <span class="o">=</span> <span class="n">input_col</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;Input column should be a list.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_col</span> <span class="o">=</span> <span class="n">input_col</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">output_col</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;Please provide the target column.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;Target column should be a string.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_col</span> <span class="o">=</span> <span class="n">output_col</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time_period</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exclude_time_period</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;time_periods need to be a multiple of 2 (i.e. have a start and end date)&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span> <span class="o">=</span> <span class="n">time_period</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exclude_time_period</span> <span class="o">=</span> <span class="n">exclude_time_period</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alphas</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alphas</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;alphas should be a list of int</span><span class="se">\&#39;</span><span class="s1">s or numpy ndarray.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span> <span class="o">=</span> <span class="n">alphas</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span>        <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>    <span class="c1"># Baseline&#39;s indepndent columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span>       <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>    <span class="c1"># Baseline&#39;s dependent column</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span>              <span class="o">=</span> <span class="kc">None</span>              <span class="c1"># Best Model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model_name</span>    <span class="o">=</span> <span class="kc">None</span>              <span class="c1"># Best Model&#39;s name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span>             <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>    <span class="c1"># Best Model&#39;s predictions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_true</span>             <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>    <span class="c1"># Testing set&#39;s true values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span>       <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span>             <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># List of models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span>        <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># List of model names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span>         <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># List of max scores of each model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_scores</span>       <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># List of alpha scores run on all models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span>            <span class="o">=</span> <span class="p">{}</span>                <span class="c1"># Each model&#39;s metrics</span>
+
+
+<div class="viewcode-block" id="Model_Data.split_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.split_data">[docs]</a>    <span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Split data according to time_period values &quot;&quot;&quot;</span>
+
+        <span class="n">time_period1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">exclude_time_period1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_time_period</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude_time_period</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Extract data ranging in time_period1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">time_period1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_col</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">time_period1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_col</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude_time_period</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude_time_period</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># Drop data ranging in exclude_time_period1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">exclude_time_period1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">exclude_time_period1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="c1"># CHECK: Can optimize this part</span>
+        <span class="c1"># Error checking to ensure time_period values are valid</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_col</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_col</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">e</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.adj_r2"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.adj_r2">[docs]</a>    <span class="k">def</span> <span class="nf">adj_r2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate and return adjusted r2 score.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        r2  :</span>
+<span class="sd">            Original r2 score.</span>
+<span class="sd">        n   :</span>
+<span class="sd">            Number of points in data sample.</span>
+<span class="sd">        k   :</span>
+<span class="sd">            Number of variables in model, excluding the constant.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Adjusted R2 score.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.linear_regression"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.linear_regression">[docs]</a>    <span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Linear Regression.</span>
+
+<span class="sd">        This function runs linear regression and stores the, </span>
+<span class="sd">        1. Model</span>
+<span class="sd">        2. Model name </span>
+<span class="sd">        2. Mean score of cross validation</span>
+<span class="sd">        3. Alpha score (=0, since linear regression doesn&#39;t use alpha. However, storing alpha helps in indexing problems while plotting)</span>
+<span class="sd">        4. Metrics</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">)</span>
+        <span class="n">mean_score</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Linear Regression&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_scores</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;Linear Regression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_score</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.lasso_regression"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.lasso_regression">[docs]</a>    <span class="k">def</span> <span class="nf">lasso_regression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Lasso Regression.</span>
+
+<span class="sd">        This function runs lasso regression and stores the,</span>
+<span class="sd">        1. Model</span>
+<span class="sd">        2. Model name</span>
+<span class="sd">        2. Mean score of cross validation</span>
+<span class="sd">        3. Scores for each alpha</span>
+<span class="sd">        4. Metrics</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">score_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">max_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        <span class="n">best_alpha</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Lasso</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">)</span>
+            <span class="n">mean_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+            <span class="n">score_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_score</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">mean_score</span> <span class="o">&gt;</span> <span class="n">max_score</span><span class="p">:</span>
+                <span class="n">max_score</span> <span class="o">=</span> <span class="n">mean_score</span>
+                <span class="n">best_alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+        <span class="n">adj_r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_r2</span><span class="p">(</span><span class="n">max_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lasso</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">best_alpha</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Lasso Regression&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;Lasso Regression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score_list</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.ridge_regression"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.ridge_regression">[docs]</a>    <span class="k">def</span> <span class="nf">ridge_regression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Ridge Regression.</span>
+
+<span class="sd">        This function runs ridge regression and stores the,</span>
+<span class="sd">        1. Model</span>
+<span class="sd">        2. Model name</span>
+<span class="sd">        2. Mean score of cross validation</span>
+<span class="sd">        3. Scores for each alpha</span>
+<span class="sd">        4. Metrics</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">score_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">max_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        <span class="n">best_alpha</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">)</span>
+            <span class="n">mean_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+            <span class="n">score_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_score</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">mean_score</span> <span class="o">&gt;</span> <span class="n">max_score</span><span class="p">:</span>
+                <span class="n">max_score</span> <span class="o">=</span> <span class="n">mean_score</span>
+                <span class="n">best_alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+        <span class="n">adj_r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_r2</span><span class="p">(</span><span class="n">max_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">best_alpha</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Ridge Regression&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;Ridge Regression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score_list</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.elastic_net_regression"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.elastic_net_regression">[docs]</a>    <span class="k">def</span> <span class="nf">elastic_net_regression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; ElasticNet Regression.</span>
+
+<span class="sd">        This function runs elastic net regression and stores the,</span>
+<span class="sd">        1. Model</span>
+<span class="sd">        2. Model name</span>
+<span class="sd">        2. Mean score of cross validation</span>
+<span class="sd">        3. Scores for each alpha</span>
+<span class="sd">        4. Metrics</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">score_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">max_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        <span class="n">best_alpha</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">ElasticNet</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">)</span>
+            <span class="n">mean_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+            <span class="n">score_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_score</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">mean_score</span> <span class="o">&gt;</span> <span class="n">max_score</span><span class="p">:</span>
+                <span class="n">max_score</span> <span class="o">=</span> <span class="n">mean_score</span>
+                <span class="n">best_alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+        <span class="n">adj_r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_r2</span><span class="p">(</span><span class="n">max_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ElasticNet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">best_alpha</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ElasticNet Regression&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;ElasticNet Regression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score_list</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.run_models"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.run_models">[docs]</a>    <span class="k">def</span> <span class="nf">run_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Run all models.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model</span>
+<span class="sd">            Best model</span>
+<span class="sd">        dict</span>
+<span class="sd">            Metrics of the models</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lasso_regression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ridge_regression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elastic_net_regression</span><span class="p">()</span>
+
+        <span class="c1"># Find model with maximum score</span>
+        <span class="n">max_score</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_score</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">max_scores</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_score</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.custom_model"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.custom_model">[docs]</a>    <span class="k">def</span> <span class="nf">custom_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Run custom model provided by user.</span>
+
+<span class="sd">        To Do,</span>
+<span class="sd">        1. Define custom function&#39;s parameters, its data types, and return types</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        func    : function</span>
+<span class="sd">            Custom function</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Custom function&#39;s metrics</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span><span class="p">[</span><span class="s1">&#39;mse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span><span class="p">[</span><span class="s1">&#39;rmse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span><span class="p">[</span><span class="s1">&#39;mse&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_r2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_metrics</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.best_model_fit"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.best_model_fit">[docs]</a>    <span class="k">def</span> <span class="nf">best_model_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Fit data to optimal model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model   : sklearn estimator</span>
+<span class="sd">            Sklearn model</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline_out</span><span class="p">,</span> 
+                                                            <span class="n">test_size</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">y_test</span>                        <span class="c1"># Pandas Series</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>    <span class="c1"># numpy.ndarray</span>
+
+        <span class="c1"># Set all negative values to zero since energy &gt; 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># n and k values for adj r2 score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_test</span> <span class="o">=</span> <span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>   <span class="c1"># Number of points in data sample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k_test</span> <span class="o">=</span> <span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>   <span class="c1"># Number of variables in model, excluding the constant</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.display_metrics"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.display_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">display_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Display metrics of best model.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Best model&#39;s metrics</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_model_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_true</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;mse&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_true</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;rmse&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;mse&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_r2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_test</span><span class="p">)</span>
+
+        <span class="c1"># Normalized Mean Bias Error</span>
+        <span class="n">numerator</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_true</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span><span class="p">)</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_test</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_test</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_true</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_true</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;nmbe&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span></div>
+
+
+<div class="viewcode-block" id="Model_Data.display_plots"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Model_Data.Model_Data.display_plots">[docs]</a>    <span class="k">def</span> <span class="nf">display_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Display plots.</span>
+
+<span class="sd">        This function displays two figures,</span>
+<span class="sd">        1. Alphas v/s Mean cross validated score</span>
+<span class="sd">        2. Baseline and projection plots</span>
+
+<span class="sd">        To Do,</span>
+<span class="sd">        1. Change hardcoding of for loop range.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.figure</span>
+<span class="sd">            Alphas v/s Mean cross validated score</span>
+<span class="sd">        matplotlib.figure</span>
+<span class="sd">            Baseline and projection plots</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Figure 1</span>
+        <span class="c1"># Plot Model Score vs Alphas to get an idea of which alphas work best</span>
+        <span class="n">fig1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">Model_Data</span><span class="o">.</span><span class="n">figure_count</span><span class="p">)</span>
+        <span class="n">Model_Data</span><span class="o">.</span><span class="n">figure_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)):</span>    <span class="c1"># CHECK: Change hardcoding of range(1,..)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_scores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Alphas&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Model Accuracy&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;R2 Score v/s alpha&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+
+        <span class="c1"># Figure 2</span>
+        <span class="c1"># Baseline and projection plots</span>
+        <span class="n">fig2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">Model_Data</span><span class="o">.</span><span class="n">figure_count</span><span class="p">)</span>
+        <span class="n">Model_Data</span><span class="o">.</span><span class="n">figure_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Number of plots to display</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        
+        <span class="c1"># Plot 1 - Baseline</span>
+        <span class="n">base_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">base_df</span><span class="p">[</span><span class="s1">&#39;y_true&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_true</span>
+        <span class="n">base_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pred</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">base_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Baseline Period (</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># Display projection plots</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">num_plot</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_plot</span><span class="p">)</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">project_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>    
+                <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_true&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_col</span><span class="p">]</span>
+                <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_col</span><span class="p">])</span>
+                <span class="n">project_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Projection Period (</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">num_plot</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">fig2</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pranav Gupta.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
