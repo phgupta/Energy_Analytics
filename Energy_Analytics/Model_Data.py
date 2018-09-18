@@ -1,10 +1,10 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-To Do,
+To Do
 1. Break down time_period into baseline_period and projection_period.
 2. Extend exlude_time_period to allow multiple periods.
 
-Authors,
+Authors
 Last modified: September 15 2018
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
@@ -449,6 +449,10 @@ class Model_Data:
                 project_df = pd.DataFrame()    
                 project_df['y_true'] = self.original_data.loc[period, self.output_col]
                 project_df['y_pred'] = self.model.predict(self.original_data.loc[period, self.input_col])
+               
+                # Set all negative values to zero since energy > 0
+                project_df['y_pred'][project_df['y_pred'] < 0] = 0
+
                 project_df.plot(ax=ax, figsize=figsize,
                     title='Projection Period ({}-{})'.format(self.time_period[i], self.time_period[i+1]))
                 num_plot += 1

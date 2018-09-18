@@ -306,10 +306,12 @@ Last modified: September 15 2018
 <dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_outliers">
 <code class="descname">remove_outliers</code><span class="sig-paren">(</span><em>data</em>, <em>sd_val</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_outliers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_outliers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove outliers from dataframe.</p>
-<p class="rubric">Notes</p>
-<ol class="arabic simple">
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
 <li>This function excludes all lines with NA in all columns.</li>
 </ol>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -348,8 +350,9 @@ Last modified: September 15 2018
 <dt id="Energy_Analytics.Clean_Data.Clean_Data.resample_data">
 <code class="descname">resample_data</code><span class="sig-paren">(</span><em>data</em>, <em>freq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.resample_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.resample_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resample dataframe.</p>
-<p class="rubric">Notes</p>
-<ol class="arabic simple">
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
 <li>Also need to deal with energy quantities where resampling is .sum()</li>
 <li>Figure out how to apply different functions to different columns .apply()</li>
 <li><dl class="first docutils">
@@ -358,6 +361,7 @@ Last modified: September 15 2018
 </dl>
 </li>
 </ol>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -384,7 +388,8 @@ Last modified: September 15 2018
 <div class="section" id="module-Energy_Analytics.Import_Data">
 <span id="energy-analytics-import-data-module"></span><h2>Energy_Analytics.Import_Data module<a class="headerlink" href="#module-Energy_Analytics.Import_Data" title="Permalink to this headline">¶</a></h2>
 <p>This script imports data from csv files and returns a dataframe.</p>
-<p class="rubric">Notes</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
 <ol class="arabic simple">
 <li>If only folder is specified and no filename, all csv’s will be read in sorted order by name.</li>
 </ol>
@@ -393,11 +398,12 @@ Last modified: September 15 2018
 2.2. file_name and folder_name both of type list(str)</p>
 <p>To Do,
 1. Import data from InfluxDB, MongoDB and SkySpark.</p>
-<p>Authors,
+<p class="last">Authors,
 Last modified: September 15 2018
 &#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;
 &#64;author Jacob Rodriguez  &lt;<a class="reference external" href="mailto:jbrodriguez&#37;&#52;&#48;ucdavis&#46;edu">jbrodriguez<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;
 &#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+</div>
 <dl class="class">
 <dt id="Energy_Analytics.Import_Data.Import_Data">
 <em class="property">class </em><code class="descclassname">Energy_Analytics.Import_Data.</code><code class="descname">Import_Data</code><a class="reference internal" href="../_modules/Energy_Analytics/Import_Data.html#Import_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Import_Data.Import_Data" title="Permalink to this definition">¶</a></dt>
@@ -437,23 +443,212 @@ Last modified: September 15 2018
 </div>
 <div class="section" id="module-Energy_Analytics.Influx_Dataframe_Client">
 <span id="energy-analytics-influx-dataframe-client-module"></span><h2>Energy_Analytics.Influx_Dataframe_Client module<a class="headerlink" href="#module-Energy_Analytics.Influx_Dataframe_Client" title="Permalink to this headline">¶</a></h2>
+<p>Interface for InfluxDB.</p>
+<dl class="docutils">
+<dt>Two dataframe formats are accepted both are shown below:</dt>
+<dd>time              ap_name  AP_count             parse_ap_name building_number floor room  test_field</dd>
+</dl>
+<p>0 2016-04-01 07:00:00+00:00  ap135-100-103d-r177       1.0  [ap135, 100, 103d, r177]             100     1  03d         1.0
+1 2016-04-01 07:00:00+00:00   ap135-100-121-r177       3.0   [ap135, 100, 121, r177]             100     1  121         1.0
+2 2016-04-01 07:00:00+00:00   ap135-100-139-r177       6.0   [ap135, 100, 139, r177]             100     1  139         1.0
+3 2016-04-01 07:00:00+00:00   ap135-100-140-r177       5.0   [ap135, 100, 140, r177]             100     1  140         1.0
+4 2016-04-01 07:00:00+00:00  ap135-100-149b-r177       1.0  [ap135, 100, 149b, r177]             100     1  49b         1.0</p>
+<dl class="docutils">
+<dt>The same dataframe can also be given as where the index is the time:</dt>
+<dd>AP_count              ap_name building_number floor room  test_field</dd>
+</dl>
+<p>2016-04-01 07:00:00+00:00         1  ap135-100-103d-r177             100     1  03d           1
+2016-04-01 07:00:00+00:00         5   ap135-100-150-r177             100     1  150           1
+2016-04-01 07:00:00+00:00         3   ap135-100-121-r177             100     1  121           1
+2016-04-01 07:00:00+00:00         5   ap135-100-140-r177             100     1  140           1
+2016-04-01 07:00:00+00:00         1  ap135-100-149b-r177             100     1  49b           1</p>
+<p>This is converted to the following json before being given to DataFrameClient during write
+[</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="docutils">
+<dt>{</dt>
+<dd><dl class="first docutils">
+<dt>‘fields’: {</dt>
+<dd>‘AP_count’: 1.0,
+‘test_field’: 1.0
+},</dd>
+</dl>
+<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
+‘tags’: {</p>
+<blockquote>
+<div>‘floor’: ‘1’,
+‘building_number’: ‘100’,
+‘ap_name’: ‘ap135-100-103d-r177’,
+‘room’: ‘03d’
+},</div></blockquote>
+<p class="last">‘measurement’: ‘wifi_data9’
+},</p>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>{</dt>
+<dd><dl class="first docutils">
+<dt>‘fields’: {</dt>
+<dd>‘AP_count’: 3.0,
+‘test_field’: 1.0
+},</dd>
+</dl>
+<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
+‘tags’: {</p>
+<blockquote>
+<div>‘floor’: 1,
+‘building_number’: ‘100’,
+‘ap_name’: ‘ap135-100-121-r177’,
+‘room’: ‘121’
+},</div></blockquote>
+<p class="last">‘measurement’: ‘wifi_data9’
+},</p>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>{</dt>
+<dd><dl class="first docutils">
+<dt>‘fields’: {</dt>
+<dd>‘AP_count’: 6.0,
+‘test_field’: 1.0
+},</dd>
+</dl>
+<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
+‘tags’: {</p>
+<blockquote class="last">
+<div>‘floor’: 1,
+‘building_number’: ‘100’,
+‘ap_name’: ‘ap135-100-139-r177’,
+‘room’: ‘139’
+},</div></blockquote>
+</dd>
+<dt>‘measurement’: ‘wifi_data9’</dt>
+<dd>},</dd>
+</dl>
+<dl class="docutils">
+<dt>{</dt>
+<dd><dl class="first docutils">
+<dt>‘fields’: {</dt>
+<dd>‘AP_count’: 5.0,
+‘test_field’: 1.0
+},</dd>
+</dl>
+<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
+‘tags’: {</p>
+<blockquote>
+<div>‘floor’: 1,
+‘building_number’: ‘100’,
+‘ap_name’: ‘ap135-100-140-r177’,
+‘room’: ‘140’
+},</div></blockquote>
+<p class="last">‘measurement’: ‘wifi_data9’},</p>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>{</dt>
+<dd><dl class="first docutils">
+<dt>‘fields’: {</dt>
+<dd>‘AP_count’: 1.0,
+‘test_field’: 1.0
+},</dd>
+</dl>
+<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
+‘tags’: {</p>
+<blockquote>
+<div>‘floor’: ‘1’,
+‘building_number’: ‘100’,
+‘ap_name’: ‘ap135-100-149b-r177’,
+‘room’: ‘49b’
+},</div></blockquote>
+<p class="last">‘measurement’: ‘wifi_data9’
+}</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>Time can be specified in epoch time or Influx format</p>
+<p>When making queries, identifiers may be put into Double quotes depending on the
+characters they contain. String literals i.e. tag values must be in single quotes!</p>
 <dl class="class">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client">
 <em class="property">class </em><code class="descclassname">Energy_Analytics.Influx_Dataframe_Client.</code><code class="descname">Influx_Dataframe_Client</code><span class="sig-paren">(</span><em>config_file</em>, <em>db_section=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class is the interface for InfluxDB.</p>
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.client">
-<code class="descname">client</code><em class="property"> = None</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.client" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.host">
+<code class="descname">host</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.host" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Host name.</p>
+</dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.data">
-<code class="descname">data</code><em class="property"> = None</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.port">
+<code class="descname">port</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.port" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Port number.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.username">
+<code class="descname">username</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.username" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Username of account.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.password">
+<code class="descname">password</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.password" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Password of account.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.database">
-<code class="descname">database</code><em class="property"> = ''</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.database" title="Permalink to this definition">¶</a></dt>
+<code class="descname">database</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.database" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Database name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.use_ssl">
+<code class="descname">use_ssl</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.use_ssl" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Use SSL.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.verify_ssl_is_on">
+<code class="descname">verify_ssl_is_on</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.verify_ssl_is_on" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Verifies is SSL is active.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.client">
+<code class="descname">client</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.client" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Creates an instance of InfluxDBClient.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.df_client">
+<code class="descname">df_client</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.df_client" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Creates an instance of DataFrameClient.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.data">
+<code class="descname">data</code><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>pd.DataFrame()</em> – Dataframe storing data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">client</code><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">data</code><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">database</code><em class="property"> = ''</em></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -464,24 +659,42 @@ be deleted from the measurement.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.df_client">
-<code class="descname">df_client</code><em class="property"> = None</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.df_client" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">df_client</code><em class="property"> = None</em></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_data_client">
 <code class="descname">expose_data_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.expose_data_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_data_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expose DataFrameClient to user so they can utilize all functions of
-DataFrameClient if functionality is not provided by
-Influx_Dataframe_Client module</p>
+<dd><p>Expose DataFrameClient to user so they can utilize all functions of DataFrameClient if functionality is not provided by
+Influx_Dataframe_Client module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Class attribute.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">DataFrameClient</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_influx_client">
 <code class="descname">expose_influx_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.expose_influx_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_influx_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expose InfluxDBClient to user so they can utilize all functions of
-InfluxDBClient if functionality is not provided by
-Influx_Dataframe_Client module</p>
+<dd><p>Expose InfluxDBClient to user so they can utilize all functions of InfluxDBClient if functionality is not provided by
+Influx_Dataframe_Client module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Class attribute.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">InfluxDBClient</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -499,31 +712,50 @@ SHOW TAG VALUES FROM “MEASUREMENT_ARGUMENT” WITH KEY IN = “TAG_ARGUMENT”
 </dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.host">
-<code class="descname">host</code><em class="property"> = ''</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.host" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">host</code><em class="property"> = ''</em></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_DB">
 <code class="descname">list_DB</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.list_DB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_DB" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of all the names of the databases on the influxDB server</p>
+<dd><p>List all the names of the databases on the InfluxDB server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of all the names of the databases on the InfluxDB server.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_retention_policies">
 <code class="descname">list_retention_policies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.list_retention_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_retention_policies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of dictionaries with all the databases
-on the influxDB server and their associated retention policies</p>
+<dd><p>List all the names and its retention policies of the databases on the InfluxDB server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Key: Name of Database, Value:  Associated retention policy.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.password">
-<code class="descname">password</code><em class="property"> = ''</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.password" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">password</code><em class="property"> = ''</em></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.port">
-<code class="descname">port</code><em class="property"> = ''</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.port" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">port</code><em class="property"> = ''</em></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -537,8 +769,22 @@ dataframe</p>
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.query_data">
 <code class="descname">query_data</code><span class="sig-paren">(</span><em>query</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.query_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.query_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends the specified query string to the specified database using
-InfluxDBClient the query must be in Influx Query Language</p>
+<dd><p>Query InfluxDB.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query</strong> (<em>str</em>) – Query in Influx Query Language.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><em>pd.DataFrame()</em> – Data returned</li>
+<li><em>Sends the specified query string to the specified database using</em></li>
+<li><em>InfluxDBClient the query must be in Influx Query Language</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -560,42 +806,90 @@ dataframe even if the response has no results</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.use_ssl">
-<code class="descname">use_ssl</code><em class="property"> = False</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.use_ssl" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">use_ssl</code><em class="property"> = False</em></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.username">
-<code class="descname">username</code><em class="property"> = ''</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.username" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">username</code><em class="property"> = ''</em></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.verify_ssl_is_on">
-<code class="descname">verify_ssl_is_on</code><em class="property"> = False</em><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.verify_ssl_is_on" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">verify_ssl_is_on</code><em class="property"> = False</em></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_csv">
 <code class="descname">write_csv</code><span class="sig-paren">(</span><em>csv_fileName</em>, <em>tags</em>, <em>fields</em>, <em>measurement</em>, <em>database=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.write_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take in csv file and upload to database. User must specify list of tags
-and a list of fields as well as the csv file name. Database is optional
-by default the database specified by the client will be used</p>
+<dd><p>Upload csv file data to database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>csv_filename</strong> (<em>str</em>) – Name of csv file.</li>
+<li><strong>tags</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Tags of the data.</li>
+<li><strong>fields</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Fields of the data.</li>
+<li><strong>measurement</strong> (<em>str</em>) – Measurement.</li>
+<li><strong>database</strong> (<em>str</em>) – Database name. Defaults to the one specified by client.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Calls and returns another class function.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">self.write_dataframe()</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_dataframe">
 <code class="descname">write_dataframe</code><span class="sig-paren">(</span><em>data</em>, <em>tags</em>, <em>fields</em>, <em>measurement</em>, <em>database=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.write_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write a dataframe to the specified measurement, the user needs to
-specify the tags and fields that are to be included in the measurement
-as lists</p>
+<dd><p>Write a dataframe to the specified measurement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe containing meter data.</li>
+<li><strong>tags</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Tags of the data.</li>
+<li><strong>fields</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Fields of the data.</li>
+<li><strong>measurement</strong> (<em>str</em>) – Measurement.</li>
+<li><strong>database</strong> (<em>str</em>) – Database name.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Calls and returns another class function.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">self.__post_to_DB()</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_json">
 <code class="descname">write_json</code><span class="sig-paren">(</span><em>json</em>, <em>database=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client.write_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take in json in the form of a list of dictionaries or a single dictionary
-and upload to database. User must specify list of tags and a list of fields as well as the csv file name. Database is optional
-by default the database specified by the client will be used</p>
+<dd><p>Upload json data to database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>json</strong> (<em>dict</em>) – JSON data to upload.</li>
+<li><strong>database</strong> (<em>str</em>) – Database name. Defaults to the one specified by client.   :</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -603,18 +897,35 @@ by default the database specified by the client will be used</p>
 <dl class="function">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.transform_to_dict">
 <code class="descclassname">Energy_Analytics.Influx_Dataframe_Client.</code><code class="descname">transform_to_dict</code><span class="sig-paren">(</span><em>s</em>, <em>tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#transform_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.transform_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dictionary where the keys are passed in as a list and the values
-are obtained from the apply function as a row</p>
+<dd><p>Transforms list to dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s</strong> (<em>list</em>) – List of values</li>
+<li><strong>tags</strong> (<em>list</em>) – List of keys</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dictionary where the keys are passed in as a list and the values are obtained from the apply function as a row</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
 <div class="section" id="module-Energy_Analytics.Model_Data">
 <span id="energy-analytics-model-data-module"></span><h2>Energy_Analytics.Model_Data module<a class="headerlink" href="#module-Energy_Analytics.Model_Data" title="Permalink to this headline">¶</a></h2>
 <p>This script splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots.</p>
-<p>To Do,
+<p>To Do
 1. Break down time_period into baseline_period and projection_period.
 2. Extend exlude_time_period to allow multiple periods.</p>
-<p>Authors,
+<p>Authors
 Last modified: September 15 2018
 &#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
 <dl class="class">
@@ -899,32 +1210,33 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <div class="section" id="module-Energy_Analytics.Wrapper">
 <span id="energy-analytics-wrapper-module"></span><h2>Energy_Analytics.Wrapper module<a class="headerlink" href="#module-Energy_Analytics.Wrapper" title="Permalink to this headline">¶</a></h2>
 <p>This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</p>
-<p class="rubric">Notes</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
 <ol class="arabic simple">
 <li>df.loc[(slice(None, None, None)), …] is equivalent to “df.loc[:,…]”</li>
 <li>df.resample(freq=’h’).mean() drops all non-float/non-int columns</li>
 <li>os._exit(1) exits the program without calling cleanup handlers.</li>
 </ol>
-<p>To Do,
+<p>To Do
 1. Model
-1.1 Add TimeSeriesSplit, ANN, SVM, Randomforest.
-1.2. Add max_iter as a parameter.
-1.3. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
+1.1. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
+1.2 Add TimeSeriesSplit, ANN, SVM, Randomforest.
+1.3. Add max_iter as a parameter.
 2. Wrapper
-2.1. Run iterations on resampling frequency, adding time features (TOD, DOW, DOY…) !!!!
-2.2. Add option to standardize/normalize data before fitting to model (Preprocess?)
-2.3. Add Pearson’s correlation coefficient.
-2.4. Give user the option to run specific models.
+2.1. Add option to standardize/normalize data before fitting to model (Preprocess?)
+2.2. Add Pearson’s correlation coefficient.
+2.3. Give user the option to run specific models.
 3. All
-3.1. Change SystemError to specific errors.
-3.2. Ensure Python2.7 compatibility.
+3.1. Ensure Python2.7 compatibility.
+3.2. Change SystemError to specific errors.
 4. Cleanup
-4.1. Run pylint on all files.
-4.2. Documentation.
+4.1. Documentation.
+4.2. Run pylint on all files.
 4.3. Structure code to publish to PyPI.</p>
-<p>Authors,
+<p class="last">Authors
 Last modified: September 15 2018
 &#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+</div>
 <dl class="class">
 <dt id="Energy_Analytics.Wrapper.Wrapper">
 <em class="property">class </em><code class="descclassname">Energy_Analytics.Wrapper.</code><code class="descname">Wrapper</code><span class="sig-paren">(</span><em>results_folder_name='results'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper" title="Permalink to this definition">¶</a></dt>
@@ -1101,10 +1413,12 @@ Last modified: September 15 2018
 
 <dl class="method">
 <dt id="Energy_Analytics.Wrapper.Wrapper.search">
-<code class="descname">search</code><span class="sig-paren">(</span><em>file_name, imported_data=None, resample_freq=['15T', 'h', 'd'], time_freq={'dow': [False, False, False, False, True, False], 'doy': [False, False, False, False, False, True], 'month': [False, True, False, False, False, False], 'tod': [False, False, False, True, False, False], 'week': [False, False, True, False, False, False], 'year': [True, False, False, False, False, False]}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.search" title="Permalink to this definition">¶</a></dt>
+<code class="descname">search</code><span class="sig-paren">(</span><em>file_name</em>, <em>imported_data=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run models on different data configurations.</p>
-<p class="rubric">Notes</p>
-<p>The input json file should include ALL parameters.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The input json file should include ALL parameters.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

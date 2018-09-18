@@ -67,8 +67,8 @@ class Clean_Data:
     def resample_data(self, data, freq):
         """ Resample dataframe.
 
-        Notes
-        -----
+        Note
+        ----
         1. Also need to deal with energy quantities where resampling is .sum()
         2. Figure out how to apply different functions to different columns .apply()
         3. This theoretically work in upsampling too, check docs
@@ -136,8 +136,8 @@ class Clean_Data:
     def remove_outliers(self, data, sd_val):
         """ Remove outliers from dataframe.
 
-        Notes
-        -----
+        Note
+        ----
         1. This function excludes all lines with NA in all columns.
 
         Parameters

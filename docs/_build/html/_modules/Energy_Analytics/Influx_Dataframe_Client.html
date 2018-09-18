@@ -147,13 +147,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for Energy_Analytics.Influx_Dataframe_Client</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">configparser</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">influxdb</span> <span class="k">import</span> <span class="n">InfluxDBClient</span>
-<span class="kn">from</span> <span class="nn">influxdb</span> <span class="k">import</span> <span class="n">DataFrameClient</span>
+<span></span><span class="sd">&quot;&quot;&quot; Interface for InfluxDB.</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Two dataframe formats are accepted both are shown below:</span>
 <span class="sd">                       time              ap_name  AP_count             parse_ap_name building_number floor room  test_field</span>
 <span class="sd">0 2016-04-01 07:00:00+00:00  ap135-100-103d-r177       1.0  [ap135, 100, 103d, r177]             100     1  03d         1.0</span>
@@ -246,14 +241,32 @@
 
 <span class="sd">When making queries, identifiers may be put into Double quotes depending on the</span>
 <span class="sd">characters they contain. String literals i.e. tag values must be in single quotes!</span>
-<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">influxdb</span> <span class="k">import</span> <span class="n">InfluxDBClient</span>
+<span class="kn">from</span> <span class="nn">influxdb</span> <span class="k">import</span> <span class="n">DataFrameClient</span>
 
 
 <div class="viewcode-block" id="transform_to_dict"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.transform_to_dict">[docs]</a><span class="k">def</span> <span class="nf">transform_to_dict</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Returns a dictionary where the keys are passed in as a list and the values</span>
-<span class="sd">    are obtained from the apply function as a row</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot; Transforms list to dictionary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s       : list</span>
+<span class="sd">        List of values</span>
+<span class="sd">    tags    : list</span>
+<span class="sd">        List of keys</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary where the keys are passed in as a list and the values are obtained from the apply function as a row</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
         <span class="n">dic</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
@@ -261,24 +274,59 @@
 
 
 <div class="viewcode-block" id="Influx_Dataframe_Client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client">[docs]</a><span class="k">class</span> <span class="nc">Influx_Dataframe_Client</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class is the interface for InfluxDB.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    host                : str</span>
+<span class="sd">        Host name.</span>
+<span class="sd">    port                : str</span>
+<span class="sd">        Port number.</span>
+<span class="sd">    username            : str</span>
+<span class="sd">        Username of account.</span>
+<span class="sd">    password            : str</span>
+<span class="sd">        Password of account.</span>
+<span class="sd">    database            : str</span>
+<span class="sd">        Database name.</span>
+<span class="sd">    use_ssl             : bool</span>
+<span class="sd">        Use SSL.</span>
+<span class="sd">    verify_ssl_is_on    : bool</span>
+<span class="sd">        Verifies is SSL is active.</span>
+<span class="sd">    client              : str</span>
+<span class="sd">        Creates an instance of InfluxDBClient.</span>
+<span class="sd">    df_client           : str</span>
+<span class="sd">        Creates an instance of DataFrameClient.</span>
+<span class="sd">    data                : pd.DataFrame()</span>
+<span class="sd">        Dataframe storing data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1">#Connection details</span>
-    <span class="n">host</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">port</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">use_ssl</span><span class="o">=</span> <span class="kc">False</span>
-    <span class="n">verify_ssl_is_on</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="c1">#clients for influxDB both DataFrameClient and the InfluxDBClient</span>
-    <span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">df_client</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">host</span>                <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">port</span>                <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">username</span>            <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">password</span>            <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">database</span>            <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">use_ssl</span>             <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">verify_ssl_is_on</span>    <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">client</span>              <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">df_client</span>           <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span>                <span class="o">=</span> <span class="kc">None</span>
 
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">db_section</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Constructor reads credentials from config file and establishes a connection</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Constructor reads credentials from config file and establishes a connection.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config_file     : str</span>
+<span class="sd">            Configuration file name.</span>
+<span class="sd">        db_section      : str</span>
+<span class="sd">            Database section.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># read from config file</span>
         <span class="n">Config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
         <span class="n">Config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
@@ -299,13 +347,12 @@
 
 
     <span class="k">def</span> <span class="nf">__make_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Setup client for both InfluxDBClient and DataFrameClient.</span>
+<span class="sd">        </span>
+<span class="sd">        DataFrameClient is for queries and InfluxDBClient is for writes.</span>
 <span class="sd">        This function is not necessary for the user.</span>
 
-<span class="sd">        Setup client both InfluxDBClient and DataFrameClient</span>
-<span class="sd">        DataFrameClient is for queries and InfluxDBClient is for writes</span>
-<span class="sd">        Not needed by user</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">InfluxDBClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
                     <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
@@ -314,59 +361,109 @@
                     <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
                     <span class="n">database</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span><span class="n">ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ssl</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify_ssl_is_on</span><span class="p">)</span>
 
+
     <span class="k">def</span> <span class="nf">__build_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Builds json dictionary list out of dataframe given in the format expected by InfluxDBClient.</span>
+
+<span class="sd">        Both tags and fields need to be lists which include the columns in the dataframe that are going to be included in the tags</span>
+<span class="sd">        and fields dictionary.</span>
 <span class="sd">        This function is not necessary for the user.</span>
 
-<span class="sd">        Builds json dictionary list out of dataframe given in the format expected</span>
-<span class="sd">        by InfluxDBClient. Both tags and fields need to be lists which include</span>
-<span class="sd">        the columns in the dataframe that are going to be included in the tags</span>
-<span class="sd">        and fields dictionary</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data            : pd.DataFrame()</span>
+<span class="sd">            Dataframe containing meter data.</span>
+<span class="sd">        tags            : str</span>
+<span class="sd">            Tags of the data.</span>
+<span class="sd">        fields          : str</span>
+<span class="sd">            Fields of the data.</span>
+<span class="sd">        measurement     : str</span>
+<span class="sd">            Measurement.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json</span>
+<span class="sd">            JSON dictionary list.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">data</span><span class="p">[</span><span class="s1">&#39;measurement&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">tags</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transform_to_dict</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">fields</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transform_to_dict</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">json</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s2">&quot;measurement&quot;</span><span class="p">,</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="s2">&quot;fields&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">json</span>
 
+
     <span class="k">def</span> <span class="nf">__post_to_DB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Sends json dictionary list to specified database to InfluxDBClient.</span>
+
 <span class="sd">        This function is necessary for the user.</span>
 
-<span class="sd">        Sends json dictionary list to specified database to InfluxDBClient</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json        : json</span>
+<span class="sd">            JSON dictionary.</span>
+<span class="sd">        database    : str</span>
+<span class="sd">            Database name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        InfluxDBClient.write_points instance</span>
+<span class="sd">           Data type returned by instance of InfluxDBClient.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">write_points</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">16384</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
-
 <div class="viewcode-block" id="Influx_Dataframe_Client.expose_influx_client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_influx_client">[docs]</a>    <span class="k">def</span> <span class="nf">expose_influx_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Expose InfluxDBClient to user so they can utilize all functions of</span>
-<span class="sd">        InfluxDBClient if functionality is not provided by</span>
-<span class="sd">        Influx_Dataframe_Client module</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Expose InfluxDBClient to user so they can utilize all functions of InfluxDBClient if functionality is not provided by</span>
+<span class="sd">        Influx_Dataframe_Client module.</span>
 
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        InfluxDBClient</span>
+<span class="sd">            Class attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span></div>
 
-<div class="viewcode-block" id="Influx_Dataframe_Client.expose_data_client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_data_client">[docs]</a>    <span class="k">def</span> <span class="nf">expose_data_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Expose DataFrameClient to user so they can utilize all functions of</span>
-<span class="sd">        DataFrameClient if functionality is not provided by</span>
-<span class="sd">        Influx_Dataframe_Client module</span>
-<span class="sd">        &#39;&#39;&#39;</span>
 
+<div class="viewcode-block" id="Influx_Dataframe_Client.expose_data_client"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.expose_data_client">[docs]</a>    <span class="k">def</span> <span class="nf">expose_data_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Expose DataFrameClient to user so they can utilize all functions of DataFrameClient if functionality is not provided by</span>
+<span class="sd">        Influx_Dataframe_Client module.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrameClient</span>
+<span class="sd">            Class attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span></div>
 
 
 <div class="viewcode-block" id="Influx_Dataframe_Client.write_dataframe"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">write_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Write a dataframe to the specified measurement, the user needs to</span>
-<span class="sd">        specify the tags and fields that are to be included in the measurement</span>
-<span class="sd">        as lists</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Write a dataframe to the specified measurement.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data            : pd.DataFrame()</span>
+<span class="sd">            Dataframe containing meter data.</span>
+<span class="sd">        tags            : list(str)</span>
+<span class="sd">            Tags of the data.</span>
+<span class="sd">        fields          : list(str)</span>
+<span class="sd">            Fields of the data.</span>
+<span class="sd">        measurement     : str</span>
+<span class="sd">            Measurement.</span>
+<span class="sd">        database        : str</span>
+<span class="sd">            Database name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self.__post_to_DB()</span>
+<span class="sd">            Calls and returns another class function.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#set default database</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">database</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
@@ -381,15 +478,31 @@
         <span class="n">json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__build_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">)</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__post_to_DB</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">ret</span></div>
 
+
 <div class="viewcode-block" id="Influx_Dataframe_Client.write_csv"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_csv">[docs]</a>    <span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">csv_fileName</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Take in csv file and upload to database. User must specify list of tags</span>
-<span class="sd">        and a list of fields as well as the csv file name. Database is optional</span>
-<span class="sd">        by default the database specified by the client will be used</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Upload csv file data to database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        csv_filename    : str</span>
+<span class="sd">            Name of csv file.</span>
+<span class="sd">        tags            : list(str)</span>
+<span class="sd">            Tags of the data.</span>
+<span class="sd">        fields          : list(str)</span>
+<span class="sd">            Fields of the data.</span>
+<span class="sd">        measurement     : str</span>
+<span class="sd">            Measurement.</span>
+<span class="sd">        database        : str</span>
+<span class="sd">            Database name. Defaults to the one specified by client.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self.write_dataframe()</span>
+<span class="sd">            Calls and returns another class function.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#set default database</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">database</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
@@ -397,15 +510,20 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_fileName</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">tags</span><span class="p">,</span><span class="n">fields</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">database</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">ret</span></div>
 
+
 <div class="viewcode-block" id="Influx_Dataframe_Client.write_json"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.write_json">[docs]</a>    <span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">json</span><span class="p">,</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Take in json in the form of a list of dictionaries or a single dictionary</span>
-<span class="sd">        and upload to database. User must specify list of tags and a list of fields as well as the csv file name. Database is optional</span>
-<span class="sd">        by default the database specified by the client will be used</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Upload json data to database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json            : dict</span>
+<span class="sd">            JSON data to upload.</span>
+<span class="sd">        database        : str</span>
+<span class="sd">            Database name. Defaults to the one specified by client.   : </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#set default database</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">database</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
@@ -420,10 +538,16 @@
 
         <span class="k">return</span> <span class="n">ret</span></div>
 
+
 <div class="viewcode-block" id="Influx_Dataframe_Client.list_DB"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_DB">[docs]</a>    <span class="k">def</span> <span class="nf">list_DB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Returns a list of all the names of the databases on the influxDB server</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; List all the names of the databases on the InfluxDB server.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            List of all the names of the databases on the InfluxDB server.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">list_to_return</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">DB_dict_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_list_database</span><span class="p">()</span>
 
@@ -432,27 +556,45 @@
 
         <span class="k">return</span> <span class="n">list_to_return</span></div>
 
-<div class="viewcode-block" id="Influx_Dataframe_Client.list_retention_policies"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_retention_policies">[docs]</a>    <span class="k">def</span> <span class="nf">list_retention_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Returns a list of dictionaries with all the databases</span>
-<span class="sd">        on the influxDB server and their associated retention policies</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Influx_Dataframe_Client.list_retention_policies"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.list_retention_policies">[docs]</a>    <span class="k">def</span> <span class="nf">list_retention_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; List all the names and its retention policies of the databases on the InfluxDB server.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Key: Name of Database, Value:  Associated retention policy.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">DB_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_DB</span><span class="p">()</span>
         <span class="n">dict_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">DB_list</span><span class="p">)):</span>
             <span class="n">temp_dict</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">temp_dict</span><span class="p">[</span><span class="n">DB_list</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_list_retention_policies</span><span class="p">(</span><span class="n">DB_list</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
             <span class="n">dict_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_dict</span><span class="p">)</span>
+        
         <span class="k">return</span> <span class="n">dict_list</span></div>
 
+
 <div class="viewcode-block" id="Influx_Dataframe_Client.query_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.query_data">[docs]</a>    <span class="k">def</span> <span class="nf">query_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">query</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Query InfluxDB.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        query   : str</span>
+<span class="sd">            Query in Influx Query Language.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame()</span>
+<span class="sd">            Data returned</span>
 <span class="sd">        Sends the specified query string to the specified database using</span>
 <span class="sd">        InfluxDBClient the query must be in Influx Query Language</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;wifi_data8&#39;</span><span class="p">,</span><span class="n">chunked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span></div>
+
 
 <div class="viewcode-block" id="Influx_Dataframe_Client.query"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">use_database</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -462,6 +604,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">use_database</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">query_result</span><span class="o">.</span><span class="n">raw</span></div>
+
 
 <div class="viewcode-block" id="Influx_Dataframe_Client.show_meta_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.show_meta_data">[docs]</a>    <span class="k">def</span> <span class="nf">show_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -480,6 +623,7 @@
             <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_dict</span><span class="p">[</span><span class="s1">&#39;tagKey&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">result_list</span></div>
 
+
 <div class="viewcode-block" id="Influx_Dataframe_Client.get_meta_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.get_meta_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a list of TAG VALUES for specified measurement in specified database</span>
@@ -497,6 +641,8 @@
             <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_dict</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">result_list</span></div>
+
+
 <div class="viewcode-block" id="Influx_Dataframe_Client.get_meta_data_time_series"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.get_meta_data_time_series">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_data_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns tags along with the time stamps</span>
@@ -505,6 +651,7 @@
         <span class="c1">#get all data with from measurement</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">specific_query</span><span class="p">(</span><span class="n">database</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">tags</span><span class="p">]</span></div>
+
 
 <div class="viewcode-block" id="Influx_Dataframe_Client.specific_query"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.specific_query">[docs]</a>    <span class="k">def</span> <span class="nf">specific_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">groupList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">groupTime</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -601,6 +748,7 @@
             <span class="c1">#Must have an empty result make empty dataframe</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">df</span></div>
+
 
 <div class="viewcode-block" id="Influx_Dataframe_Client.delete_based_on_time"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client.delete_based_on_time">[docs]</a>    <span class="k">def</span> <span class="nf">delete_based_on_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">database</span><span class="p">,</span><span class="n">measurement</span><span class="p">,</span><span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>

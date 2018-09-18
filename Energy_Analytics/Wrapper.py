@@ -1,30 +1,29 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Notes
------
+Note
+----
 1. df.loc[(slice(None, None, None)), ...] is equivalent to "df.loc[:,...]"
 2. df.resample(freq='h').mean() drops all non-float/non-int columns
 3. os._exit(1) exits the program without calling cleanup handlers.
 
-To Do,
+To Do
 1. Model
-1.1 Add TimeSeriesSplit, ANN, SVM, Randomforest.
-1.2. Add max_iter as a parameter.
-1.3. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
+1.1. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
+1.2 Add TimeSeriesSplit, ANN, SVM, Randomforest.
+1.3. Add max_iter as a parameter.
 2. Wrapper
-2.1. Run iterations on resampling frequency, adding time features (TOD, DOW, DOY...) !!!!
-2.2. Add option to standardize/normalize data before fitting to model (Preprocess?)
-2.3. Add Pearson's correlation coefficient.
-2.4. Give user the option to run specific models.
+2.1. Add option to standardize/normalize data before fitting to model (Preprocess?)
+2.2. Add Pearson's correlation coefficient.
+2.3. Give user the option to run specific models.
 3. All
-3.1. Change SystemError to specific errors.
-3.2. Ensure Python2.7 compatibility.
+3.1. Ensure Python2.7 compatibility.
+3.2. Change SystemError to specific errors.
 4. Cleanup
-4.1. Run pylint on all files.
-4.2. Documentation.
+4.1. Documentation.
+4.2. Run pylint on all files.
 4.3. Structure code to publish to PyPI.
 
-Authors,
+Authors
 Last modified: September 15 2018
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
@@ -39,6 +38,10 @@ from Energy_Analytics import Import_Data
 from Energy_Analytics import Clean_Data
 from Energy_Analytics import Preprocess_Data
 from Energy_Analytics import Model_Data
+# from Import_Data import *
+# from Clean_Data import *
+# from Preprocess_Data import *
+# from Model_Data import *
 
 
 class Wrapper:
@@ -143,20 +146,11 @@ class Wrapper:
 
 
     # CHECK: Modify looping of time_freq
-    def search(self, file_name, imported_data=None,
-                resample_freq=['15T', 'h', 'd'], 
-                time_freq = {
-                    'year'  :   [True,  False,  False,  False,  False,  False],
-                    'month' :   [False, True,   False,  False,  False,  False],
-                    'week'  :   [False, False,  True,   False,  False,  False],
-                    'tod'   :   [False, False,  False,  True,   False,  False],
-                    'dow'   :   [False, False,  False,  False,  True,   False],
-                    'doy'   :   [False, False,  False,  False,  False,  True]
-                }):
+    def search(self, file_name, imported_data=None):
         """ Run models on different data configurations.
 
-        Notes
-        -----
+        Note
+        ----
         The input json file should include ALL parameters.
 
         Parameters
@@ -172,6 +166,19 @@ class Wrapper:
 
         """
 
+        resample_freq=['15T', 'h', 'd']
+        time_freq = {
+            'year'  :   [True,  False,  False,  False,  False,  False],
+            'month' :   [False, True,   False,  False,  False,  False],
+            'week'  :   [False, False,  True,   False,  False,  False],
+            'tod'   :   [False, False,  False,  True,   False,  False],
+            'dow'   :   [False, False,  False,  False,  True,   False],
+            'doy'   :   [False, False,  False,  False,  False,  True]
+        }
+        
+        optimal_score = float('-inf')
+        optimal_model = None
+
         # CSV Files
         if not imported_data:
 
@@ -186,12 +193,18 @@ class Wrapper:
             
             input_json = json.load(f)
 
+            # Resample data interval
             for x in resample_freq:
+
+                # Add time features
+                for i in range(len(time_freq.items())):
 
                     clean_json = input_json['Clean']    # CHECK: Move line above for loop.
                     cleaned_data = self.clean_data(imported_data, rename_col=clean_json['Rename Col'], drop_col=clean_json['Drop Col'],
                                                 resample=clean_json['Resample'], 
+                                                
                                                 freq=x,
+                                                
                                                 interpolate=clean_json['Interpolate'], limit=clean_json['Limit'],
                                                 method=clean_json['Method'], remove_na=clean_json['Remove NA'],
                                                 remove_na_how=clean_json['Remove NA How'], remove_outliers=clean_json['Remove Outliers'],
@@ -202,9 +215,11 @@ class Wrapper:
                     preprocessed_data = self.preprocess_data(cleaned_data, cdh_cpoint=preproc_json['CDH CPoint'],
                                 hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
                                 col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
-                                year=preproc_json['Year'], month=preproc_json['Month'], week=preproc_json['Week'],
-                                tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'], doy=preproc_json['Day of Year'],
-                                var_to_expand=preproc_json['Variables to Expand'])
+
+                                year=time_freq['year'][i], month=time_freq['month'][i], week=time_freq['week'][i],
+                                tod=time_freq['tod'][i], dow=time_freq['dow'][i], doy=time_freq['doy'][i])
+
+                                # var_to_expand=preproc_json['Variables to Expand'])
 
                     model_json = input_json['Model']
                     model_data = self.model(preprocessed_data, #global_count=Wrapper.global_count,
@@ -212,8 +227,23 @@ class Wrapper:
                         time_period=model_json['Time Period'], exclude_time_period=model_json['Exclude Time Period'],
                         alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
 
+                    # Putting comment in json file to indicate which parameters have been changed
+                    time_feature = None
+                    for key in time_freq:
+                        if time_freq[key][i]:
+                            time_feature = key
+                    self.result['Comment'] = 'Freq: ' + x + ', ' + 'Time Feature: ' + time_feature
+                    
+                    # Keep track of highest adj_r2 score
+                    if self.result['Model']['Optimal Model\'s Metrics']['adj_r2'] > optimal_score:
+                        optimal_score = self.result['Model']['Optimal Model\'s Metrics']['adj_r2']
+                        optimal_model_file_name = self.results_folder_name + '/results-' + str(Wrapper.global_count) + '.json'
+
                     self.write_json()
                     Wrapper.global_count += 1
+
+
+        print('Most optimal model: ', optimal_model_file_name)
 
 
     def import_data(self, file_name='*', folder_name='.', head_row=0, index_col=0,

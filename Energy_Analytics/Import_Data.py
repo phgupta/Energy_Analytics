@@ -1,7 +1,7 @@
 """ This script imports data from csv files and returns a dataframe. 
 
-Notes
------
+Note
+----
 1. If only folder is specified and no filename, all csv's will be read in sorted order by name.
 2. Doesn't handle cases when user provides
 2.1. file_name of type str and folder_name of type list(str)
