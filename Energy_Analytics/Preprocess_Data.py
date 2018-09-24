@@ -98,7 +98,7 @@ class Preprocess_Data:
                 raise SystemError('col and degree should be lists.')
 
 
-    def add_time_features(self, year=False, month=False, week=True, tod=True, dow=True, doy=False):
+    def add_time_features(self, year=False, month=False, week=True, tod=True, dow=True):
         """ Add time features to dataframe.
 
         Parameters
@@ -113,8 +113,6 @@ class Preprocess_Data:
             Time of Day.
         dow    : bool
             Day of Week.
-        doy    : bool
-            Day of Year.
 
         """
 
@@ -133,8 +131,6 @@ class Preprocess_Data:
             data["tod"] = data.index.hour
         if dow:
             data["dow"] = data.index.weekday
-        if doy:
-            data["doy"] = data.index.dayofyear
 
         self.preprocessed_data = data
 

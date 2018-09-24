@@ -288,6 +288,21 @@ class Model_Data:
         self.metrics['ElasticNet Regression'] = score_list
 
 
+    def random_forest(self):
+        
+        from sklearn.ensemble import RandomForestRegressor
+        
+        model = RandomForestRegressor(random_state=42)
+        scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+        mean_score = np.mean(scores)
+
+        self.models.append(model)
+        self.model_names.append('Random Forest Regressor')
+        self.max_scores.append(mean_score)
+        self.alpha_scores.append([])
+        self.metrics['Random Forest Regressor'] = mean_score
+  
+
     def run_models(self):
         """ Run all models.
 
@@ -301,6 +316,7 @@ class Model_Data:
         """
 
         self.linear_regression()
+        self.random_forest()            # CHECK: Just added
         self.lasso_regression()
         self.ridge_regression()
         self.elastic_net_regression()
@@ -415,7 +431,7 @@ class Model_Data:
         fig1 = plt.figure(Model_Data.figure_count)
         Model_Data.figure_count += 1
 
-        for i in range(1, len(self.models)):    # CHECK: Change hardcoding of range(1,..)
+        for i in range(2, len(self.models)):    # CHECK: Change hardcoding of range(2,..)
             plt.plot(self.alphas, self.alpha_scores[i], label=self.model_names[i])
 
         plt.xlabel('Alphas')

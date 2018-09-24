@@ -36,7 +36,6 @@
 		"Week": true,
 		"Time of Day": true,
 		"Day of Week": false,
-		"Day of Year": false,
 		"Variables to Expand": ["tod", "week"]
 	},
 

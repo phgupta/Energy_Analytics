@@ -9,7 +9,7 @@ Note
 To Do
 1. Model
 1.1. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
-1.2 Add TimeSeriesSplit, ANN, SVM, Randomforest.
+1.2. Add TimeSeriesSplit, ANN, SVM.
 1.3. Add max_iter as a parameter.
 2. Wrapper
 2.1. Add option to standardize/normalize data before fitting to model (Preprocess?)
@@ -34,14 +34,14 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-from Energy_Analytics import Import_Data
-from Energy_Analytics import Clean_Data
-from Energy_Analytics import Preprocess_Data
-from Energy_Analytics import Model_Data
-# from Import_Data import *
-# from Clean_Data import *
-# from Preprocess_Data import *
-# from Model_Data import *
+# from Energy_Analytics import Import_Data
+# from Energy_Analytics import Clean_Data
+# from Energy_Analytics import Preprocess_Data
+# from Energy_Analytics import Model_Data
+from Import_Data import *
+from Clean_Data import *
+from Preprocess_Data import *
+from Model_Data import *
 
 
 class Wrapper:
@@ -134,7 +134,7 @@ class Wrapper:
                                                     hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
                                                     col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
                                                     year=preproc_json['Year'], month=preproc_json['Month'], week=preproc_json['Week'],
-                                                    tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'], doy=preproc_json['Day of Year'],
+                                                    tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'],
                                                     var_to_expand=preproc_json['Variables to Expand'])
 
             model_json = input_json['Model']
@@ -168,12 +168,11 @@ class Wrapper:
 
         resample_freq=['15T', 'h', 'd']
         time_freq = {
-            'year'  :   [True,  False,  False,  False,  False,  False],
-            'month' :   [False, True,   False,  False,  False,  False],
-            'week'  :   [False, False,  True,   False,  False,  False],
-            'tod'   :   [False, False,  False,  True,   False,  False],
-            'dow'   :   [False, False,  False,  False,  True,   False],
-            'doy'   :   [False, False,  False,  False,  False,  True]
+            'year'  :   [True,  False,  False,  False,  False],
+            'month' :   [False, True,   False,  False,  False],
+            'week'  :   [False, False,  True,   False,  False],
+            'tod'   :   [False, False,  False,  True,   False],
+            'dow'   :   [False, False,  False,  False,  True],
         }
         
         optimal_score = float('-inf')
@@ -217,7 +216,7 @@ class Wrapper:
                                 col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
 
                                 year=time_freq['year'][i], month=time_freq['month'][i], week=time_freq['week'][i],
-                                tod=time_freq['tod'][i], dow=time_freq['dow'][i], doy=time_freq['doy'][i])
+                                tod=time_freq['tod'][i], dow=time_freq['dow'][i])
 
                                 # var_to_expand=preproc_json['Variables to Expand'])
 
@@ -416,7 +415,7 @@ class Wrapper:
     def preprocess_data(self, data,
                         hdh_cpoint=65, cdh_cpoint=65, col_hdh_cdh='OAT',
                         col_degree=None, degree=None,
-                        year=False, month=False, week=False, tod=False, dow=False, doy=False,
+                        year=False, month=False, week=False, tod=False, dow=False,
                         var_to_expand=None,
                         save_file=True):
         """ Preprocesses dataframe according to user specifications and stores result in self.preprocessed_data.
@@ -445,8 +444,6 @@ class Wrapper:
             Time of Day.
         dow             : bool
             Day of Week.
-        doy             : bool
-            Day of Year.
         var_to_expand   : list(str)
             Variables to one-hot encode, e.g. var_to_expand=['tod', 'dow', 'year'].
         save_file       : bool
@@ -467,7 +464,7 @@ class Wrapper:
         preprocess_data_obj = Preprocess_Data(data)
         preprocess_data_obj.add_degree_days(col=col_hdh_cdh, hdh_cpoint=hdh_cpoint, cdh_cpoint=cdh_cpoint)
         preprocess_data_obj.add_col_features(col=col_degree, degree=degree)
-        preprocess_data_obj.add_time_features(year=year, month=month, week=week, tod=tod, dow=dow, doy=doy)
+        preprocess_data_obj.add_time_features(year=year, month=month, week=week, tod=tod, dow=dow)
         preprocess_data_obj.create_dummies(var_to_expand=var_to_expand)
         
         # Store preprocessed data in wrapper class
@@ -485,7 +482,6 @@ class Wrapper:
             'Week': week,
             'Time of Day': tod,
             'Day of Week': dow,
-            'Day of Year': doy,
             'Variables to Expand': var_to_expand
         }
 
