@@ -12,18 +12,16 @@ To Do \n
 1. Clean \n
     \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
     \t 2. Add Pearson's correlation coefficient.
-2. Preprocess \n
-    \t 1. Combine add_time_features and create_dummies.
-3. Model \n
+2. Model \n
     \t 1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
-4. Wrapper \n
+3. Wrapper \n
     \t 1. Give user the option to run specific models.
-5. All \n
+4. All \n
     \t 1. Ensure Python2.7 compatibility.
     \t 2. Change SystemError to specific errors.
     \t 3. Update python and all libraries to ensure similar results are replicated in different systems.
     \t 4. Create separate file for displaying plots?
-6. Cleanup \n
+5. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
@@ -142,8 +140,7 @@ class Wrapper:
                                                     col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
                                                     standardize=preproc_json['Standardize'], normalize=preproc_json['Normalize'],
                                                     year=preproc_json['Year'], month=preproc_json['Month'], week=preproc_json['Week'],
-                                                    tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'],
-                                                    var_to_expand=preproc_json['Variables to Expand'])
+                                                    tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'])
 
             model_json = input_json['Model']
             model_data = self.model(preprocessed_data, ind_col=model_json['Independent Col'], dep_col=model_json['Dependent Col'],
@@ -226,8 +223,6 @@ class Wrapper:
 
                                 year=time_freq['year'][i], month=time_freq['month'][i], week=time_freq['week'][i],
                                 tod=time_freq['tod'][i], dow=time_freq['dow'][i])
-
-                                # var_to_expand=preproc_json['Variables to Expand'])
 
                     model_json = input_json['Model']
                     model_data = self.model(preprocessed_data, #global_count=Wrapper.global_count,
@@ -434,7 +429,6 @@ class Wrapper:
                         col_degree=None, degree=None,
                         standardize=False, normalize=False,
                         year=False, month=False, week=False, tod=False, dow=False,
-                        var_to_expand=None,
                         save_file=True):
         """ Preprocesses dataframe according to user specifications and stores result in self.preprocessed_data.
 
@@ -466,8 +460,6 @@ class Wrapper:
             Time of Day.
         dow             : bool
             Day of Week.
-        var_to_expand   : list(str)
-            Variables to one-hot encode, e.g. var_to_expand=['tod', 'dow', 'year'].
         save_file       : bool
             Specifies whether to save file or not. Defaults to True.
 
@@ -493,7 +485,6 @@ class Wrapper:
             preprocess_data_obj.normalize()
 
         preprocess_data_obj.add_time_features(year=year, month=month, week=week, tod=tod, dow=dow)
-        preprocess_data_obj.create_dummies(var_to_expand=var_to_expand)
         
         # Store preprocessed data in wrapper class
         self.preprocessed_data = preprocess_data_obj.preprocessed_data
@@ -511,8 +502,7 @@ class Wrapper:
             'Month': month,
             'Week': week,
             'Time of Day': tod,
-            'Day of Week': dow,
-            'Variables to Expand': var_to_expand
+            'Day of Week': dow
         }
 
         if self.cleaned_data.empty:
@@ -635,7 +625,7 @@ if __name__ == '__main__':
                                     rename_col=['OAT','RelHum_Avg', 'CHW_Elec', 'Elec', 'Gas', 'HW_Heat'],
                                     drop_col='Elec')
 
-    preprocessed_data = wrapper_obj.preprocess_data(cleaned_data, week=True, tod=True, var_to_expand=['tod','week'])
+    preprocessed_data = wrapper_obj.preprocess_data(cleaned_data, week=True, tod=True)
 
     wrapper_obj.model(preprocessed_data, dep_col='HW_Heat', alphas=np.logspace(-4,1,5), figsize=(18,5),
                    time_period=["2014-01","2014-12", "2015-01","2015-12", "2016-01","2016-12"],

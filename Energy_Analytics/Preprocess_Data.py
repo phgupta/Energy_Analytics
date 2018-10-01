@@ -143,6 +143,8 @@ class Preprocess_Data:
 
         """
 
+        var_to_expand = []
+
         if self.preprocessed_data.empty:
             data = self.original_data
         else:
@@ -150,38 +152,22 @@ class Preprocess_Data:
 
         if year:
             data["year"] = data.index.year
+            var_to_expand.append("year")
         if month:
             data["month"] = data.index.month
+            var_to_expand.append("month")
         if week:
             data["week"] = data.index.week
+            var_to_expand.append("week")
         if tod:
             data["tod"] = data.index.hour
+            var_to_expand.append("tod")
         if dow:
             data["dow"] = data.index.weekday
+            var_to_expand.append("dow")
 
-        self.preprocessed_data = data
-
-
-    def create_dummies(self, var_to_expand=None):
-        """ One-hot encode time features.
-
-        Parameters
-        ----------
-        var_to_expand   : list(str)
-            Variables to one-hot encode, e.g. var_to_expand=['tod', 'dow', 'year'].
-        
-        """
-        
-        if not var_to_expand:
-            return
-
-        else:
-            if self.preprocessed_data.empty:
-                data = self.original_data
-            else: 
-                data = self.preprocessed_data
-
-            for var in var_to_expand:
+        # One-hot encode the time features
+        for var in var_to_expand:
                 
                 add_var = pd.get_dummies(data[var], prefix=var)
                 
@@ -195,4 +181,4 @@ class Preprocess_Data:
                 cols = [col for col in data.columns if var in col]
                 data.drop(columns=[cols[-1]], inplace=True)
 
-            self.preprocessed_data = data
+        self.preprocessed_data = data

@@ -37,8 +37,7 @@
 		"Month": false,
 		"Week": true,
 		"Time of Day": true,
-		"Day of Week": false,
-		"Variables to Expand": ["tod", "week"]
+		"Day of Week": false
 	},
 
 	"Model": {
