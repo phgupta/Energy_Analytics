@@ -5,7 +5,7 @@ To Do
 2. Extend exlude_time_period to allow multiple periods.
 
 Authors
-Last modified: September 15 2018
+Last modified: September 30 2018
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
 """
@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.linear_model import LinearRegression, LassoCV, RidgeCV, ElasticNetCV, Lasso, Ridge, ElasticNet
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 
 
@@ -428,16 +428,16 @@ class Model_Data:
 
         # Figure 1
         # Plot Model Score vs Alphas to get an idea of which alphas work best
-        fig1 = plt.figure(Model_Data.figure_count)
-        Model_Data.figure_count += 1
+        # fig1 = plt.figure(Model_Data.figure_count)
+        # Model_Data.figure_count += 1
 
-        for i in range(2, len(self.models)):    # CHECK: Change hardcoding of range(2,..)
-            plt.plot(self.alphas, self.alpha_scores[i], label=self.model_names[i])
+        # for i in range(2, len(self.models)):    # CHECK: Change hardcoding of range(2,..)
+        #     plt.plot(self.alphas, self.alpha_scores[i], label=self.model_names[i])
 
-        plt.xlabel('Alphas')
-        plt.ylabel('Model Accuracy')
-        plt.title("R2 Score v/s alpha")
-        plt.legend()
+        # plt.xlabel('Alphas')
+        # plt.ylabel('Model Accuracy')
+        # plt.title("R2 Score v/s alpha")
+        # plt.legend()
 
 
         # Figure 2
@@ -454,7 +454,8 @@ class Model_Data:
         base_df['y_pred'] = self.y_pred
         ax1 = fig2.add_subplot(nrows, 1, 1)
         base_df.plot(ax=ax1, figsize=figsize,
-            title='Baseline Period ({}-{})'.format(self.time_period[0], self.time_period[1]))
+            title='Baseline Period ({}-{}). \nBest Model: {}. \nBaseline Adj R2: {}'.format(self.time_period[0], self.time_period[1], 
+                                                                                        self.best_model_name, self.best_metrics['adj_r2']))
 
         # Display projection plots
         if len(self.time_period) > 2:
@@ -475,4 +476,5 @@ class Model_Data:
 
         fig2.tight_layout()
 
-        return fig1, fig2
+        # return fig1, fig2
+        return fig2

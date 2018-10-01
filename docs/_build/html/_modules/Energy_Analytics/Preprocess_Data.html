@@ -247,7 +247,7 @@
                 <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;col and degree should be lists.&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Preprocess_Data.add_time_features"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_time_features">[docs]</a>    <span class="k">def</span> <span class="nf">add_time_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">doy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Preprocess_Data.add_time_features"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_time_features">[docs]</a>    <span class="k">def</span> <span class="nf">add_time_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dow</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add time features to dataframe.</span>
 
 <span class="sd">        Parameters</span>
@@ -262,8 +262,6 @@
 <span class="sd">            Time of Day.</span>
 <span class="sd">        dow    : bool</span>
 <span class="sd">            Day of Week.</span>
-<span class="sd">        doy    : bool</span>
-<span class="sd">            Day of Year.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -282,8 +280,6 @@
             <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tod&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span>
         <span class="k">if</span> <span class="n">dow</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">&quot;dow&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span>
-        <span class="k">if</span> <span class="n">doy</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;doy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">dayofyear</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">data</span></div>
 

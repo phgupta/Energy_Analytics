@@ -7,24 +7,29 @@ Note
 3. os._exit(1) exits the program without calling cleanup handlers.
 
 To Do
-1. Model
-1.1. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
-1.2. Add TimeSeriesSplit, ANN, SVM.
-1.3. Add max_iter as a parameter.
-2. Wrapper
-2.1. Add option to standardize/normalize data before fitting to model (Preprocess?)
-2.2. Add Pearson's correlation coefficient.
-2.3. Give user the option to run specific models.
-3. All
-3.1. Ensure Python2.7 compatibility.
-3.2. Change SystemError to specific errors.
-4. Cleanup
-4.1. Documentation.
-4.2. Run pylint on all files.
-4.3. Structure code to publish to PyPI.
+1. Clean
+    1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
+2. Model
+    1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
+    2. Add max_iter as a parameter.
+    3. Remove warnings (Objective does not converge)
+3. Wrapper
+    1. Add option to standardize/normalize data before fitting to model (Preprocess?)
+    2. Add Pearson's correlation coefficient.
+    3. Give user the option to run specific models.
+4. All
+    1. Ensure Python2.7 compatibility.
+    2. Change SystemError to specific errors.
+    3. Update python and all libraries to ensure similar results are replicated in different systems.
+5. Cleanup
+    1. Documentation.
+    2. Unit Tests.
+    3. Run pylint on all files.
+    4. Structure code to publish to PyPI.
+    5. Docker.
 
 Authors
-Last modified: September 15 2018
+Last modified: September 30 2018
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
 """
@@ -34,14 +39,14 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-# from Energy_Analytics import Import_Data
-# from Energy_Analytics import Clean_Data
-# from Energy_Analytics import Preprocess_Data
-# from Energy_Analytics import Model_Data
-from Import_Data import *
-from Clean_Data import *
-from Preprocess_Data import *
-from Model_Data import *
+from Energy_Analytics import Import_Data
+from Energy_Analytics import Clean_Data
+from Energy_Analytics import Preprocess_Data
+from Energy_Analytics import Model_Data
+# from Import_Data import *
+# from Clean_Data import *
+# from Preprocess_Data import *
+# from Model_Data import *
 
 
 class Wrapper:
@@ -577,8 +582,8 @@ class Wrapper:
         self.result['Model']['Optimal Model\'s Metrics'] = self.best_metrics
 
         if plot:
-            fig1, fig2 = model_data_obj.display_plots(figsize)
-            fig1.savefig(self.results_folder_name + '/acc_alpha-' + str(Wrapper.global_count) + '.png')
+            fig2 = model_data_obj.display_plots(figsize)
+            # fig1.savefig(self.results_folder_name + '/acc_alpha-' + str(Wrapper.global_count) + '.png')
             fig2.savefig(self.results_folder_name + '/modeled_data-' + str(Wrapper.global_count) + '.png')
 
         if self.preprocessed_data.empty:

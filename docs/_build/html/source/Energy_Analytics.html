@@ -1079,6 +1079,11 @@ Last modified: September 15 2018
 </dd></dl>
 
 <dl class="method">
+<dt id="Energy_Analytics.Model_Data.Model_Data.random_forest">
+<code class="descname">random_forest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.random_forest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.random_forest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="Energy_Analytics.Model_Data.Model_Data.ridge_regression">
 <code class="descname">ridge_regression</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.ridge_regression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.ridge_regression" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ridge Regression.</p>
@@ -1170,7 +1175,7 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 
 <dl class="method">
 <dt id="Energy_Analytics.Preprocess_Data.Preprocess_Data.add_time_features">
-<code class="descname">add_time_features</code><span class="sig-paren">(</span><em>year=False</em>, <em>month=False</em>, <em>week=True</em>, <em>tod=True</em>, <em>dow=True</em>, <em>doy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Preprocess_Data.html#Preprocess_Data.add_time_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_time_features" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_time_features</code><span class="sig-paren">(</span><em>year=False</em>, <em>month=False</em>, <em>week=True</em>, <em>tod=True</em>, <em>dow=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Preprocess_Data.html#Preprocess_Data.add_time_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Preprocess_Data.Preprocess_Data.add_time_features" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add time features to dataframe.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1182,7 +1187,6 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li><strong>week</strong> (<em>bool</em>) – Week.</li>
 <li><strong>tod</strong> (<em>bool</em>) – Time of Day.</li>
 <li><strong>dow</strong> (<em>bool</em>) – Day of Week.</li>
-<li><strong>doy</strong> (<em>bool</em>) – Day of Year.</li>
 </ul>
 </td>
 </tr>
@@ -1218,21 +1222,68 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li>os._exit(1) exits the program without calling cleanup handlers.</li>
 </ol>
 <p>To Do
-1. Model
-1.1. Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())
-1.2 Add TimeSeriesSplit, ANN, SVM, Randomforest.
-1.3. Add max_iter as a parameter.
-2. Wrapper
-2.1. Add option to standardize/normalize data before fitting to model (Preprocess?)
-2.2. Add Pearson’s correlation coefficient.
-2.3. Give user the option to run specific models.
-3. All
-3.1. Ensure Python2.7 compatibility.
-3.2. Change SystemError to specific errors.
-4. Cleanup
-4.1. Documentation.
-4.2. Run pylint on all files.
-4.3. Structure code to publish to PyPI.</p>
+1. Clean</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)</li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><dl class="first docutils">
+<dt>Model</dt>
+<dd><ol class="first last arabic">
+<li>Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())</li>
+<li>Add TimeSeriesSplit, ANN, SVM.</li>
+<li>Add max_iter as a parameter.</li>
+<li><dl class="first docutils">
+<dt>Modeled_Data.png file should have</dt>
+<dd><ol class="first last arabic">
+<li>Model name.</li>
+<li>All metrics.</li>
+<li>Comment.</li>
+<li>JSON file number.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li>Remove warnings (Objective does not converge)</li>
+<li>No need to print r2 score vs alpha graph.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Wrapper</dt>
+<dd><ol class="first last arabic">
+<li>Add option to standardize/normalize data before fitting to model (Preprocess?)</li>
+<li>Add Pearson’s correlation coefficient.</li>
+<li>Give user the option to run specific models.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>All</dt>
+<dd><ol class="first last arabic">
+<li>Ensure Python2.7 compatibility.</li>
+<li>Change SystemError to specific errors.</li>
+<li>Update python and all libraries to ensure results are replicated in different systems.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Cleanup</dt>
+<dd><ol class="first last arabic">
+<li>Documentation.</li>
+<li>Unit Tests.</li>
+<li>Run pylint on all files.</li>
+<li>Structure code to publish to PyPI.</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
 <p class="last">Authors
 Last modified: September 15 2018
 &#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
@@ -1361,7 +1412,7 @@ Last modified: September 15 2018
 
 <dl class="method">
 <dt id="Energy_Analytics.Wrapper.Wrapper.preprocess_data">
-<code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>data</em>, <em>hdh_cpoint=65</em>, <em>cdh_cpoint=65</em>, <em>col_hdh_cdh='OAT'</em>, <em>col_degree=None</em>, <em>degree=None</em>, <em>year=False</em>, <em>month=False</em>, <em>week=False</em>, <em>tod=False</em>, <em>dow=False</em>, <em>doy=False</em>, <em>var_to_expand=None</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.preprocess_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.preprocess_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>data</em>, <em>hdh_cpoint=65</em>, <em>cdh_cpoint=65</em>, <em>col_hdh_cdh='OAT'</em>, <em>col_degree=None</em>, <em>degree=None</em>, <em>year=False</em>, <em>month=False</em>, <em>week=False</em>, <em>tod=False</em>, <em>dow=False</em>, <em>var_to_expand=None</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.preprocess_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.preprocess_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Preprocesses dataframe according to user specifications and stores result in self.preprocessed_data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1379,7 +1430,6 @@ Last modified: September 15 2018
 <li><strong>week</strong> (<em>bool</em>) – Week.</li>
 <li><strong>tod</strong> (<em>bool</em>) – Time of Day.</li>
 <li><strong>dow</strong> (<em>bool</em>) – Day of Week.</li>
-<li><strong>doy</strong> (<em>bool</em>) – Day of Year.</li>
 <li><strong>var_to_expand</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Variables to one-hot encode, e.g. var_to_expand=[‘tod’, ‘dow’, ‘year’].</li>
 <li><strong>save_file</strong> (<em>bool</em>) – Specifies whether to save file or not. Defaults to True.</li>
 </ul>
