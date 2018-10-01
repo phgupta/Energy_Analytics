@@ -2,19 +2,20 @@
 
 Note
 ----
-1. If only folder is specified and no filename, all csv's will be read in sorted order by name.
-2. Doesn't handle cases when user provides
-2.1. file_name of type str and folder_name of type list(str)
-2.2. file_name and folder_name both of type list(str)
+1. If only folder is specified and no filename, all csv's will be read in sorted order by name. \n
+2. Doesn't handle cases when user provides \n
+    \t 1. file_name of type str and folder_name of type list(str) \n
+    \t 2. file_name and folder_name both of type list(str)
 
-To Do,
+To Do \n
 1. Import data from InfluxDB, MongoDB and SkySpark.
 
-Authors,
-Last modified: September 15 2018
-@author Marco Pritoni <marco.pritoni@gmail.com>
-@author Jacob Rodriguez  <jbrodriguez@ucdavis.edu>
-@author Pranav Gupta <phgupta@ucdavis.edu>
+Authors \n
+@author Marco Pritoni <marco.pritoni@gmail.com> \n
+@author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
+@author Pranav Gupta <phgupta@ucdavis.edu> \n
+
+Last modified: September 15 2018 \n
 
 """
 
@@ -43,12 +44,12 @@ class Import_Data:
         Note
         ----
         1. If folder exists out of current directory, folder_name should contain correct regex
-        2. Assuming there's no file called "*.csv"
+        2. Assuming there's no file called "\*.csv"
 
         Parameters
         ----------
         file_name       : str
-            CSV file to be imported. Defaults to '*' - all csv files in the folder.
+            CSV file to be imported. Defaults to '\*' - all csv files in the folder.
         folder_name     : str
             Folder where file resides. Defaults to '.' - current directory.
         head_row        : int

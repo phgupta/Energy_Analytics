@@ -86,14 +86,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Energy_Analytics</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Energy_Analytics package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Clean_Data">Energy_Analytics.Clean_Data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Import_Data">Energy_Analytics.Import_Data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Influx_Dataframe_Client">Energy_Analytics.Influx_Dataframe_Client module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Clean_Data">Energy_Analytics.Clean_Data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Model_Data">Energy_Analytics.Model_Data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Preprocess_Data">Energy_Analytics.Preprocess_Data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics.Wrapper">Energy_Analytics.Wrapper module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-Energy_Analytics">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -166,244 +164,33 @@
             
   <div class="section" id="energy-analytics-package">
 <h1>Energy_Analytics package<a class="headerlink" href="#energy-analytics-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-Energy_Analytics.Clean_Data">
-<span id="energy-analytics-clean-data-module"></span><h2>Energy_Analytics.Clean_Data module<a class="headerlink" href="#module-Energy_Analytics.Clean_Data" title="Permalink to this headline">¶</a></h2>
-<p>This script cleans a dataframe according to user specifications.</p>
-<p>To Do,
-1. For remove_outliers() - may need a different boundary for each column.</p>
-<p>Authors,
-Last modified: September 15 2018
-&#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;
-&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
-<dl class="class">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data">
-<em class="property">class </em><code class="descclassname">Energy_Analytics.Clean_Data.</code><code class="descname">Clean_Data</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>This class cleans a dataframe according to user specification</p>
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.clean_data">
-<code class="descname">clean_data</code><span class="sig-paren">(</span><em>resample=True</em>, <em>freq='h'</em>, <em>interpolate=True</em>, <em>limit=1</em>, <em>method='linear'</em>, <em>remove_na=True</em>, <em>remove_na_how='any'</em>, <em>remove_outliers=True</em>, <em>sd_val=3</em>, <em>remove_out_of_bounds=True</em>, <em>low_bound=0</em>, <em>high_bound=9998</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.clean_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.clean_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clean dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>resample</strong> (<em>bool</em>) – Indicates whether to resample data or not.</li>
-<li><strong>freq</strong> (<em>str</em>) – Resampling frequency i.e. d, h, 15T…</li>
-<li><strong>interpolate</strong> (<em>bool</em>) – Indicates whether to interpolate data or not.</li>
-<li><strong>limit</strong> (<em>int</em>) – Interpolation limit.</li>
-<li><strong>method</strong> (<em>str</em>) – Interpolation method.</li>
-<li><strong>remove_na</strong> (<em>bool</em>) – Indicates whether to remove NAs or not.</li>
-<li><strong>remove_na_how</strong> (<em>str</em>) – Specificies how to remove NA i.e. all, any…</li>
-<li><strong>remove_outliers</strong> (<em>bool</em>) – Indicates whether to remove outliers or not.</li>
-<li><strong>sd_val</strong> (<em>int</em>) – Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</li>
-<li><strong>remove_out_of_bounds</strong> (<em>bool</em>) – Indicates whether to remove out of bounds datapoints or not.</li>
-<li><strong>low_bound</strong> (<em>int</em>) – Low bound of the data.</li>
-<li><strong>high_bound</strong> (<em>int</em>) – High bound of the data.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.drop_columns">
-<code class="descname">drop_columns</code><span class="sig-paren">(</span><em>col</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.drop_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.drop_columns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Drop columns in dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>col</strong> (<em>str</em>) – Column to drop.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.interpolate_data">
-<code class="descname">interpolate_data</code><span class="sig-paren">(</span><em>data</em>, <em>limit</em>, <em>method</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.interpolate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.interpolate_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolate dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to interpolate</li>
-<li><strong>limit</strong> (<em>int</em>) – Interpolation limit.</li>
-<li><strong>method</strong> (<em>str</em>) – Interpolation method.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing interpolated data</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_na">
-<code class="descname">remove_na</code><span class="sig-paren">(</span><em>data</em>, <em>remove_na_how</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_na" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove NAs from dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to remove NAs from.</li>
-<li><strong>remove_na_how</strong> (<em>str</em>) – Specificies how to remove NA i.e. all, any…</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe with NAs removed.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_out_of_bounds">
-<code class="descname">remove_out_of_bounds</code><span class="sig-paren">(</span><em>data</em>, <em>low_bound</em>, <em>high_bound</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_out_of_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_out_of_bounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove out of bound datapoints from dataframe.</p>
-<p>This function removes all points &lt; low_bound and &gt; high_bound.</p>
-<p>To Do,
-1. Add a different boundary for each column.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to remove bounds from.</li>
-<li><strong>low_bound</strong> (<em>int</em>) – Low bound of the data.</li>
-<li><strong>high_bound</strong> (<em>int</em>) – High bound of the data.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe with out of bounds removed.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_outliers">
-<code class="descname">remove_outliers</code><span class="sig-paren">(</span><em>data</em>, <em>sd_val</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_outliers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_outliers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove outliers from dataframe.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ol class="last arabic simple">
-<li>This function excludes all lines with NA in all columns.</li>
-</ol>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to remove outliers from.</li>
-<li><strong>sd_val</strong> (<em>int</em>) – Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe with outliers removed.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.rename_columns">
-<code class="descname">rename_columns</code><span class="sig-paren">(</span><em>col</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.rename_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.rename_columns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename columns of dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of columns to rename.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Clean_Data.Clean_Data.resample_data">
-<code class="descname">resample_data</code><span class="sig-paren">(</span><em>data</em>, <em>freq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.resample_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.resample_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resample dataframe.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ol class="last arabic simple">
-<li>Also need to deal with energy quantities where resampling is .sum()</li>
-<li>Figure out how to apply different functions to different columns .apply()</li>
-<li><dl class="first docutils">
-<dt>This theoretically work in upsampling too, check docs</dt>
-<dd><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.resample.html">http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.resample.html</a></dd>
-</dl>
-</li>
-</ol>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to resample</li>
-<li><strong>freq</strong> (<em>str</em>) – Resampling frequency i.e. d, h, 15T…</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing resampled data</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 <div class="section" id="module-Energy_Analytics.Import_Data">
 <span id="energy-analytics-import-data-module"></span><h2>Energy_Analytics.Import_Data module<a class="headerlink" href="#module-Energy_Analytics.Import_Data" title="Permalink to this headline">¶</a></h2>
 <p>This script imports data from csv files and returns a dataframe.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ol class="arabic simple">
-<li>If only folder is specified and no filename, all csv’s will be read in sorted order by name.</li>
+<ol class="arabic">
+<li><p class="first">If only folder is specified and no filename, all csv’s will be read in sorted order by name.</p>
+</li>
+<li><p class="first">Doesn’t handle cases when user provides</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>file_name of type str and folder_name of type list(str)</li>
+<li>file_name and folder_name both of type list(str)</li>
 </ol>
-<p>2. Doesn’t handle cases when user provides
-2.1. file_name of type str and folder_name of type list(str)
-2.2. file_name and folder_name both of type list(str)</p>
-<p>To Do,
-1. Import data from InfluxDB, MongoDB and SkySpark.</p>
-<p class="last">Authors,
-Last modified: September 15 2018
-&#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;
-&#64;author Jacob Rodriguez  &lt;<a class="reference external" href="mailto:jbrodriguez&#37;&#52;&#48;ucdavis&#46;edu">jbrodriguez<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;
-&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+</div></blockquote>
+</li>
+</ol>
+<p>To Do</p>
+<ol class="arabic simple">
+<li>Import data from InfluxDB, MongoDB and SkySpark.</li>
+</ol>
+<p>Authors</p>
+<p>&#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
+<p>&#64;author Jacob Rodriguez  &lt;<a class="reference external" href="mailto:jbrodriguez&#37;&#52;&#48;ucdavis&#46;edu">jbrodriguez<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+<p class="last">&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
 </div>
+<p>Last modified: September 15 2018</p>
 <dl class="class">
 <dt id="Energy_Analytics.Import_Data.Import_Data">
 <em class="property">class </em><code class="descclassname">Energy_Analytics.Import_Data.</code><code class="descname">Import_Data</code><a class="reference internal" href="../_modules/Energy_Analytics/Import_Data.html#Import_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Import_Data.Import_Data" title="Permalink to this definition">¶</a></dt>
@@ -417,7 +204,7 @@ Last modified: September 15 2018
 <p class="first admonition-title">Note</p>
 <ol class="last arabic simple">
 <li>If folder exists out of current directory, folder_name should contain correct regex</li>
-<li>Assuming there’s no file called “<a href="#id1"><span class="problematic" id="id2">*</span></a>.csv”</li>
+<li>Assuming there’s no file called “*.csv”</li>
 </ol>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -444,133 +231,6 @@ Last modified: September 15 2018
 <div class="section" id="module-Energy_Analytics.Influx_Dataframe_Client">
 <span id="energy-analytics-influx-dataframe-client-module"></span><h2>Energy_Analytics.Influx_Dataframe_Client module<a class="headerlink" href="#module-Energy_Analytics.Influx_Dataframe_Client" title="Permalink to this headline">¶</a></h2>
 <p>Interface for InfluxDB.</p>
-<dl class="docutils">
-<dt>Two dataframe formats are accepted both are shown below:</dt>
-<dd>time              ap_name  AP_count             parse_ap_name building_number floor room  test_field</dd>
-</dl>
-<p>0 2016-04-01 07:00:00+00:00  ap135-100-103d-r177       1.0  [ap135, 100, 103d, r177]             100     1  03d         1.0
-1 2016-04-01 07:00:00+00:00   ap135-100-121-r177       3.0   [ap135, 100, 121, r177]             100     1  121         1.0
-2 2016-04-01 07:00:00+00:00   ap135-100-139-r177       6.0   [ap135, 100, 139, r177]             100     1  139         1.0
-3 2016-04-01 07:00:00+00:00   ap135-100-140-r177       5.0   [ap135, 100, 140, r177]             100     1  140         1.0
-4 2016-04-01 07:00:00+00:00  ap135-100-149b-r177       1.0  [ap135, 100, 149b, r177]             100     1  49b         1.0</p>
-<dl class="docutils">
-<dt>The same dataframe can also be given as where the index is the time:</dt>
-<dd>AP_count              ap_name building_number floor room  test_field</dd>
-</dl>
-<p>2016-04-01 07:00:00+00:00         1  ap135-100-103d-r177             100     1  03d           1
-2016-04-01 07:00:00+00:00         5   ap135-100-150-r177             100     1  150           1
-2016-04-01 07:00:00+00:00         3   ap135-100-121-r177             100     1  121           1
-2016-04-01 07:00:00+00:00         5   ap135-100-140-r177             100     1  140           1
-2016-04-01 07:00:00+00:00         1  ap135-100-149b-r177             100     1  49b           1</p>
-<p>This is converted to the following json before being given to DataFrameClient during write
-[</p>
-<blockquote>
-<div><blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd><dl class="first docutils">
-<dt>‘fields’: {</dt>
-<dd>‘AP_count’: 1.0,
-‘test_field’: 1.0
-},</dd>
-</dl>
-<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
-‘tags’: {</p>
-<blockquote>
-<div>‘floor’: ‘1’,
-‘building_number’: ‘100’,
-‘ap_name’: ‘ap135-100-103d-r177’,
-‘room’: ‘03d’
-},</div></blockquote>
-<p class="last">‘measurement’: ‘wifi_data9’
-},</p>
-</dd>
-</dl>
-<dl class="docutils">
-<dt>{</dt>
-<dd><dl class="first docutils">
-<dt>‘fields’: {</dt>
-<dd>‘AP_count’: 3.0,
-‘test_field’: 1.0
-},</dd>
-</dl>
-<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
-‘tags’: {</p>
-<blockquote>
-<div>‘floor’: 1,
-‘building_number’: ‘100’,
-‘ap_name’: ‘ap135-100-121-r177’,
-‘room’: ‘121’
-},</div></blockquote>
-<p class="last">‘measurement’: ‘wifi_data9’
-},</p>
-</dd>
-</dl>
-<dl class="docutils">
-<dt>{</dt>
-<dd><dl class="first docutils">
-<dt>‘fields’: {</dt>
-<dd>‘AP_count’: 6.0,
-‘test_field’: 1.0
-},</dd>
-</dl>
-<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
-‘tags’: {</p>
-<blockquote class="last">
-<div>‘floor’: 1,
-‘building_number’: ‘100’,
-‘ap_name’: ‘ap135-100-139-r177’,
-‘room’: ‘139’
-},</div></blockquote>
-</dd>
-<dt>‘measurement’: ‘wifi_data9’</dt>
-<dd>},</dd>
-</dl>
-<dl class="docutils">
-<dt>{</dt>
-<dd><dl class="first docutils">
-<dt>‘fields’: {</dt>
-<dd>‘AP_count’: 5.0,
-‘test_field’: 1.0
-},</dd>
-</dl>
-<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
-‘tags’: {</p>
-<blockquote>
-<div>‘floor’: 1,
-‘building_number’: ‘100’,
-‘ap_name’: ‘ap135-100-140-r177’,
-‘room’: ‘140’
-},</div></blockquote>
-<p class="last">‘measurement’: ‘wifi_data9’},</p>
-</dd>
-</dl>
-<dl class="docutils">
-<dt>{</dt>
-<dd><dl class="first docutils">
-<dt>‘fields’: {</dt>
-<dd>‘AP_count’: 1.0,
-‘test_field’: 1.0
-},</dd>
-</dl>
-<p>‘time’: Timestamp(‘2016-04-01 07:00:00+0000’, tz=’UTC’),
-‘tags’: {</p>
-<blockquote>
-<div>‘floor’: ‘1’,
-‘building_number’: ‘100’,
-‘ap_name’: ‘ap135-100-149b-r177’,
-‘room’: ‘49b’
-},</div></blockquote>
-<p class="last">‘measurement’: ‘wifi_data9’
-}</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>]</p>
-</div></blockquote>
-<p>Time can be specified in epoch time or Influx format</p>
-<p>When making queries, identifiers may be put into Double quotes depending on the
-characters they contain. String literals i.e. tag values must be in single quotes!</p>
 <dl class="class">
 <dt id="Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client">
 <em class="property">class </em><code class="descclassname">Energy_Analytics.Influx_Dataframe_Client.</code><code class="descname">Influx_Dataframe_Client</code><span class="sig-paren">(</span><em>config_file</em>, <em>db_section=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Influx_Dataframe_Client.html#Influx_Dataframe_Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Influx_Dataframe_Client.Influx_Dataframe_Client" title="Permalink to this definition">¶</a></dt>
@@ -919,15 +579,235 @@ dataframe even if the response has no results</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-Energy_Analytics.Clean_Data">
+<span id="energy-analytics-clean-data-module"></span><h2>Energy_Analytics.Clean_Data module<a class="headerlink" href="#module-Energy_Analytics.Clean_Data" title="Permalink to this headline">¶</a></h2>
+<p>This script cleans a dataframe according to user specifications.</p>
+<p>Last modified: September 15 2018</p>
+<p>To Do</p>
+<ol class="arabic simple">
+<li>For remove_outliers() - may need a different boundary for each column.</li>
+</ol>
+<p>Authors</p>
+<p>&#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;
+&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+<dl class="class">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data">
+<em class="property">class </em><code class="descclassname">Energy_Analytics.Clean_Data.</code><code class="descname">Clean_Data</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class cleans a dataframe according to user specification</p>
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.clean_data">
+<code class="descname">clean_data</code><span class="sig-paren">(</span><em>resample=True</em>, <em>freq='h'</em>, <em>interpolate=True</em>, <em>limit=1</em>, <em>method='linear'</em>, <em>remove_na=True</em>, <em>remove_na_how='any'</em>, <em>remove_outliers=True</em>, <em>sd_val=3</em>, <em>remove_out_of_bounds=True</em>, <em>low_bound=0</em>, <em>high_bound=9998</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.clean_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.clean_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>resample</strong> (<em>bool</em>) – Indicates whether to resample data or not.</li>
+<li><strong>freq</strong> (<em>str</em>) – Resampling frequency i.e. d, h, 15T…</li>
+<li><strong>interpolate</strong> (<em>bool</em>) – Indicates whether to interpolate data or not.</li>
+<li><strong>limit</strong> (<em>int</em>) – Interpolation limit.</li>
+<li><strong>method</strong> (<em>str</em>) – Interpolation method.</li>
+<li><strong>remove_na</strong> (<em>bool</em>) – Indicates whether to remove NAs or not.</li>
+<li><strong>remove_na_how</strong> (<em>str</em>) – Specificies how to remove NA i.e. all, any…</li>
+<li><strong>remove_outliers</strong> (<em>bool</em>) – Indicates whether to remove outliers or not.</li>
+<li><strong>sd_val</strong> (<em>int</em>) – Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</li>
+<li><strong>remove_out_of_bounds</strong> (<em>bool</em>) – Indicates whether to remove out of bounds datapoints or not.</li>
+<li><strong>low_bound</strong> (<em>int</em>) – Low bound of the data.</li>
+<li><strong>high_bound</strong> (<em>int</em>) – High bound of the data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.drop_columns">
+<code class="descname">drop_columns</code><span class="sig-paren">(</span><em>col</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.drop_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.drop_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop columns in dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>col</strong> (<em>str</em>) – Column to drop.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.interpolate_data">
+<code class="descname">interpolate_data</code><span class="sig-paren">(</span><em>data</em>, <em>limit</em>, <em>method</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.interpolate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.interpolate_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to interpolate</li>
+<li><strong>limit</strong> (<em>int</em>) – Interpolation limit.</li>
+<li><strong>method</strong> (<em>str</em>) – Interpolation method.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing interpolated data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_na">
+<code class="descname">remove_na</code><span class="sig-paren">(</span><em>data</em>, <em>remove_na_how</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_na" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove NAs from dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to remove NAs from.</li>
+<li><strong>remove_na_how</strong> (<em>str</em>) – Specificies how to remove NA i.e. all, any…</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe with NAs removed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_out_of_bounds">
+<code class="descname">remove_out_of_bounds</code><span class="sig-paren">(</span><em>data</em>, <em>low_bound</em>, <em>high_bound</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_out_of_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_out_of_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove out of bound datapoints from dataframe.</p>
+<p>This function removes all points &lt; low_bound and &gt; high_bound.</p>
+<p>To Do,
+1. Add a different boundary for each column.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to remove bounds from.</li>
+<li><strong>low_bound</strong> (<em>int</em>) – Low bound of the data.</li>
+<li><strong>high_bound</strong> (<em>int</em>) – High bound of the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe with out of bounds removed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.remove_outliers">
+<code class="descname">remove_outliers</code><span class="sig-paren">(</span><em>data</em>, <em>sd_val</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.remove_outliers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.remove_outliers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove outliers from dataframe.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
+<li>This function excludes all lines with NA in all columns.</li>
+</ol>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to remove outliers from.</li>
+<li><strong>sd_val</strong> (<em>int</em>) – Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe with outliers removed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.rename_columns">
+<code class="descname">rename_columns</code><span class="sig-paren">(</span><em>col</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.rename_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.rename_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename columns of dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of columns to rename.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Clean_Data.Clean_Data.resample_data">
+<code class="descname">resample_data</code><span class="sig-paren">(</span><em>data</em>, <em>freq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Clean_Data.html#Clean_Data.resample_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Clean_Data.Clean_Data.resample_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample dataframe.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
+<li>Also need to deal with energy quantities where resampling is .sum()</li>
+<li>Figure out how to apply different functions to different columns .apply()</li>
+<li><dl class="first docutils">
+<dt>This theoretically work in upsampling too, check docs</dt>
+<dd><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.resample.html">http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.resample.html</a></dd>
+</dl>
+</li>
+</ol>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to resample</li>
+<li><strong>freq</strong> (<em>str</em>) – Resampling frequency i.e. d, h, 15T…</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing resampled data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-Energy_Analytics.Model_Data">
 <span id="energy-analytics-model-data-module"></span><h2>Energy_Analytics.Model_Data module<a class="headerlink" href="#module-Energy_Analytics.Model_Data" title="Permalink to this headline">¶</a></h2>
 <p>This script splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots.</p>
-<p>To Do
-1. Break down time_period into baseline_period and projection_period.
-2. Extend exlude_time_period to allow multiple periods.</p>
-<p>Authors
-Last modified: September 15 2018
-&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+<p>Last modified: September 30 2018</p>
+<p>To Do</p>
+<ol class="arabic simple">
+<li>Break down time_period into baseline_period and projection_period.</li>
+<li>Extend exlude_time_period to allow multiple periods.</li>
+</ol>
+<p>Authors</p>
+<p>&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
 <dl class="class">
 <dt id="Energy_Analytics.Model_Data.Model_Data">
 <em class="property">class </em><code class="descclassname">Energy_Analytics.Model_Data.</code><code class="descname">Model_Data</code><span class="sig-paren">(</span><em>df</em>, <em>input_col</em>, <em>output_col</em>, <em>time_period</em>, <em>exclude_time_period</em>, <em>alphas</em>, <em>cv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data" title="Permalink to this definition">¶</a></dt>
@@ -1125,9 +1005,9 @@ Last modified: September 15 2018
 <div class="section" id="module-Energy_Analytics.Preprocess_Data">
 <span id="energy-analytics-preprocess-data-module"></span><h2>Energy_Analytics.Preprocess_Data module<a class="headerlink" href="#module-Energy_Analytics.Preprocess_Data" title="Permalink to this headline">¶</a></h2>
 <p>This script preprocesses a dataframe according to user specifications.</p>
-<p>Authors,
-Last modified: September 15 2018
-&#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;
+<p>Last modified: September 15 2018</p>
+<p>Authors</p>
+<p>&#64;author Marco Pritoni &lt;<a class="reference external" href="mailto:marco&#46;pritoni&#37;&#52;&#48;gmail&#46;com">marco<span>&#46;</span>pritoni<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;
 &#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
 <dl class="class">
 <dt id="Energy_Analytics.Preprocess_Data.Preprocess_Data">
@@ -1214,6 +1094,7 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <div class="section" id="module-Energy_Analytics.Wrapper">
 <span id="energy-analytics-wrapper-module"></span><h2>Energy_Analytics.Wrapper module<a class="headerlink" href="#module-Energy_Analytics.Wrapper" title="Permalink to this headline">¶</a></h2>
 <p>This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</p>
+<p>Last modified: September 30 2018</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ol class="arabic simple">
@@ -1221,72 +1102,54 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li>df.resample(freq=’h’).mean() drops all non-float/non-int columns</li>
 <li>os._exit(1) exits the program without calling cleanup handlers.</li>
 </ol>
-<p>To Do
-1. Clean</p>
+<p>To Do</p>
+<ol class="arabic">
+<li><p class="first">Clean</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li>Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)</li>
 </ol>
 </div></blockquote>
-<ol class="arabic simple" start="2">
-<li><dl class="first docutils">
-<dt>Model</dt>
-<dd><ol class="first last arabic">
-<li>Regression outputs negative values! Set predict = 0 in projected values (model_data/display_plots())</li>
-<li>Add TimeSeriesSplit, ANN, SVM.</li>
-<li>Add max_iter as a parameter.</li>
-<li><dl class="first docutils">
-<dt>Modeled_Data.png file should have</dt>
-<dd><ol class="first last arabic">
-<li>Model name.</li>
-<li>All metrics.</li>
-<li>Comment.</li>
-<li>JSON file number.</li>
-</ol>
-</dd>
-</dl>
 </li>
-<li>Remove warnings (Objective does not converge)</li>
-<li>No need to print r2 score vs alpha graph.</li>
+<li><p class="first">Model</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Add TimeSeriesSplit, ANN, SVM, ARIMA.</li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 </li>
-<li><dl class="first docutils">
-<dt>Wrapper</dt>
-<dd><ol class="first last arabic">
+<li><p class="first">Wrapper</p>
+<blockquote>
+<div><ol class="arabic simple">
 <li>Add option to standardize/normalize data before fitting to model (Preprocess?)</li>
 <li>Add Pearson’s correlation coefficient.</li>
 <li>Give user the option to run specific models.</li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 </li>
-<li><dl class="first docutils">
-<dt>All</dt>
-<dd><ol class="first last arabic">
+<li><p class="first">All</p>
+<blockquote>
+<div><ol class="arabic simple">
 <li>Ensure Python2.7 compatibility.</li>
 <li>Change SystemError to specific errors.</li>
-<li>Update python and all libraries to ensure results are replicated in different systems.</li>
+<li>Update python and all libraries to ensure similar results are replicated in different systems.</li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 </li>
-<li><dl class="first docutils">
-<dt>Cleanup</dt>
-<dd><ol class="first last arabic">
+<li><p class="first">Cleanup</p>
+<blockquote>
+<div><ol class="arabic simple">
 <li>Documentation.</li>
 <li>Unit Tests.</li>
 <li>Run pylint on all files.</li>
 <li>Structure code to publish to PyPI.</li>
+<li>Docker.</li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 </li>
 </ol>
-<p class="last">Authors
-Last modified: September 15 2018
-&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
+<p>Authors</p>
+<p class="last">&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
 </div>
 <dl class="class">
 <dt id="Energy_Analytics.Wrapper.Wrapper">
@@ -1350,7 +1213,7 @@ Last modified: September 15 2018
 <p class="first admonition-title">Note</p>
 <ol class="last arabic simple">
 <li>If folder exists out of current directory, folder_name should contain correct regex</li>
-<li>Assuming there’s no file called “<a href="#id3"><span class="problematic" id="id4">*</span></a>.csv”</li>
+<li>Assuming there’s no file called “*.csv”</li>
 </ol>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1493,9 +1356,6 @@ Last modified: September 15 2018
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-Energy_Analytics">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Energy_Analytics" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

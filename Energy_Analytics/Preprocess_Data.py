@@ -1,7 +1,8 @@
 """ This script preprocesses a dataframe according to user specifications.
 
-Authors,
 Last modified: September 15 2018
+
+Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com>
 @author Pranav Gupta <phgupta@ucdavis.edu>
 

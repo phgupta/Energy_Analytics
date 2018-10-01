@@ -1,10 +1,11 @@
 """ This script cleans a dataframe according to user specifications.
 
-To Do,
+Last modified: September 15 2018
+
+To Do \n
 1. For remove_outliers() - may need a different boundary for each column.
 
-Authors,
-Last modified: September 15 2018
+Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com>
 @author Pranav Gupta <phgupta@ucdavis.edu>
 

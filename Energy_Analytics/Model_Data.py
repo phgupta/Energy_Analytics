@@ -1,11 +1,12 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-To Do
-1. Break down time_period into baseline_period and projection_period.
+Last modified: September 30 2018
+
+To Do \n
+1. Break down time_period into baseline_period and projection_period. \n
 2. Extend exlude_time_period to allow multiple periods.
 
-Authors
-Last modified: September 30 2018
+Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
 """

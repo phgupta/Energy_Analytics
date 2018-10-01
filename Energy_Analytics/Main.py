@@ -3,7 +3,7 @@ import pandas as pd
 import configparser
 import matplotlib.pyplot as plt
 
-from Influx_Dataframe_Client import Influx_Dataframe_Client
+from Influx_Dataframe_Client import *
 import sys
 sys.path.append("..")
 from Energy_Analytics import Wrapper

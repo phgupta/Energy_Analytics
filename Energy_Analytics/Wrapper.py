@@ -1,33 +1,34 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
+Last modified: September 30 2018
+
 Note
 ----
 1. df.loc[(slice(None, None, None)), ...] is equivalent to "df.loc[:,...]"
 2. df.resample(freq='h').mean() drops all non-float/non-int columns
 3. os._exit(1) exits the program without calling cleanup handlers.
 
-To Do
-1. Clean
-    1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
-2. Model
-    1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
-3. Wrapper
-    1. Add option to standardize/normalize data before fitting to model (Preprocess?)
-    2. Add Pearson's correlation coefficient.
-    3. Give user the option to run specific models.
-4. All
-    1. Ensure Python2.7 compatibility.
-    2. Change SystemError to specific errors.
-    3. Update python and all libraries to ensure similar results are replicated in different systems.
-5. Cleanup
-    1. Documentation.
-    2. Unit Tests.
-    3. Run pylint on all files.
-    4. Structure code to publish to PyPI.
-    5. Docker.
+To Do \n
+1. Clean \n
+    \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
+2. Model \n
+    \t 1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
+3. Wrapper \n
+    \t 1. Add option to standardize/normalize data before fitting to model (Preprocess?)
+    \t 2. Add Pearson's correlation coefficient.
+    \t 3. Give user the option to run specific models.
+4. All \n
+    \t 1. Ensure Python2.7 compatibility.
+    \t 2. Change SystemError to specific errors.
+    \t 3. Update python and all libraries to ensure similar results are replicated in different systems.
+5. Cleanup \n
+    \t 1. Documentation.
+    \t 2. Unit Tests.
+    \t 3. Run pylint on all files.
+    \t 4. Structure code to publish to PyPI.
+    \t 5. Docker.
 
-Authors
-Last modified: September 30 2018
+Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
 """
@@ -255,12 +256,12 @@ class Wrapper:
         Note
         ----
         1. If folder exists out of current directory, folder_name should contain correct regex
-        2. Assuming there's no file called "*.csv"
+        2. Assuming there's no file called "\*.csv"
 
         Parameters
         ----------
         file_name       : str
-            CSV file to be imported. Defaults to '*' - all csv files in the folder.
+            CSV file to be imported. Defaults to '\*' - all csv files in the folder.
         folder_name     : str
             Folder where file resides. Defaults to '.' - current directory.
         head_row        : int

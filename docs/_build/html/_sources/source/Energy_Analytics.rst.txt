@@ -1,17 +1,6 @@
 Energy\_Analytics package
 =========================
 
-Submodules
-----------
-
-Energy\_Analytics\.Clean\_Data module
--------------------------------------
-
-.. automodule:: Energy_Analytics.Clean_Data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Energy\_Analytics\.Import\_Data module
 --------------------------------------
 
@@ -24,6 +13,14 @@ Energy\_Analytics\.Influx\_Dataframe\_Client module
 ---------------------------------------------------
 
 .. automodule:: Energy_Analytics.Influx_Dataframe_Client
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Energy\_Analytics\.Clean\_Data module
+-------------------------------------
+
+.. automodule:: Energy_Analytics.Clean_Data
     :members:
     :undoc-members:
     :show-inheritance:
@@ -48,15 +45,6 @@ Energy\_Analytics\.Wrapper module
 ---------------------------------
 
 .. automodule:: Energy_Analytics.Wrapper
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: Energy_Analytics
     :members:
     :undoc-members:
     :show-inheritance:
