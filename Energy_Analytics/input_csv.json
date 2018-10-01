@@ -31,6 +31,8 @@
 		"HDH CDH Calc Col": "OAT",
 		"Col Degree": null,
 		"Degree": null,
+		"Standardize": false,
+		"Normalize": true,
 		"Year": false,
 		"Month": false,
 		"Week": true,

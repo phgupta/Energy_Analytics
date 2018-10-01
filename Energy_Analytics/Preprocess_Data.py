@@ -9,6 +9,7 @@ Authors \n
 """
 
 import pandas as pd
+from sklearn import preprocessing
 
 class Preprocess_Data:
 
@@ -97,6 +98,31 @@ class Preprocess_Data:
                     self.preprocessed_data = data
             else:
                 raise SystemError('col and degree should be lists.')
+
+
+    def standardize(self):
+        """ Standardize data. """
+
+        if self.preprocessed_data.empty:
+            data = self.original_data
+        else:
+            data = self.preprocessed_data
+        
+        scaler = preprocessing.StandardScaler()
+        data = pd.DataFrame(scaler.fit_transform(data), columns=data.columns, index=data.index)
+        self.preprocessed_data = data
+
+
+    def normalize(self):
+        """ Normalize data. """
+
+        if self.preprocessed_data.empty:
+            data = self.original_data
+        else:
+            data = self.preprocessed_data
+
+        data = pd.DataFrame(preprocessing.normalize(data), columns=data.columns, index=data.index)
+        self.preprocessed_data = data
 
 
     def add_time_features(self, year=False, month=False, week=True, tod=True, dow=True):

@@ -11,17 +11,19 @@ Note
 To Do \n
 1. Clean \n
     \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
-2. Model \n
-    \t 1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
-3. Wrapper \n
-    \t 1. Add option to standardize/normalize data before fitting to model (Preprocess?)
     \t 2. Add Pearson's correlation coefficient.
-    \t 3. Give user the option to run specific models.
-4. All \n
+2. Preprocess \n
+    \t 1. Combine add_time_features and create_dummies.
+3. Model \n
+    \t 1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
+4. Wrapper \n
+    \t 1. Give user the option to run specific models.
+5. All \n
     \t 1. Ensure Python2.7 compatibility.
     \t 2. Change SystemError to specific errors.
     \t 3. Update python and all libraries to ensure similar results are replicated in different systems.
-5. Cleanup \n
+    \t 4. Create separate file for displaying plots?
+6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
@@ -38,14 +40,15 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-from Energy_Analytics import Import_Data
-from Energy_Analytics import Clean_Data
-from Energy_Analytics import Preprocess_Data
-from Energy_Analytics import Model_Data
-# from Import_Data import Import_Data
-# from Clean_Data import *
-# from Preprocess_Data import *
-# from Model_Data import *
+import seaborn as sns
+# from Energy_Analytics import Import_Data
+# from Energy_Analytics import Clean_Data
+# from Energy_Analytics import Preprocess_Data
+# from Energy_Analytics import Model_Data
+from Import_Data import *
+from Clean_Data import *
+from Preprocess_Data import *
+from Model_Data import *
 
 
 class Wrapper:
@@ -137,6 +140,7 @@ class Wrapper:
             preprocessed_data = self.preprocess_data(cleaned_data, cdh_cpoint=preproc_json['CDH CPoint'],
                                                     hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
                                                     col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
+                                                    standardize=preproc_json['Standardize'], normalize=preproc_json['Normalize'],
                                                     year=preproc_json['Year'], month=preproc_json['Month'], week=preproc_json['Week'],
                                                     tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'],
                                                     var_to_expand=preproc_json['Variables to Expand'])
@@ -218,6 +222,7 @@ class Wrapper:
                     preprocessed_data = self.preprocess_data(cleaned_data, cdh_cpoint=preproc_json['CDH CPoint'],
                                 hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
                                 col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
+                                standardize=preproc_json['Standardize'], normalize=preproc_json['Normalize'],
 
                                 year=time_freq['year'][i], month=time_freq['month'][i], week=time_freq['week'][i],
                                 tod=time_freq['tod'][i], dow=time_freq['dow'][i])
@@ -374,12 +379,20 @@ class Wrapper:
                                 remove_outliers=remove_outliers, sd_val=sd_val,
                                 remove_out_of_bounds=remove_out_of_bounds,
                                 low_bound=low_bound, high_bound=high_bound)
+
+        # CHECK: Add saved filename in result.json
+        # Create heatmap of Pearson's correlation coefficient
+        # corr = data.corr()
+        # fig1 = plt.figure(Wrapper.global_count)
+        # Wrapper.global_count += 1
+        # ax = sns.heatmap(corr)
+        # fig1.savefig(self.results_folder_name + '/pearson_corr-' + str(Wrapper.global_count) + '.png')
         
         if rename_col:  # Rename columns of dataframe
             clean_data_obj.rename_columns(rename_col)
         if drop_col:    # Drop columns of dataframe
             clean_data_obj.drop_columns(drop_col)
-        
+
         # Store cleaned data in wrapper class
         self.cleaned_data = clean_data_obj.cleaned_data
 
@@ -419,6 +432,7 @@ class Wrapper:
     def preprocess_data(self, data,
                         hdh_cpoint=65, cdh_cpoint=65, col_hdh_cdh='OAT',
                         col_degree=None, degree=None,
+                        standardize=False, normalize=False,
                         year=False, month=False, week=False, tod=False, dow=False,
                         var_to_expand=None,
                         save_file=True):
@@ -438,6 +452,10 @@ class Wrapper:
             Column to exponentiate.
         degree          : list(str)
             Exponentiation degree.
+        standardize     : bool
+            Standardize data.
+        normalize       : bool
+            Normalize data.
         year            : bool
             Year.
         month           : bool
@@ -468,6 +486,12 @@ class Wrapper:
         preprocess_data_obj = Preprocess_Data(data)
         preprocess_data_obj.add_degree_days(col=col_hdh_cdh, hdh_cpoint=hdh_cpoint, cdh_cpoint=cdh_cpoint)
         preprocess_data_obj.add_col_features(col=col_degree, degree=degree)
+
+        if standardize:
+            preprocess_data_obj.standardize()
+        if normalize:
+            preprocess_data_obj.normalize()
+
         preprocess_data_obj.add_time_features(year=year, month=month, week=week, tod=tod, dow=dow)
         preprocess_data_obj.create_dummies(var_to_expand=var_to_expand)
         
@@ -481,6 +505,8 @@ class Wrapper:
             'HDH CDH Calc Col': col_hdh_cdh,
             'Col Degree': col_degree,
             'Degree': degree,
+            'Standardize': standardize,
+            'Normalize': normalize,
             'Year': year,
             'Month': month,
             'Week': week,
