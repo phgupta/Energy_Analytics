@@ -4,7 +4,6 @@ import pandas as pd
 import sys
 sys.path.append("..")
 from Energy_Analytics import Wrapper
-# from Energy_Analytics.Import_Data import *
 
 class TestImport(unittest.TestCase):
 

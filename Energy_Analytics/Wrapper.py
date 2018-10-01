@@ -11,8 +11,6 @@ To Do
     1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
 2. Model
     1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
-    2. Add max_iter as a parameter.
-    3. Remove warnings (Objective does not converge)
 3. Wrapper
     1. Add option to standardize/normalize data before fitting to model (Preprocess?)
     2. Add Pearson's correlation coefficient.
@@ -43,7 +41,7 @@ from Energy_Analytics import Import_Data
 from Energy_Analytics import Clean_Data
 from Energy_Analytics import Preprocess_Data
 from Energy_Analytics import Model_Data
-# from Import_Data import *
+# from Import_Data import Import_Data
 # from Clean_Data import *
 # from Preprocess_Data import *
 # from Model_Data import *

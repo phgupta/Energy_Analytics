@@ -269,7 +269,8 @@ class Model_Data:
         best_alpha = None
 
         for alpha in self.alphas:
-            model = ElasticNet(normalize=True, alpha=alpha, max_iter=5000)
+            # CHECK: tol value too large?
+            model = ElasticNet(normalize=True, alpha=alpha, max_iter=5000, tol=0.01)
             model.fit(self.baseline_in, self.baseline_out.values.ravel())
             scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
             mean_score = np.mean(scores)
@@ -281,7 +282,8 @@ class Model_Data:
 
         adj_r2 = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
-        self.models.append(ElasticNet(alpha=best_alpha, max_iter=5000))
+        # CHECK: tol value too large?
+        self.models.append(ElasticNet(alpha=best_alpha, max_iter=5000, tol=0.01))
         self.model_names.append('ElasticNet Regression')
         self.max_scores.append(max_score)
         self.alpha_scores.append(score_list)
