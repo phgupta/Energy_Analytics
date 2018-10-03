@@ -98,7 +98,7 @@ class Wrapper:
             json.dump(self.result, f)
 
 
-    def read_json(self, file_name):
+    def read_json(self, file_name=None, input_json=None, imported_data=pd.DataFrame()):
         """ Read input json file.
 
         Notes
@@ -107,47 +107,58 @@ class Wrapper:
 
         Parameters
         ----------
-        file_name    : str
+        file_name   : str
             Filename to be read.
+        input_json  : dict
+            JSON object to be read.
+        imported_data   : pd.DataFrame()
+            Pandas Dataframe containing data.
 
         """
 
-        if not isinstance(file_name, str) or not file_name.endswith('.json') or not os.path.isfile('./'+file_name):
-            raise SystemError('File name should be a valid .json file residing in current directory.')
+        if not file_name and not input_json or file_name and input_json:
+            raise SystemError('Provide either json file or json object to read.')
+        
+        # Read json file
+        if file_name:
+            if not isinstance(file_name, str) or not file_name.endswith('.json') or not os.path.isfile('./'+file_name):
+                raise SystemError('File name should be a valid .json file residing in current directory.')
+            else:
+                f = open(file_name)
+                input_json = json.load(f)
 
-
-        with open(file_name) as f:
-
-            input_json = json.load(f)
-
+        if imported_data.empty:
             import_json = input_json['Import']
             imported_data = self.import_data(file_name=import_json['File Name'], folder_name=import_json['Folder Name'],
                                             head_row=import_json['Head Row'], index_col=import_json['Index Col'],
-                                            convert_col=import_json['Convert Col'], concat_files=import_json['Concat Files'])
+                                            convert_col=import_json['Convert Col'], concat_files=import_json['Concat Files'],
+                                            save_file=import_json['Save File'])
 
-            clean_json = input_json['Clean']
-            cleaned_data = self.clean_data(imported_data, rename_col=clean_json['Rename Col'], drop_col=clean_json['Drop Col'],
-                                            resample=clean_json['Resample'], freq=clean_json['Frequency'],
-                                            interpolate=clean_json['Interpolate'], limit=clean_json['Limit'],
-                                            method=clean_json['Method'], remove_na=clean_json['Remove NA'],
-                                            remove_na_how=clean_json['Remove NA How'], remove_outliers=clean_json['Remove Outliers'],
-                                            sd_val=clean_json['SD Val'], remove_out_of_bounds=clean_json['Remove Out of Bounds'],
-                                            low_bound=clean_json['Low Bound'], high_bound=clean_json['High Bound'])
+        clean_json = input_json['Clean']
+        cleaned_data = self.clean_data(imported_data, rename_col=clean_json['Rename Col'], drop_col=clean_json['Drop Col'],
+                                        resample=clean_json['Resample'], freq=clean_json['Frequency'],
+                                        interpolate=clean_json['Interpolate'], limit=clean_json['Limit'],
+                                        method=clean_json['Method'], remove_na=clean_json['Remove NA'],
+                                        remove_na_how=clean_json['Remove NA How'], remove_outliers=clean_json['Remove Outliers'],
+                                        sd_val=clean_json['SD Val'], remove_out_of_bounds=clean_json['Remove Out of Bounds'],
+                                        low_bound=clean_json['Low Bound'], high_bound=clean_json['High Bound'],
+                                        save_file=clean_json['Save File'])
 
-            preproc_json = input_json['Preprocess']
-            preprocessed_data = self.preprocess_data(cleaned_data, cdh_cpoint=preproc_json['CDH CPoint'],
-                                                    hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
-                                                    col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
-                                                    standardize=preproc_json['Standardize'], normalize=preproc_json['Normalize'],
-                                                    year=preproc_json['Year'], month=preproc_json['Month'], week=preproc_json['Week'],
-                                                    tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'])
+        preproc_json = input_json['Preprocess']
+        preprocessed_data = self.preprocess_data(cleaned_data, cdh_cpoint=preproc_json['CDH CPoint'],
+                                                hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
+                                                col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
+                                                standardize=preproc_json['Standardize'], normalize=preproc_json['Normalize'],
+                                                year=preproc_json['Year'], month=preproc_json['Month'], week=preproc_json['Week'],
+                                                tod=preproc_json['Time of Day'], dow=preproc_json['Day of Week'],
+                                                save_file=preproc_json['Save File'])
 
-            model_json = input_json['Model']
-            model_data = self.model(preprocessed_data, ind_col=model_json['Independent Col'], dep_col=model_json['Dependent Col'],
-                                    time_period=model_json['Time Period'], exclude_time_period=model_json['Exclude Time Period'],
-                                    alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
+        model_json = input_json['Model']
+        model_data = self.model(preprocessed_data, ind_col=model_json['Independent Col'], dep_col=model_json['Dependent Col'],
+                                time_period=model_json['Time Period'], exclude_time_period=model_json['Exclude Time Period'],
+                                alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
 
-            self.write_json()
+        self.write_json()
 
 
     # CHECK: Modify looping of time_freq
@@ -164,10 +175,6 @@ class Wrapper:
             Optional json file to read parameters.
         imported_data   : pd.DataFrame()
             Pandas Dataframe containing data.
-        resample_freq   : list(str)
-            Resampling frequencies to test.
-        time_freq       : dict
-            Time features to test.
 
         """
 
@@ -185,50 +192,26 @@ class Wrapper:
 
         # CSV Files
         if not imported_data:
-
             with open(file_name) as f:
                 input_json = json.load(f)
                 import_json = input_json['Import']
                 imported_data = self.import_data(file_name=import_json['File Name'], folder_name=import_json['Folder Name'],
                                                 head_row=import_json['Head Row'], index_col=import_json['Index Col'],
-                                                convert_col=import_json['Convert Col'], concat_files=import_json['Concat Files'])
+                                                convert_col=import_json['Convert Col'], concat_files=import_json['Concat Files'],
+                                                save_file=import_json['Save File'])
 
         with open(file_name) as f:
-            
             input_json = json.load(f)
 
-            # Resample data interval
-            for x in resample_freq:
+            for x in resample_freq: # Resample data interval
+                input_json['Clean']['Frequency'] = x
 
-                # Add time features
-                for i in range(len(time_freq.items())):
-
-                    clean_json = input_json['Clean']    # CHECK: Move line above for loop.
-                    cleaned_data = self.clean_data(imported_data, rename_col=clean_json['Rename Col'], drop_col=clean_json['Drop Col'],
-                                                resample=clean_json['Resample'], 
-                                                
-                                                freq=x,
-                                                
-                                                interpolate=clean_json['Interpolate'], limit=clean_json['Limit'],
-                                                method=clean_json['Method'], remove_na=clean_json['Remove NA'],
-                                                remove_na_how=clean_json['Remove NA How'], remove_outliers=clean_json['Remove Outliers'],
-                                                sd_val=clean_json['SD Val'], remove_out_of_bounds=clean_json['Remove Out of Bounds'],
-                                                low_bound=clean_json['Low Bound'], high_bound=clean_json['High Bound'])
-                    
-                    preproc_json = input_json['Preprocess']
-                    preprocessed_data = self.preprocess_data(cleaned_data, cdh_cpoint=preproc_json['CDH CPoint'],
-                                hdh_cpoint=preproc_json['HDH CPoint'], col_hdh_cdh=preproc_json['HDH CDH Calc Col'],
-                                col_degree=preproc_json['Col Degree'], degree=preproc_json['Degree'],
-                                standardize=preproc_json['Standardize'], normalize=preproc_json['Normalize'],
-
-                                year=time_freq['year'][i], month=time_freq['month'][i], week=time_freq['week'][i],
-                                tod=time_freq['tod'][i], dow=time_freq['dow'][i])
-
-                    model_json = input_json['Model']
-                    model_data = self.model(preprocessed_data, #global_count=Wrapper.global_count,
-                        ind_col=model_json['Independent Col'], dep_col=model_json['Dependent Col'],
-                        time_period=model_json['Time Period'], exclude_time_period=model_json['Exclude Time Period'],
-                        alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
+                for i in range(len(time_freq.items())): # Add time features
+                    input_json['Preprocess']['Year']        = time_freq['year'][i]
+                    input_json['Preprocess']['Month']       = time_freq['month'][i]
+                    input_json['Preprocess']['Week']        = time_freq['week'][i]
+                    input_json['Preprocess']['Time of Day'] = time_freq['tod'][i]
+                    input_json['Preprocess']['Day of Week'] = time_freq['dow'][i]
 
                     # Putting comment in json file to indicate which parameters have been changed
                     time_feature = None
@@ -236,17 +219,21 @@ class Wrapper:
                         if time_freq[key][i]:
                             time_feature = key
                     self.result['Comment'] = 'Freq: ' + x + ', ' + 'Time Feature: ' + time_feature
+
+                    # Read parameters in input_json
+                    self.read_json(file_name=None, input_json=input_json, imported_data=imported_data)
                     
                     # Keep track of highest adj_r2 score
                     if self.result['Model']['Optimal Model\'s Metrics']['adj_r2'] > optimal_score:
                         optimal_score = self.result['Model']['Optimal Model\'s Metrics']['adj_r2']
                         optimal_model_file_name = self.results_folder_name + '/results-' + str(Wrapper.global_count) + '.json'
 
-                    self.write_json()
                     Wrapper.global_count += 1
 
-
         print('Most optimal model: ', optimal_model_file_name)
+        freq = self.result['Comment'].split(' ')[1][:-1]
+        time_feat = self.result['Comment'].split(' ')[-1]
+        print('Freq: ', freq, 'Time Feature: ', time_feat)
 
 
     def import_data(self, file_name='*', folder_name='.', head_row=0, index_col=0,

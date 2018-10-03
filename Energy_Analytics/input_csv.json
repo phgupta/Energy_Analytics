@@ -5,7 +5,8 @@
 		"Head Row": [5, 5, 0],
 		"Index Col": 0,
 		"Convert Col": true,
-		"Concat Files": false
+		"Concat Files": false,
+		"Save File": false
 	},
 
 	"Clean": {
@@ -22,7 +23,8 @@
 		"SD Val": 3,
 		"Remove Out of Bounds": true,
 		"Low Bound": 0,
-		"High Bound": 9998
+		"High Bound": 9998,
+		"Save File": false
 	},
 
 	"Preprocess": {
@@ -37,7 +39,8 @@
 		"Month": false,
 		"Week": true,
 		"Time of Day": true,
-		"Day of Week": false
+		"Day of Week": false,
+		"Save File": false
 	},
 
 	"Model": {
