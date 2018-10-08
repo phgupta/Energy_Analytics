@@ -98,7 +98,7 @@ class Model_Data:
         self.baseline_out       = pd.DataFrame()    # Baseline's dependent column
 
         self.best_model         = None              # Best Model
-        self.best_model_name    = 'None'              # Best Model's name
+        self.best_model_name    = None              # Best Model's name
         self.y_pred             = pd.DataFrame()    # Best Model's predictions
         self.y_true             = pd.DataFrame()    # Testing set's true values
         self.best_metrics       = {}
@@ -206,8 +206,6 @@ class Model_Data:
                 max_score = mean_score
                 best_alpha = alpha
 
-        adj_r2 = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
-
         self.models.append(Lasso(normalize=True, alpha=best_alpha, max_iter=5000))
         self.model_names.append('Lasso Regression')
         self.max_scores.append(max_score)
@@ -239,8 +237,6 @@ class Model_Data:
             if mean_score > max_score:
                 max_score = mean_score
                 best_alpha = alpha
-
-        adj_r2 = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
         self.models.append(Ridge(alpha=best_alpha, max_iter=5000))
         self.model_names.append('Ridge Regression')
@@ -274,8 +270,6 @@ class Model_Data:
             if mean_score > max_score:
                 max_score = mean_score
                 best_alpha = alpha
-
-        adj_r2 = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
         # CHECK: tol value too large?
         self.models.append(ElasticNet(alpha=best_alpha, max_iter=5000, tol=0.01))
@@ -423,60 +417,3 @@ class Model_Data:
         self.best_metrics['nmbe'] = numerator / denominator
 
         return self.best_metrics
-
-
-    def display_plots(self, figsize):
-        """ Display plots.
-
-        This function displays two figures,
-        1. Alphas v/s Mean cross validated score
-        2. Baseline and projection plots
-
-        To Do,
-        1. Change hardcoding of for loop range.
-
-        Returns
-        -------
-        matplotlib.figure
-            Baseline and projection plots
-
-        """
-
-        # Figure 2
-        # Baseline and projection plots
-        fig2 = plt.figure(Model_Data.figure_count)
-        Model_Data.figure_count += 1
-
-        # Number of plots to display
-        nrows = len(self.time_period) / 2
-        
-        # Plot 1 - Baseline
-        base_df = pd.DataFrame()
-        base_df['y_true'] = self.y_true
-        base_df['y_pred'] = self.y_pred
-        ax1 = fig2.add_subplot(nrows, 1, 1)
-        base_df.plot(ax=ax1, figsize=figsize,
-            title='Baseline Period ({}-{}). \nBest Model: {}. \nBaseline Adj R2: {}'.format(self.time_period[0], self.time_period[1], 
-                                                                                self.best_model_name, self.best_metrics['adj_r2']))
-
-        # Display projection plots
-        if len(self.time_period) > 2:
-            num_plot = 2
-            for i in range(2, len(self.time_period), 2):
-                ax = fig2.add_subplot(nrows, 1, num_plot)
-                period = (slice(self.time_period[i], self.time_period[i+1]))
-                project_df = pd.DataFrame()    
-                project_df['y_true'] = self.original_data.loc[period, self.output_col]
-                project_df['y_pred'] = self.best_model.predict(self.original_data.loc[period, self.input_col])
-               
-                # Set all negative values to zero since energy > 0
-                project_df['y_pred'][project_df['y_pred'] < 0] = 0
-
-                project_df.plot(ax=ax, figsize=figsize,
-                    title='Projection Period ({}-{})'.format(self.time_period[i], self.time_period[i+1]))
-                num_plot += 1
-
-        fig2.tight_layout()
-
-        # return fig1, fig2
-        return fig2

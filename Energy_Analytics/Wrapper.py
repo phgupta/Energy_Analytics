@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: October 7 2018
+Last modified: October 8 2018
 
 Note
 ----
@@ -19,22 +19,23 @@ To Do \n
     \t 1. Add SVM and ARIMA. Checkout Gaussian processes.
     \t 2. Add param_dict parameter.
     \t 3. Create separate variables for baseline and project periods.
-4. Wrapper \n
+4. Plot \n
+    \t 1. Project onto exisiting years & future.
+5. Wrapper \n
     \t 1. Give user the option to run specific models.
     \t 2. Add cost savings.
-5. All \n
+6. All \n
     \t 1. Change SystemError to specific errors.
     \t 2. Update python and all libraries to ensure similar results are replicated in different systems.
-    \t 3. Create separate file for displaying plots?
-    \t 4. Look into adding other plots.
-    \t 5. Write documentation from user's perspective.
-6. Cleanup \n
+    \t 3. Look into adding other plots.
+    \t 4. Write documentation from user's perspective.
+7. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
     \t 4. Structure code to publish to PyPI.
     \t 5. Docker.
-7. Optimize \n
+8. Optimize \n
     \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
 Authors \n
@@ -56,6 +57,7 @@ from Import_Data import *
 from Clean_Data import *
 from Preprocess_Data import *
 from Model_Data import *
+from Plot_Data import *
 
 
 class Wrapper:
@@ -92,9 +94,12 @@ class Wrapper:
         self.imported_data          = pd.DataFrame()
         self.cleaned_data           = pd.DataFrame()
         self.preprocessed_data      = pd.DataFrame()
+
+        # Create instance of Plot_Data 
+        self.plot_data_obj          = Plot_Data()
         
         # Store UTC Time
-        self.result['Time (UTC)'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        self.result['Time (UTC)']   = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
         # Create results folder if it doesn't exist
         if not os.path.isdir(self.results_folder_name):
@@ -590,8 +595,12 @@ class Wrapper:
         self.result['Model']['Optimal Model\'s Metrics'] = model_data_obj.best_model_fit()
 
         if plot:
-            fig2 = model_data_obj.display_plots(figsize)
-            fig2.savefig(self.results_folder_name + '/modeled_data-' + str(Wrapper.global_count) + '.png')
+            fig = self.plot_data_obj.baseline_projection_plot(model_data_obj.y_true, model_data_obj.y_pred, model_data_obj.time_period,
+                                                            model_data_obj.best_model_name, model_data_obj.best_metrics['adj_r2'],
+                                                            model_data_obj.original_data,
+                                                            model_data_obj.input_col, model_data_obj.output_col,
+                                                            model_data_obj.best_model)
+            fig.savefig(self.results_folder_name + '/baseline_projection_plot-' + str(Wrapper.global_count) + '.png')
 
         if self.preprocessed_data.empty:
             self.result['Model']['Source'] = '' # User provided their own dataframe, i.e. they did not use preprocessed_data()
