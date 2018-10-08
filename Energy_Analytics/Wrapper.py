@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: September 30 2018
+Last modified: October 7 2018
 
 Note
 ----
@@ -18,6 +18,7 @@ To Do \n
 3. Model \n
     \t 1. Add SVM and ARIMA. Checkout Gaussian processes.
     \t 2. Add param_dict parameter.
+    \t 3. Create separate variables for baseline and project periods.
 4. Wrapper \n
     \t 1. Give user the option to run specific models.
     \t 2. Add cost savings.

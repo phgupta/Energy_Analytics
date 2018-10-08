@@ -1,6 +1,6 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-Last modified: September 30 2018
+Last modified: October 7 2018
 
 To Do \n
 1. Break down time_period into baseline_period and projection_period. \n
@@ -24,7 +24,7 @@ from sklearn.model_selection import KFold, cross_val_score, train_test_split
 
 class Model_Data:
 
-    """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots. 
+    """ This class splits the data into baseline and projection periods, runs models on them and displays metrics & plots. 
 
     Attributes
     ----------
@@ -98,7 +98,7 @@ class Model_Data:
         self.baseline_out       = pd.DataFrame()    # Baseline's dependent column
 
         self.best_model         = None              # Best Model
-        self.best_model_name    = None              # Best Model's name
+        self.best_model_name    = 'None'              # Best Model's name
         self.y_pred             = pd.DataFrame()    # Best Model's predictions
         self.y_true             = pd.DataFrame()    # Testing set's true values
         self.best_metrics       = {}
