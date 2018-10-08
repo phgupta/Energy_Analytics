@@ -17,6 +17,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 
 
@@ -95,7 +97,7 @@ class Model_Data:
         self.baseline_in        = pd.DataFrame()    # Baseline's indepndent columns
         self.baseline_out       = pd.DataFrame()    # Baseline's dependent column
 
-        self.model              = None              # Best Model
+        self.best_model         = None              # Best Model
         self.best_model_name    = None              # Best Model's name
         self.y_pred             = pd.DataFrame()    # Best Model's predictions
         self.y_true             = pd.DataFrame()    # Testing set's true values
@@ -104,7 +106,6 @@ class Model_Data:
         self.models             = []                # List of models
         self.model_names        = []                # List of model names
         self.max_scores         = []                # List of max scores of each model
-        self.alpha_scores       = []                # List of alpha scores run on all models
         self.metrics            = {}                # Each model's metrics
 
 
@@ -164,8 +165,7 @@ class Model_Data:
         This function runs linear regression and stores the, 
         1. Model
         2. Model name 
-        2. Mean score of cross validation
-        3. Alpha score (=0, since linear regression doesn't use alpha. However, storing alpha helps in indexing problems while plotting)
+        3. Mean score of cross validation
         4. Metrics
 
         """
@@ -177,7 +177,6 @@ class Model_Data:
         self.models.append(model)
         self.model_names.append('Linear Regression')
         self.max_scores.append(mean_score)
-        self.alpha_scores.append([])
         self.metrics['Linear Regression'] = mean_score
 
 
@@ -187,8 +186,7 @@ class Model_Data:
         This function runs lasso regression and stores the,
         1. Model
         2. Model name
-        2. Mean score of cross validation
-        3. Scores for each alpha
+        3. Max score
         4. Metrics
 
         """
@@ -213,7 +211,6 @@ class Model_Data:
         self.models.append(Lasso(normalize=True, alpha=best_alpha, max_iter=5000))
         self.model_names.append('Lasso Regression')
         self.max_scores.append(max_score)
-        self.alpha_scores.append(score_list)
         self.metrics['Lasso Regression'] = score_list
 
 
@@ -223,8 +220,7 @@ class Model_Data:
         This function runs ridge regression and stores the,
         1. Model
         2. Model name
-        2. Mean score of cross validation
-        3. Scores for each alpha
+        3. Max score
         4. Metrics
 
         """
@@ -249,7 +245,6 @@ class Model_Data:
         self.models.append(Ridge(alpha=best_alpha, max_iter=5000))
         self.model_names.append('Ridge Regression')
         self.max_scores.append(max_score)
-        self.alpha_scores.append(score_list)
         self.metrics['Ridge Regression'] = score_list
 
 
@@ -259,8 +254,7 @@ class Model_Data:
         This function runs elastic net regression and stores the,
         1. Model
         2. Model name
-        2. Mean score of cross validation
-        3. Scores for each alpha
+        3. Max score
         4. Metrics
 
         """
@@ -287,14 +281,20 @@ class Model_Data:
         self.models.append(ElasticNet(alpha=best_alpha, max_iter=5000, tol=0.01))
         self.model_names.append('ElasticNet Regression')
         self.max_scores.append(max_score)
-        self.alpha_scores.append(score_list)
         self.metrics['ElasticNet Regression'] = score_list
 
 
     def random_forest(self):
-        
-        from sklearn.ensemble import RandomForestRegressor
-        
+        """ Random Forest.
+
+        This function runs random forest and stores the,
+        1. Model
+        2. Model name
+        3. Max score
+        4. Metrics
+
+        """
+
         model = RandomForestRegressor(random_state=42)
         scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
         mean_score = np.mean(scores)
@@ -302,8 +302,28 @@ class Model_Data:
         self.models.append(model)
         self.model_names.append('Random Forest Regressor')
         self.max_scores.append(mean_score)
-        self.alpha_scores.append([])
         self.metrics['Random Forest Regressor'] = mean_score
+
+
+    def ann(self):
+        """ Artificial Neural Network.
+
+        This function runs ANN and stores the,
+        1. Model
+        2. Model name
+        3. Max score
+        4. Metrics
+
+        """
+        
+        model = MLPRegressor()
+        scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+        mean_score = np.mean(scores)
+
+        self.models.append(model)
+        self.model_names.append('Artificial Neural Network')
+        self.max_scores.append(mean_score)
+        self.metrics['Artificial Neural Network'] = mean_score
   
 
     def run_models(self):
@@ -319,16 +339,22 @@ class Model_Data:
         """
 
         self.linear_regression()
-        self.random_forest()            # CHECK: Just added
         self.lasso_regression()
         self.ridge_regression()
         self.elastic_net_regression()
+        self.random_forest()
+        self.ann()
 
-        # Find model with maximum score
-        max_score = max(self.max_scores)
-        self.best_model_name = self.model_names[self.max_scores.index(max_score)]
+        # Index of the model with max score
+        best_model_index = self.max_scores.index(max(self.max_scores))
 
-        return self.models[self.max_scores.index(max_score)], self.metrics
+        # Store name of the optimal model
+        self.best_model_name = self.model_names[best_model_index]
+
+        # Store optimal model
+        self.best_model = self.models[best_model_index]
+
+        return self.metrics
 
 
     def custom_model(self, func):
@@ -360,34 +386,8 @@ class Model_Data:
         return self.custom_metrics
 
 
-    def best_model_fit(self, model):
-        """ Fit data to optimal model.
-
-        Parameters
-        ----------
-        model   : sklearn estimator
-            Sklearn model
-
-        """
-
-        self.model = model
-        X_train, X_test, y_train, y_test = train_test_split(self.baseline_in, self.baseline_out, 
-                                                            test_size=0.30, random_state=42)
-
-        self.model.fit(X_train, y_train)
-        self.y_true = y_test                        # Pandas Series
-        self.y_pred = self.model.predict(X_test)    # numpy.ndarray
-
-        # Set all negative values to zero since energy > 0
-        self.y_pred[self.y_pred < 0] = 0
-        
-        # n and k values for adj r2 score
-        self.n_test = X_test.shape[0]   # Number of points in data sample
-        self.k_test = X_test.shape[1]   # Number of variables in model, excluding the constant
-
-
-    def display_metrics(self):
-        """ Display metrics of best model.
+    def best_model_fit(self):
+        """ Fit data to optimal model and return its metrics.
 
         Returns
         -------
@@ -396,6 +396,21 @@ class Model_Data:
 
         """
 
+        X_train, X_test, y_train, y_test = train_test_split(self.baseline_in, self.baseline_out, 
+                                                            test_size=0.30, random_state=42)
+
+        self.best_model.fit(X_train, y_train)
+        self.y_true = y_test                        # Pandas Series
+        self.y_pred = self.best_model.predict(X_test)    # numpy.ndarray
+
+        # Set all negative values to zero since energy > 0
+        self.y_pred[self.y_pred < 0] = 0
+        
+        # n and k values for adj r2 score
+        self.n_test = X_test.shape[0]   # Number of points in data sample
+        self.k_test = X_test.shape[1]   # Number of variables in model, excluding the constant
+
+        # Store best model's metrics
         self.best_metrics['name']   = self.best_model_name
         self.best_metrics['r2']     = r2_score(self.y_true, self.y_pred)
         self.best_metrics['mse']    = mean_squared_error(self.y_true, self.y_pred)
@@ -423,25 +438,9 @@ class Model_Data:
         Returns
         -------
         matplotlib.figure
-            Alphas v/s Mean cross validated score
-        matplotlib.figure
             Baseline and projection plots
 
         """
-
-        # Figure 1
-        # Plot Model Score vs Alphas to get an idea of which alphas work best
-        # fig1 = plt.figure(Model_Data.figure_count)
-        # Model_Data.figure_count += 1
-
-        # for i in range(2, len(self.models)):    # CHECK: Change hardcoding of range(2,..)
-        #     plt.plot(self.alphas, self.alpha_scores[i], label=self.model_names[i])
-
-        # plt.xlabel('Alphas')
-        # plt.ylabel('Model Accuracy')
-        # plt.title("R2 Score v/s alpha")
-        # plt.legend()
-
 
         # Figure 2
         # Baseline and projection plots
@@ -458,7 +457,7 @@ class Model_Data:
         ax1 = fig2.add_subplot(nrows, 1, 1)
         base_df.plot(ax=ax1, figsize=figsize,
             title='Baseline Period ({}-{}). \nBest Model: {}. \nBaseline Adj R2: {}'.format(self.time_period[0], self.time_period[1], 
-                                                                                        self.best_model_name, self.best_metrics['adj_r2']))
+                                                                                self.best_model_name, self.best_metrics['adj_r2']))
 
         # Display projection plots
         if len(self.time_period) > 2:
@@ -468,7 +467,7 @@ class Model_Data:
                 period = (slice(self.time_period[i], self.time_period[i+1]))
                 project_df = pd.DataFrame()    
                 project_df['y_true'] = self.original_data.loc[period, self.output_col]
-                project_df['y_pred'] = self.model.predict(self.original_data.loc[period, self.input_col])
+                project_df['y_pred'] = self.best_model.predict(self.original_data.loc[period, self.input_col])
                
                 # Set all negative values to zero since energy > 0
                 project_df['y_pred'][project_df['y_pred'] < 0] = 0

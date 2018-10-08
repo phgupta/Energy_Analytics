@@ -9,24 +9,32 @@ Note
 3. os._exit(1) exits the program without calling cleanup handlers.
 
 To Do \n
-1. Clean \n
+1. Import \n
+    \t 1. Integrate InfluxData and Skyspark client.
+    \t 2. Run analysis on XBOS data.
+2. Clean \n
     \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
     \t 2. Add Pearson's correlation coefficient.
-2. Model \n
-    \t 1. Add TimeSeriesSplit, ANN, SVM, ARIMA.
-3. Wrapper \n
+3. Model \n
+    \t 1. Add SVM and ARIMA. Checkout Gaussian processes.
+    \t 2. Add param_dict parameter.
+4. Wrapper \n
     \t 1. Give user the option to run specific models.
-4. All \n
-    \t 1. Ensure Python2.7 compatibility.
-    \t 2. Change SystemError to specific errors.
-    \t 3. Update python and all libraries to ensure similar results are replicated in different systems.
-    \t 4. Create separate file for displaying plots?
-5. Cleanup \n
+    \t 2. Add cost savings.
+5. All \n
+    \t 1. Change SystemError to specific errors.
+    \t 2. Update python and all libraries to ensure similar results are replicated in different systems.
+    \t 3. Create separate file for displaying plots?
+    \t 4. Look into adding other plots.
+    \t 5. Write documentation from user's perspective.
+6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
     \t 4. Structure code to publish to PyPI.
     \t 5. Docker.
+7. Optimize \n
+    \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
@@ -286,7 +294,8 @@ class Wrapper:
             'Head Row': head_row,
             'Index Col': index_col,
             'Convert Col': convert_col,
-            'Concat Files': concat_files
+            'Concat Files': concat_files,
+            'Save File': save_file
         }
         
         if save_file:
@@ -393,7 +402,8 @@ class Wrapper:
             'SD Val': sd_val,
             'Remove Out of Bounds': remove_out_of_bounds,
             'Low Bound': low_bound,
-            'High Bound': str(high_bound) if high_bound == float('inf') else high_bound
+            'High Bound': str(high_bound) if high_bound == float('inf') else high_bound,
+            'Save File': save_file
         }
 
         if self.imported_data.empty:
@@ -489,7 +499,8 @@ class Wrapper:
             'Month': month,
             'Week': week,
             'Time of Day': tod,
-            'Day of Week': dow
+            'Day of Week': dow,
+            'Save File': save_file
         }
 
         if self.cleaned_data.empty:
@@ -553,7 +564,7 @@ class Wrapper:
 
         # Split data into baseline and projection
         model_data_obj.split_data()
-        
+
         # Logging
         self.result['Model'] = {
             'Independent Col': ind_col,
@@ -563,29 +574,22 @@ class Wrapper:
             'Alphas': list(alphas),
             'CV': cv,
             'Plot': plot,
-            'Fig Size': figsize,
-            # 'Optimal Model': best_model_name
-            # Add custom model func name?
+            'Fig Size': figsize
         }
 
         # Runs all models on the data and returns optimal model
-        best_model, metrics = model_data_obj.run_models()
-        self.result['Model']['All Models'] = metrics
+        all_metrics = model_data_obj.run_models()
+        self.result['Model']['All Model\'s Metrics'] = all_metrics
 
         # CHECK: Define custom model's parameter and return types in documentation.
         if custom_model_func:
             self.result['Model']['Custom Model\'s Metrics'] = model_data_obj.custom_model(custom_model_func)
 
         # Fit optimal model to data
-        model_data_obj.best_model_fit(best_model)
-
-        # Save metrics of optimal model
-        self.best_metrics = model_data_obj.display_metrics()
-        self.result['Model']['Optimal Model\'s Metrics'] = self.best_metrics
+        self.result['Model']['Optimal Model\'s Metrics'] = model_data_obj.best_model_fit()
 
         if plot:
             fig2 = model_data_obj.display_plots(figsize)
-            # fig1.savefig(self.results_folder_name + '/acc_alpha-' + str(Wrapper.global_count) + '.png')
             fig2.savefig(self.results_folder_name + '/modeled_data-' + str(Wrapper.global_count) + '.png')
 
         if self.preprocessed_data.empty:

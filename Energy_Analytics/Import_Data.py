@@ -70,7 +70,7 @@ class Import_Data:
             except Exception as e:
                 raise e
 
-        # Import multiple csv files in a particular folder
+        # Import multiple csv files in a particular folder.
         elif isinstance(file_name, list) and isinstance(folder_name, str):
 
             for i, file in enumerate(file_name):
