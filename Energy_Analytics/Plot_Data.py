@@ -1,6 +1,6 @@
 """ This script contains functions for displaying various plots.
 
-Last modified: October 8 2018
+Last modified: October 12 2018
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>

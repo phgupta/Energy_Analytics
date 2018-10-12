@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: October 8 2018
+Last modified: October 12 2018
 
 Note
 ----

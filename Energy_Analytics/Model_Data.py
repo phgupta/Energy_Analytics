@@ -1,6 +1,6 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-Last modified: October 7 2018
+Last modified: October 12 2018
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
