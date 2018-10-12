@@ -2,10 +2,6 @@
 
 Last modified: October 7 2018
 
-To Do \n
-1. Break down time_period into baseline_period and projection_period. \n
-2. Extend exlude_time_period to allow multiple periods.
-
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
 
@@ -37,7 +33,8 @@ class Model_Data:
     figure_count = 1
 
 
-    def __init__(self, df, input_col, output_col, time_period, exclude_time_period, alphas, cv):
+    def __init__(self, df, input_col, output_col, alphas, cv,
+                exclude_time_period, baseline_period, projection_period=None):
         """ Constructor.
 
         To Do
@@ -52,14 +49,16 @@ class Model_Data:
             Independent column(s) of dataframe. Defaults to all columns except the last.
         output_col              : str
             Dependent column of dataframe.
-        time_period             : list(str)
-            List of time periods to split the data into baseline and projection periods. It needs to have a start and an end date.
-        exclude_time_period     : list(str)
-            List of time periods to exclude for modeling.
         alphas                  : list(int)
             List of alphas to run regression on.
         cv                      : int
             Number of folds for cross-validation. 
+        exclude_time_period     : list(str)
+            List of time periods to exclude for modeling.
+        baseline_period         : list(str)
+            List of time periods to split the data into baseline period. It needs to have a start and an end date.
+        projection_period       : list(str)
+            List of time periods to split the data into projection period. It needs to have a start and an end date.
 
         """
 
@@ -81,18 +80,18 @@ class Model_Data:
             raise SystemError('Target column should be a string.')
         else:
             self.output_col = output_col
-        
-        if (len(time_period) % 2 != 0) or (len(exclude_time_period) % 2 != 0):
-            raise SystemError('time_periods need to be a multiple of 2 (i.e. have a start and end date)')
-        else:
-            self.time_period = time_period
-            self.exclude_time_period = exclude_time_period
 
         if not isinstance(alphas, list) and not isinstance(alphas, np.ndarray):
             raise SystemError('alphas should be a list of int\'s or numpy ndarray.')
         else:
             self.alphas = alphas
 
+        if (len(exclude_time_period) % 2 != 0) or (len(baseline_period) % 2 != 0) or (len(projection_period) % 2 != 0):
+            raise SystemError('all time periods need to be a multiple of 2 (i.e. have a start and end date)')
+        else:
+            self.exclude_time_period = exclude_time_period
+            self.baseline_period = baseline_period
+            self.projection_period = projection_period
         
         self.baseline_in        = pd.DataFrame()    # Baseline's indepndent columns
         self.baseline_out       = pd.DataFrame()    # Baseline's dependent column
@@ -110,9 +109,9 @@ class Model_Data:
 
 
     def split_data(self):
-        """ Split data according to time_period values """
+        """ Split data according to baseline and projection time period values """
 
-        time_period1 = (slice(self.time_period[0], self.time_period[1]))
+        time_period1 = (slice(self.baseline_period[0], self.baseline_period[1]))
         exclude_time_period1 = (slice(self.exclude_time_period[0], self.exclude_time_period[1]))
         try:
             # Extract data ranging in time_period1
@@ -128,14 +127,13 @@ class Model_Data:
 
         # CHECK: Can optimize this part
         # Error checking to ensure time_period values are valid
-        if len(self.time_period) > 2:
-            for i in range(2, len(self.time_period), 2):
-                period = (slice(self.time_period[i], self.time_period[i+1]))
-                try:
-                    self.original_data.loc[period, self.input_col]
-                    self.original_data.loc[period, self.output_col]
-                except Exception as e:
-                    raise e
+        for i in range(0, len(self.projection_period), 2):
+            period = (slice(self.projection_period[i], self.projection_period[i+1]))
+            try:
+                self.original_data.loc[period, self.input_col]
+                self.original_data.loc[period, self.output_col]
+            except Exception as e:
+                raise e
 
 
     def adj_r2(self, r2, n, k):

@@ -14,11 +14,10 @@ To Do \n
     \t 2. Run analysis on XBOS data.
 2. Clean \n
     \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
-    \t 2. Add Pearson's correlation coefficient.
 3. Model \n
-    \t 1. Add SVM and ARIMA. Checkout Gaussian processes.
+    \t 1. Add ARIMA. Checkout Gaussian processes.
     \t 2. Add param_dict parameter.
-    \t 3. Create separate variables for baseline and project periods.
+    \t 3. Extend exlude_time_period to allow multiple periods.
 4. Plot \n
     \t 1. Project onto exisiting years & future.
 5. Wrapper \n
@@ -26,15 +25,15 @@ To Do \n
     \t 2. Add cost savings.
 6. All \n
     \t 1. Change SystemError to specific errors.
-    \t 2. Update python and all libraries to ensure similar results are replicated in different systems.
-    \t 3. Look into adding other plots.
-    \t 4. Write documentation from user's perspective.
+    \t 2. Look into adding other plots.
+    \t 3. Write documentation from user's perspective.
 7. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
     \t 4. Structure code to publish to PyPI.
     \t 5. Docker.
+    \t 6. Ensure results are replicated in different systems.
 8. Optimize \n
     \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
@@ -48,7 +47,6 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-# import seaborn as sns
 # from Energy_Analytics import Import_Data
 # from Energy_Analytics import Clean_Data
 # from Energy_Analytics import Preprocess_Data
@@ -169,7 +167,8 @@ class Wrapper:
 
         model_json = input_json['Model']
         model_data = self.model(preprocessed_data, ind_col=model_json['Independent Col'], dep_col=model_json['Dependent Col'],
-                                time_period=model_json['Time Period'], exclude_time_period=model_json['Exclude Time Period'],
+                                baseline_period=model_json['Baseline Period'], projection_period=model_json['Projection Period'],
+                                exclude_time_period=model_json['Exclude Time Period'],
                                 alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
 
         self.write_json()
@@ -377,14 +376,10 @@ class Wrapper:
                                 remove_out_of_bounds=remove_out_of_bounds,
                                 low_bound=low_bound, high_bound=high_bound)
 
-        # CHECK: Add saved filename in result.json
-        # Create heatmap of Pearson's correlation coefficient
-        # corr = data.corr()
-        # fig1 = plt.figure(Wrapper.global_count)
-        # Wrapper.global_count += 1
-        # ax = sns.heatmap(corr)
-        # fig1.savefig(self.results_folder_name + '/pearson_corr-' + str(Wrapper.global_count) + '.png')
-        
+        # Correlation plot
+        fig = self.plot_data_obj.correlation_plot(clean_data_obj.cleaned_data)
+        fig.savefig(self.results_folder_name + '/correlation_plot-' + str(Wrapper.global_count) + '.png')
+
         if rename_col:  # Rename columns of dataframe
             clean_data_obj.rename_columns(rename_col)
         if drop_col:    # Drop columns of dataframe
@@ -525,7 +520,8 @@ class Wrapper:
 
 
     def model(self, data,
-            ind_col=None, dep_col=None, time_period=[None,None], exclude_time_period=[None,None], 
+            ind_col=None, dep_col=None, 
+            baseline_period=[None,None], projection_period=[None,None], exclude_time_period=[None,None], 
             alphas=np.logspace(-4,1,30),
             cv=3, plot=True, figsize=None,
             custom_model_func=None):
@@ -539,8 +535,10 @@ class Wrapper:
             Independent column(s) of dataframe. Defaults to all columns except the last.
         dep_col                 : str
             Dependent column of dataframe.
-        time_period             : list(str)
-            List of time periods to split the data into baseline and projection periods. It needs to have a start and an end date.
+        baseline_period         : list(str)
+            List of time periods to split the data into baseline periods. It needs to have a start and an end date.
+        projection_period       : list(str)
+            List of time periods to split the data into projection periods. It needs to have a start and an end date.
         exclude_time_period     : list(str)
             List of time periods to exclude for modeling.
         alphas                  : list(int)
@@ -566,7 +564,7 @@ class Wrapper:
             raise SystemError('data has to be a pandas dataframe.')
         
         # Create instance
-        model_data_obj = Model_Data(data, ind_col, dep_col, time_period, exclude_time_period, alphas, cv)
+        model_data_obj = Model_Data(data, ind_col, dep_col, alphas, cv, exclude_time_period, baseline_period, projection_period)
 
         # Split data into baseline and projection
         model_data_obj.split_data()
@@ -575,7 +573,8 @@ class Wrapper:
         self.result['Model'] = {
             'Independent Col': ind_col,
             'Dependent Col': dep_col,
-            'Time Period': time_period,
+            'Baseline Period': baseline_period,
+            'Projection Period': projection_period,
             'Exclude Time Period': exclude_time_period,
             'Alphas': list(alphas),
             'CV': cv,
@@ -595,7 +594,8 @@ class Wrapper:
         self.result['Model']['Optimal Model\'s Metrics'] = model_data_obj.best_model_fit()
 
         if plot:
-            fig = self.plot_data_obj.baseline_projection_plot(model_data_obj.y_true, model_data_obj.y_pred, model_data_obj.time_period,
+            fig = self.plot_data_obj.baseline_projection_plot(model_data_obj.y_true, model_data_obj.y_pred, 
+                                                            model_data_obj.baseline_period, model_data_obj.projection_period,
                                                             model_data_obj.best_model_name, model_data_obj.best_metrics['adj_r2'],
                                                             model_data_obj.original_data,
                                                             model_data_obj.input_col, model_data_obj.output_col,
@@ -629,7 +629,7 @@ if __name__ == '__main__':
     preprocessed_data = wrapper_obj.preprocess_data(cleaned_data, week=True, tod=True)
 
     wrapper_obj.model(preprocessed_data, dep_col='HW_Heat', alphas=np.logspace(-4,1,5), figsize=(18,5),
-                   time_period=["2014-01","2014-12", "2015-01","2015-12", "2016-01","2016-12"],
+                   baseline_period=["2014-01","2014-12"], projection_period=["2015-01","2015-12", "2016-01","2016-12"],
                    cv=5,
                    exclude_time_period=['2014-06', '2014-07'],
                    custom_model_func=func)
