@@ -149,7 +149,7 @@
   <h1>Source code for Energy_Analytics.Wrapper</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</span>
 
-<span class="sd">Last modified: September 30 2018</span>
+<span class="sd">Last modified: October 12 2018</span>
 
 <span class="sd">Note</span>
 <span class="sd">----</span>
@@ -158,24 +158,33 @@
 <span class="sd">3. os._exit(1) exits the program without calling cleanup handlers.</span>
 
 <span class="sd">To Do \n</span>
-<span class="sd">1. Clean \n</span>
+<span class="sd">1. Import \n</span>
+<span class="sd">    \t 1. Integrate InfluxData and Skyspark client.</span>
+<span class="sd">    \t 2. Run analysis on XBOS data.</span>
+<span class="sd">2. Clean \n</span>
 <span class="sd">    \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)</span>
-<span class="sd">2. Model \n</span>
-<span class="sd">    \t 1. Add TimeSeriesSplit, ANN, SVM, ARIMA.</span>
-<span class="sd">3. Wrapper \n</span>
-<span class="sd">    \t 1. Add option to standardize/normalize data before fitting to model (Preprocess?)</span>
-<span class="sd">    \t 2. Add Pearson&#39;s correlation coefficient.</span>
-<span class="sd">    \t 3. Give user the option to run specific models.</span>
-<span class="sd">4. All \n</span>
-<span class="sd">    \t 1. Ensure Python2.7 compatibility.</span>
-<span class="sd">    \t 2. Change SystemError to specific errors.</span>
-<span class="sd">    \t 3. Update python and all libraries to ensure similar results are replicated in different systems.</span>
-<span class="sd">5. Cleanup \n</span>
+<span class="sd">3. Model \n</span>
+<span class="sd">    \t 1. Add ARIMA. Checkout Gaussian processes.</span>
+<span class="sd">    \t 2. Add param_dict parameter.</span>
+<span class="sd">    \t 3. Extend exlude_time_period to allow multiple periods.</span>
+<span class="sd">4. Plot \n</span>
+<span class="sd">    \t 1. Project onto exisiting years &amp; future.</span>
+<span class="sd">5. Wrapper \n</span>
+<span class="sd">    \t 1. Give user the option to run specific models.</span>
+<span class="sd">    \t 2. Add cost savings.</span>
+<span class="sd">6. All \n</span>
+<span class="sd">    \t 1. Change SystemError to specific errors.</span>
+<span class="sd">    \t 2. Look into adding other plots.</span>
+<span class="sd">    \t 3. Write documentation from user&#39;s perspective.</span>
+<span class="sd">7. Cleanup \n</span>
 <span class="sd">    \t 1. Documentation.</span>
 <span class="sd">    \t 2. Unit Tests.</span>
 <span class="sd">    \t 3. Run pylint on all files.</span>
 <span class="sd">    \t 4. Structure code to publish to PyPI.</span>
 <span class="sd">    \t 5. Docker.</span>
+<span class="sd">    \t 6. Ensure results are replicated in different systems.</span>
+<span class="sd">8. Optimize \n</span>
+<span class="sd">    \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.</span>
 
 <span class="sd">Authors \n</span>
 <span class="sd">@author Pranav Gupta &lt;phgupta@ucdavis.edu&gt;</span>
@@ -191,10 +200,11 @@
 <span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Clean_Data</span>
 <span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Preprocess_Data</span>
 <span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Model_Data</span>
-<span class="c1"># from Import_Data import Import_Data</span>
+<span class="c1"># from Import_Data import *</span>
 <span class="c1"># from Clean_Data import *</span>
 <span class="c1"># from Preprocess_Data import *</span>
 <span class="c1"># from Model_Data import *</span>
+<span class="c1"># from Plot_Data import *</span>
 
 
 <div class="viewcode-block" id="Wrapper"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper">[docs]</a><span class="k">class</span> <span class="nc">Wrapper</span><span class="p">:</span>
@@ -231,9 +241,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">imported_data</span>          <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span>           <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span>      <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+        <span class="c1"># Create instance of Plot_Data </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_data_obj</span>          <span class="o">=</span> <span class="n">Plot_Data</span><span class="p">()</span>
         
         <span class="c1"># Store UTC Time</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Time (UTC)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Time (UTC)&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
 
         <span class="c1"># Create results folder if it doesn&#39;t exist</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_folder_name</span><span class="p">):</span>
@@ -246,7 +259,7 @@
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Wrapper.read_json"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper.read_json">[docs]</a>    <span class="k">def</span> <span class="nf">read_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+<div class="viewcode-block" id="Wrapper.read_json"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper.read_json">[docs]</a>    <span class="k">def</span> <span class="nf">read_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_json</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">imported_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot; Read input json file.</span>
 
 <span class="sd">        Notes</span>
@@ -255,47 +268,59 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        file_name    : str</span>
+<span class="sd">        file_name   : str</span>
 <span class="sd">            Filename to be read.</span>
+<span class="sd">        input_json  : dict</span>
+<span class="sd">            JSON object to be read.</span>
+<span class="sd">        imported_data   : pd.DataFrame()</span>
+<span class="sd">            Pandas Dataframe containing data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;./&#39;</span><span class="o">+</span><span class="n">file_name</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;File name should be a valid .json file residing in current directory.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">input_json</span> <span class="ow">or</span> <span class="n">file_name</span> <span class="ow">and</span> <span class="n">input_json</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;Provide either json file or json object to read.&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Read json file</span>
+        <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;./&#39;</span><span class="o">+</span><span class="n">file_name</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;File name should be a valid .json file residing in current directory.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                <span class="n">input_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-
-            <span class="n">input_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">imported_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">import_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Import&#39;</span><span class="p">]</span>
             <span class="n">imported_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_data</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;File Name&#39;</span><span class="p">],</span> <span class="n">folder_name</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Folder Name&#39;</span><span class="p">],</span>
                                             <span class="n">head_row</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Head Row&#39;</span><span class="p">],</span> <span class="n">index_col</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Index Col&#39;</span><span class="p">],</span>
-                                            <span class="n">convert_col</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Convert Col&#39;</span><span class="p">],</span> <span class="n">concat_files</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Concat Files&#39;</span><span class="p">])</span>
+                                            <span class="n">convert_col</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Convert Col&#39;</span><span class="p">],</span> <span class="n">concat_files</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Concat Files&#39;</span><span class="p">],</span>
+                                            <span class="n">save_file</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Save File&#39;</span><span class="p">])</span>
 
-            <span class="n">clean_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Clean&#39;</span><span class="p">]</span>
-            <span class="n">cleaned_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_data</span><span class="p">(</span><span class="n">imported_data</span><span class="p">,</span> <span class="n">rename_col</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Rename Col&#39;</span><span class="p">],</span> <span class="n">drop_col</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Drop Col&#39;</span><span class="p">],</span>
-                                            <span class="n">resample</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Resample&#39;</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">],</span>
-                                            <span class="n">interpolate</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Interpolate&#39;</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Limit&#39;</span><span class="p">],</span>
-                                            <span class="n">method</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">],</span> <span class="n">remove_na</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove NA&#39;</span><span class="p">],</span>
-                                            <span class="n">remove_na_how</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove NA How&#39;</span><span class="p">],</span> <span class="n">remove_outliers</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove Outliers&#39;</span><span class="p">],</span>
-                                            <span class="n">sd_val</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;SD Val&#39;</span><span class="p">],</span> <span class="n">remove_out_of_bounds</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove Out of Bounds&#39;</span><span class="p">],</span>
-                                            <span class="n">low_bound</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Low Bound&#39;</span><span class="p">],</span> <span class="n">high_bound</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;High Bound&#39;</span><span class="p">])</span>
+        <span class="n">clean_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Clean&#39;</span><span class="p">]</span>
+        <span class="n">cleaned_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_data</span><span class="p">(</span><span class="n">imported_data</span><span class="p">,</span> <span class="n">rename_col</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Rename Col&#39;</span><span class="p">],</span> <span class="n">drop_col</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Drop Col&#39;</span><span class="p">],</span>
+                                        <span class="n">resample</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Resample&#39;</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">],</span>
+                                        <span class="n">interpolate</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Interpolate&#39;</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Limit&#39;</span><span class="p">],</span>
+                                        <span class="n">method</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">],</span> <span class="n">remove_na</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove NA&#39;</span><span class="p">],</span>
+                                        <span class="n">remove_na_how</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove NA How&#39;</span><span class="p">],</span> <span class="n">remove_outliers</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove Outliers&#39;</span><span class="p">],</span>
+                                        <span class="n">sd_val</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;SD Val&#39;</span><span class="p">],</span> <span class="n">remove_out_of_bounds</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove Out of Bounds&#39;</span><span class="p">],</span>
+                                        <span class="n">low_bound</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Low Bound&#39;</span><span class="p">],</span> <span class="n">high_bound</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;High Bound&#39;</span><span class="p">],</span>
+                                        <span class="n">save_file</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Save File&#39;</span><span class="p">])</span>
 
-            <span class="n">preproc_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">]</span>
-            <span class="n">preprocessed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">,</span> <span class="n">cdh_cpoint</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;CDH CPoint&#39;</span><span class="p">],</span>
-                                                    <span class="n">hdh_cpoint</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;HDH CPoint&#39;</span><span class="p">],</span> <span class="n">col_hdh_cdh</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;HDH CDH Calc Col&#39;</span><span class="p">],</span>
-                                                    <span class="n">col_degree</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Col Degree&#39;</span><span class="p">],</span> <span class="n">degree</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Degree&#39;</span><span class="p">],</span>
-                                                    <span class="n">year</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">],</span> <span class="n">month</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Month&#39;</span><span class="p">],</span> <span class="n">week</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Week&#39;</span><span class="p">],</span>
-                                                    <span class="n">tod</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Time of Day&#39;</span><span class="p">],</span> <span class="n">dow</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Day of Week&#39;</span><span class="p">],</span>
-                                                    <span class="n">var_to_expand</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Variables to Expand&#39;</span><span class="p">])</span>
+        <span class="n">preproc_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">]</span>
+        <span class="n">preprocessed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">,</span> <span class="n">cdh_cpoint</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;CDH CPoint&#39;</span><span class="p">],</span>
+                                                <span class="n">hdh_cpoint</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;HDH CPoint&#39;</span><span class="p">],</span> <span class="n">col_hdh_cdh</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;HDH CDH Calc Col&#39;</span><span class="p">],</span>
+                                                <span class="n">col_degree</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Col Degree&#39;</span><span class="p">],</span> <span class="n">degree</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Degree&#39;</span><span class="p">],</span>
+                                                <span class="n">standardize</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Standardize&#39;</span><span class="p">],</span> <span class="n">normalize</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Normalize&#39;</span><span class="p">],</span>
+                                                <span class="n">year</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">],</span> <span class="n">month</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Month&#39;</span><span class="p">],</span> <span class="n">week</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Week&#39;</span><span class="p">],</span>
+                                                <span class="n">tod</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Time of Day&#39;</span><span class="p">],</span> <span class="n">dow</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Day of Week&#39;</span><span class="p">],</span>
+                                                <span class="n">save_file</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Save File&#39;</span><span class="p">])</span>
 
-            <span class="n">model_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span>
-            <span class="n">model_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">preprocessed_data</span><span class="p">,</span> <span class="n">ind_col</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Independent Col&#39;</span><span class="p">],</span> <span class="n">dep_col</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Dependent Col&#39;</span><span class="p">],</span>
-                                    <span class="n">time_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Time Period&#39;</span><span class="p">],</span> <span class="n">exclude_time_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Exclude Time Period&#39;</span><span class="p">],</span>
-                                    <span class="n">alphas</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Alphas&#39;</span><span class="p">],</span> <span class="n">cv</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;CV&#39;</span><span class="p">],</span> <span class="n">plot</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Plot&#39;</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Fig Size&#39;</span><span class="p">])</span>
+        <span class="n">model_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span>
+        <span class="n">model_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">preprocessed_data</span><span class="p">,</span> <span class="n">ind_col</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Independent Col&#39;</span><span class="p">],</span> <span class="n">dep_col</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Dependent Col&#39;</span><span class="p">],</span>
+                                <span class="n">baseline_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Baseline Period&#39;</span><span class="p">],</span> <span class="n">projection_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Projection Period&#39;</span><span class="p">],</span>
+                                <span class="n">exclude_time_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Exclude Time Period&#39;</span><span class="p">],</span>
+                                <span class="n">alphas</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Alphas&#39;</span><span class="p">],</span> <span class="n">cv</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;CV&#39;</span><span class="p">],</span> <span class="n">plot</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Plot&#39;</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Fig Size&#39;</span><span class="p">])</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">write_json</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_json</span><span class="p">()</span></div>
 
 
     <span class="c1"># CHECK: Modify looping of time_freq</span>
@@ -312,10 +337,6 @@
 <span class="sd">            Optional json file to read parameters.</span>
 <span class="sd">        imported_data   : pd.DataFrame()</span>
 <span class="sd">            Pandas Dataframe containing data.</span>
-<span class="sd">        resample_freq   : list(str)</span>
-<span class="sd">            Resampling frequencies to test.</span>
-<span class="sd">        time_freq       : dict</span>
-<span class="sd">            Time features to test.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -333,51 +354,26 @@
 
         <span class="c1"># CSV Files</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">imported_data</span><span class="p">:</span>
-
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">input_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                 <span class="n">import_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Import&#39;</span><span class="p">]</span>
                 <span class="n">imported_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_data</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;File Name&#39;</span><span class="p">],</span> <span class="n">folder_name</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Folder Name&#39;</span><span class="p">],</span>
                                                 <span class="n">head_row</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Head Row&#39;</span><span class="p">],</span> <span class="n">index_col</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Index Col&#39;</span><span class="p">],</span>
-                                                <span class="n">convert_col</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Convert Col&#39;</span><span class="p">],</span> <span class="n">concat_files</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Concat Files&#39;</span><span class="p">])</span>
+                                                <span class="n">convert_col</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Convert Col&#39;</span><span class="p">],</span> <span class="n">concat_files</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Concat Files&#39;</span><span class="p">],</span>
+                                                <span class="n">save_file</span><span class="o">=</span><span class="n">import_json</span><span class="p">[</span><span class="s1">&#39;Save File&#39;</span><span class="p">])</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            
             <span class="n">input_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-            <span class="c1"># Resample data interval</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">resample_freq</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">resample_freq</span><span class="p">:</span> <span class="c1"># Resample data interval</span>
+                <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Clean&#39;</span><span class="p">][</span><span class="s1">&#39;Frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
 
-                <span class="c1"># Add time features</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time_freq</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span>
-
-                    <span class="n">clean_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Clean&#39;</span><span class="p">]</span>    <span class="c1"># CHECK: Move line above for loop.</span>
-                    <span class="n">cleaned_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_data</span><span class="p">(</span><span class="n">imported_data</span><span class="p">,</span> <span class="n">rename_col</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Rename Col&#39;</span><span class="p">],</span> <span class="n">drop_col</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Drop Col&#39;</span><span class="p">],</span>
-                                                <span class="n">resample</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Resample&#39;</span><span class="p">],</span> 
-                                                
-                                                <span class="n">freq</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
-                                                
-                                                <span class="n">interpolate</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Interpolate&#39;</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Limit&#39;</span><span class="p">],</span>
-                                                <span class="n">method</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">],</span> <span class="n">remove_na</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove NA&#39;</span><span class="p">],</span>
-                                                <span class="n">remove_na_how</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove NA How&#39;</span><span class="p">],</span> <span class="n">remove_outliers</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove Outliers&#39;</span><span class="p">],</span>
-                                                <span class="n">sd_val</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;SD Val&#39;</span><span class="p">],</span> <span class="n">remove_out_of_bounds</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Remove Out of Bounds&#39;</span><span class="p">],</span>
-                                                <span class="n">low_bound</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;Low Bound&#39;</span><span class="p">],</span> <span class="n">high_bound</span><span class="o">=</span><span class="n">clean_json</span><span class="p">[</span><span class="s1">&#39;High Bound&#39;</span><span class="p">])</span>
-                    
-                    <span class="n">preproc_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">]</span>
-                    <span class="n">preprocessed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">,</span> <span class="n">cdh_cpoint</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;CDH CPoint&#39;</span><span class="p">],</span>
-                                <span class="n">hdh_cpoint</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;HDH CPoint&#39;</span><span class="p">],</span> <span class="n">col_hdh_cdh</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;HDH CDH Calc Col&#39;</span><span class="p">],</span>
-                                <span class="n">col_degree</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Col Degree&#39;</span><span class="p">],</span> <span class="n">degree</span><span class="o">=</span><span class="n">preproc_json</span><span class="p">[</span><span class="s1">&#39;Degree&#39;</span><span class="p">],</span>
-
-                                <span class="n">year</span><span class="o">=</span><span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">month</span><span class="o">=</span><span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">week</span><span class="o">=</span><span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;week&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
-                                <span class="n">tod</span><span class="o">=</span><span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;tod&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dow</span><span class="o">=</span><span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;dow&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
-
-                                <span class="c1"># var_to_expand=preproc_json[&#39;Variables to Expand&#39;])</span>
-
-                    <span class="n">model_json</span> <span class="o">=</span> <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span>
-                    <span class="n">model_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">preprocessed_data</span><span class="p">,</span> <span class="c1">#global_count=Wrapper.global_count,</span>
-                        <span class="n">ind_col</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Independent Col&#39;</span><span class="p">],</span> <span class="n">dep_col</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Dependent Col&#39;</span><span class="p">],</span>
-                        <span class="n">time_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Time Period&#39;</span><span class="p">],</span> <span class="n">exclude_time_period</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Exclude Time Period&#39;</span><span class="p">],</span>
-                        <span class="n">alphas</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Alphas&#39;</span><span class="p">],</span> <span class="n">cv</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;CV&#39;</span><span class="p">],</span> <span class="n">plot</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Plot&#39;</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="n">model_json</span><span class="p">[</span><span class="s1">&#39;Fig Size&#39;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time_freq</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span> <span class="c1"># Add time features</span>
+                    <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">][</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">][</span><span class="s1">&#39;Month&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">][</span><span class="s1">&#39;Week&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;week&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">][</span><span class="s1">&#39;Time of Day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;tod&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">input_json</span><span class="p">[</span><span class="s1">&#39;Preprocess&#39;</span><span class="p">][</span><span class="s1">&#39;Day of Week&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_freq</span><span class="p">[</span><span class="s1">&#39;dow&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
 
                     <span class="c1"># Putting comment in json file to indicate which parameters have been changed</span>
                     <span class="n">time_feature</span> <span class="o">=</span> <span class="kc">None</span>
@@ -385,17 +381,21 @@
                         <span class="k">if</span> <span class="n">time_freq</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
                             <span class="n">time_feature</span> <span class="o">=</span> <span class="n">key</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Comment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Freq: &#39;</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="s1">&#39;Time Feature: &#39;</span> <span class="o">+</span> <span class="n">time_feature</span>
+
+                    <span class="c1"># Read parameters in input_json</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_json</span><span class="o">=</span><span class="n">input_json</span><span class="p">,</span> <span class="n">imported_data</span><span class="o">=</span><span class="n">imported_data</span><span class="p">)</span>
                     
                     <span class="c1"># Keep track of highest adj_r2 score</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Optimal Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">][</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">optimal_score</span><span class="p">:</span>
                         <span class="n">optimal_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Optimal Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">][</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">]</span>
                         <span class="n">optimal_model_file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_folder_name</span> <span class="o">+</span> <span class="s1">&#39;/results-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Wrapper</span><span class="o">.</span><span class="n">global_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span>
 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">write_json</span><span class="p">()</span>
                     <span class="n">Wrapper</span><span class="o">.</span><span class="n">global_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
-
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Most optimal model: &#39;</span><span class="p">,</span> <span class="n">optimal_model_file_name</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Most optimal model: &#39;</span><span class="p">,</span> <span class="n">optimal_model_file_name</span><span class="p">)</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">time_feat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Freq: &#39;</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="s1">&#39;Time Feature: &#39;</span><span class="p">,</span> <span class="n">time_feat</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Wrapper.import_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper.import_data">[docs]</a>    <span class="k">def</span> <span class="nf">import_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">folder_name</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">head_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -448,7 +448,8 @@
             <span class="s1">&#39;Head Row&#39;</span><span class="p">:</span> <span class="n">head_row</span><span class="p">,</span>
             <span class="s1">&#39;Index Col&#39;</span><span class="p">:</span> <span class="n">index_col</span><span class="p">,</span>
             <span class="s1">&#39;Convert Col&#39;</span><span class="p">:</span> <span class="n">convert_col</span><span class="p">,</span>
-            <span class="s1">&#39;Concat Files&#39;</span><span class="p">:</span> <span class="n">concat_files</span>
+            <span class="s1">&#39;Concat Files&#39;</span><span class="p">:</span> <span class="n">concat_files</span><span class="p">,</span>
+            <span class="s1">&#39;Save File&#39;</span><span class="p">:</span> <span class="n">save_file</span>
         <span class="p">}</span>
         
         <span class="k">if</span> <span class="n">save_file</span><span class="p">:</span>
@@ -523,12 +524,16 @@
                                 <span class="n">remove_outliers</span><span class="o">=</span><span class="n">remove_outliers</span><span class="p">,</span> <span class="n">sd_val</span><span class="o">=</span><span class="n">sd_val</span><span class="p">,</span>
                                 <span class="n">remove_out_of_bounds</span><span class="o">=</span><span class="n">remove_out_of_bounds</span><span class="p">,</span>
                                 <span class="n">low_bound</span><span class="o">=</span><span class="n">low_bound</span><span class="p">,</span> <span class="n">high_bound</span><span class="o">=</span><span class="n">high_bound</span><span class="p">)</span>
-        
+
+        <span class="c1"># Correlation plot</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_data_obj</span><span class="o">.</span><span class="n">correlation_plot</span><span class="p">(</span><span class="n">clean_data_obj</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_folder_name</span> <span class="o">+</span> <span class="s1">&#39;/correlation_plot-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Wrapper</span><span class="o">.</span><span class="n">global_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">rename_col</span><span class="p">:</span>  <span class="c1"># Rename columns of dataframe</span>
             <span class="n">clean_data_obj</span><span class="o">.</span><span class="n">rename_columns</span><span class="p">(</span><span class="n">rename_col</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">drop_col</span><span class="p">:</span>    <span class="c1"># Drop columns of dataframe</span>
             <span class="n">clean_data_obj</span><span class="o">.</span><span class="n">drop_columns</span><span class="p">(</span><span class="n">drop_col</span><span class="p">)</span>
-        
+
         <span class="c1"># Store cleaned data in wrapper class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">clean_data_obj</span><span class="o">.</span><span class="n">cleaned_data</span>
 
@@ -547,7 +552,8 @@
             <span class="s1">&#39;SD Val&#39;</span><span class="p">:</span> <span class="n">sd_val</span><span class="p">,</span>
             <span class="s1">&#39;Remove Out of Bounds&#39;</span><span class="p">:</span> <span class="n">remove_out_of_bounds</span><span class="p">,</span>
             <span class="s1">&#39;Low Bound&#39;</span><span class="p">:</span> <span class="n">low_bound</span><span class="p">,</span>
-            <span class="s1">&#39;High Bound&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">high_bound</span><span class="p">)</span> <span class="k">if</span> <span class="n">high_bound</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">high_bound</span>
+            <span class="s1">&#39;High Bound&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">high_bound</span><span class="p">)</span> <span class="k">if</span> <span class="n">high_bound</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">high_bound</span><span class="p">,</span>
+            <span class="s1">&#39;Save File&#39;</span><span class="p">:</span> <span class="n">save_file</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imported_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
@@ -568,8 +574,8 @@
 <div class="viewcode-block" id="Wrapper.preprocess_data"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper.preprocess_data">[docs]</a>    <span class="k">def</span> <span class="nf">preprocess_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
                         <span class="n">hdh_cpoint</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">cdh_cpoint</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">col_hdh_cdh</span><span class="o">=</span><span class="s1">&#39;OAT&#39;</span><span class="p">,</span>
                         <span class="n">col_degree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">year</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">var_to_expand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">save_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Preprocesses dataframe according to user specifications and stores result in self.preprocessed_data.</span>
 
@@ -587,6 +593,10 @@
 <span class="sd">            Column to exponentiate.</span>
 <span class="sd">        degree          : list(str)</span>
 <span class="sd">            Exponentiation degree.</span>
+<span class="sd">        standardize     : bool</span>
+<span class="sd">            Standardize data.</span>
+<span class="sd">        normalize       : bool</span>
+<span class="sd">            Normalize data.</span>
 <span class="sd">        year            : bool</span>
 <span class="sd">            Year.</span>
 <span class="sd">        month           : bool</span>
@@ -597,8 +607,6 @@
 <span class="sd">            Time of Day.</span>
 <span class="sd">        dow             : bool</span>
 <span class="sd">            Day of Week.</span>
-<span class="sd">        var_to_expand   : list(str)</span>
-<span class="sd">            Variables to one-hot encode, e.g. var_to_expand=[&#39;tod&#39;, &#39;dow&#39;, &#39;year&#39;].</span>
 <span class="sd">        save_file       : bool</span>
 <span class="sd">            Specifies whether to save file or not. Defaults to True.</span>
 
@@ -617,8 +625,13 @@
         <span class="n">preprocess_data_obj</span> <span class="o">=</span> <span class="n">Preprocess_Data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">add_degree_days</span><span class="p">(</span><span class="n">col</span><span class="o">=</span><span class="n">col_hdh_cdh</span><span class="p">,</span> <span class="n">hdh_cpoint</span><span class="o">=</span><span class="n">hdh_cpoint</span><span class="p">,</span> <span class="n">cdh_cpoint</span><span class="o">=</span><span class="n">cdh_cpoint</span><span class="p">)</span>
         <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">add_col_features</span><span class="p">(</span><span class="n">col</span><span class="o">=</span><span class="n">col_degree</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="n">degree</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">standardize</span><span class="p">:</span>
+            <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">standardize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+            <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
         <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">add_time_features</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="n">month</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="n">week</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="n">tod</span><span class="p">,</span> <span class="n">dow</span><span class="o">=</span><span class="n">dow</span><span class="p">)</span>
-        <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">create_dummies</span><span class="p">(</span><span class="n">var_to_expand</span><span class="o">=</span><span class="n">var_to_expand</span><span class="p">)</span>
         
         <span class="c1"># Store preprocessed data in wrapper class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">preprocess_data_obj</span><span class="o">.</span><span class="n">preprocessed_data</span>
@@ -630,12 +643,14 @@
             <span class="s1">&#39;HDH CDH Calc Col&#39;</span><span class="p">:</span> <span class="n">col_hdh_cdh</span><span class="p">,</span>
             <span class="s1">&#39;Col Degree&#39;</span><span class="p">:</span> <span class="n">col_degree</span><span class="p">,</span>
             <span class="s1">&#39;Degree&#39;</span><span class="p">:</span> <span class="n">degree</span><span class="p">,</span>
+            <span class="s1">&#39;Standardize&#39;</span><span class="p">:</span> <span class="n">standardize</span><span class="p">,</span>
+            <span class="s1">&#39;Normalize&#39;</span><span class="p">:</span> <span class="n">normalize</span><span class="p">,</span>
             <span class="s1">&#39;Year&#39;</span><span class="p">:</span> <span class="n">year</span><span class="p">,</span>
             <span class="s1">&#39;Month&#39;</span><span class="p">:</span> <span class="n">month</span><span class="p">,</span>
             <span class="s1">&#39;Week&#39;</span><span class="p">:</span> <span class="n">week</span><span class="p">,</span>
             <span class="s1">&#39;Time of Day&#39;</span><span class="p">:</span> <span class="n">tod</span><span class="p">,</span>
             <span class="s1">&#39;Day of Week&#39;</span><span class="p">:</span> <span class="n">dow</span><span class="p">,</span>
-            <span class="s1">&#39;Variables to Expand&#39;</span><span class="p">:</span> <span class="n">var_to_expand</span>
+            <span class="s1">&#39;Save File&#39;</span><span class="p">:</span> <span class="n">save_file</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
@@ -654,7 +669,8 @@
 
 
 <div class="viewcode-block" id="Wrapper.model"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
-            <span class="n">ind_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dep_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">exclude_time_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> 
+            <span class="n">ind_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dep_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">baseline_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">projection_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">exclude_time_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> 
             <span class="n">alphas</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span>
             <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">custom_model_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -668,8 +684,10 @@
 <span class="sd">            Independent column(s) of dataframe. Defaults to all columns except the last.</span>
 <span class="sd">        dep_col                 : str</span>
 <span class="sd">            Dependent column of dataframe.</span>
-<span class="sd">        time_period             : list(str)</span>
-<span class="sd">            List of time periods to split the data into baseline and projection periods. It needs to have a start and an end date.</span>
+<span class="sd">        baseline_period         : list(str)</span>
+<span class="sd">            List of time periods to split the data into baseline periods. It needs to have a start and an end date.</span>
+<span class="sd">        projection_period       : list(str)</span>
+<span class="sd">            List of time periods to split the data into projection periods. It needs to have a start and an end date.</span>
 <span class="sd">        exclude_time_period     : list(str)</span>
 <span class="sd">            List of time periods to exclude for modeling.</span>
 <span class="sd">        alphas                  : list(int)</span>
@@ -695,44 +713,43 @@
             <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s1">&#39;data has to be a pandas dataframe.&#39;</span><span class="p">)</span>
         
         <span class="c1"># Create instance</span>
-        <span class="n">model_data_obj</span> <span class="o">=</span> <span class="n">Model_Data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ind_col</span><span class="p">,</span> <span class="n">dep_col</span><span class="p">,</span> <span class="n">time_period</span><span class="p">,</span> <span class="n">exclude_time_period</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">cv</span><span class="p">)</span>
+        <span class="n">model_data_obj</span> <span class="o">=</span> <span class="n">Model_Data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ind_col</span><span class="p">,</span> <span class="n">dep_col</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">exclude_time_period</span><span class="p">,</span> <span class="n">baseline_period</span><span class="p">,</span> <span class="n">projection_period</span><span class="p">)</span>
 
         <span class="c1"># Split data into baseline and projection</span>
         <span class="n">model_data_obj</span><span class="o">.</span><span class="n">split_data</span><span class="p">()</span>
-        
+
         <span class="c1"># Logging</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;Independent Col&#39;</span><span class="p">:</span> <span class="n">ind_col</span><span class="p">,</span>
             <span class="s1">&#39;Dependent Col&#39;</span><span class="p">:</span> <span class="n">dep_col</span><span class="p">,</span>
-            <span class="s1">&#39;Time Period&#39;</span><span class="p">:</span> <span class="n">time_period</span><span class="p">,</span>
+            <span class="s1">&#39;Baseline Period&#39;</span><span class="p">:</span> <span class="n">baseline_period</span><span class="p">,</span>
+            <span class="s1">&#39;Projection Period&#39;</span><span class="p">:</span> <span class="n">projection_period</span><span class="p">,</span>
             <span class="s1">&#39;Exclude Time Period&#39;</span><span class="p">:</span> <span class="n">exclude_time_period</span><span class="p">,</span>
             <span class="s1">&#39;Alphas&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">alphas</span><span class="p">),</span>
             <span class="s1">&#39;CV&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="p">,</span>
             <span class="s1">&#39;Plot&#39;</span><span class="p">:</span> <span class="n">plot</span><span class="p">,</span>
-            <span class="s1">&#39;Fig Size&#39;</span><span class="p">:</span> <span class="n">figsize</span><span class="p">,</span>
-            <span class="c1"># &#39;Optimal Model&#39;: best_model_name</span>
-            <span class="c1"># Add custom model func name?</span>
+            <span class="s1">&#39;Fig Size&#39;</span><span class="p">:</span> <span class="n">figsize</span>
         <span class="p">}</span>
 
         <span class="c1"># Runs all models on the data and returns optimal model</span>
-        <span class="n">best_model</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">run_models</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;All Models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="n">all_metrics</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">run_models</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;All Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_metrics</span>
 
         <span class="c1"># CHECK: Define custom model&#39;s parameter and return types in documentation.</span>
         <span class="k">if</span> <span class="n">custom_model_func</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Custom Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">custom_model</span><span class="p">(</span><span class="n">custom_model_func</span><span class="p">)</span>
 
         <span class="c1"># Fit optimal model to data</span>
-        <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model_fit</span><span class="p">(</span><span class="n">best_model</span><span class="p">)</span>
-
-        <span class="c1"># Save metrics of optimal model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">display_metrics</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Optimal Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Optimal Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model_fit</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
-            <span class="n">fig2</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">display_plots</span><span class="p">(</span><span class="n">figsize</span><span class="p">)</span>
-            <span class="c1"># fig1.savefig(self.results_folder_name + &#39;/acc_alpha-&#39; + str(Wrapper.global_count) + &#39;.png&#39;)</span>
-            <span class="n">fig2</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_folder_name</span> <span class="o">+</span> <span class="s1">&#39;/modeled_data-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Wrapper</span><span class="o">.</span><span class="n">global_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_data_obj</span><span class="o">.</span><span class="n">baseline_projection_plot</span><span class="p">(</span><span class="n">model_data_obj</span><span class="o">.</span><span class="n">y_true</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">y_pred</span><span class="p">,</span> 
+                                                            <span class="n">model_data_obj</span><span class="o">.</span><span class="n">baseline_period</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">projection_period</span><span class="p">,</span>
+                                                            <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model_name</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">],</span>
+                                                            <span class="n">model_data_obj</span><span class="o">.</span><span class="n">original_data</span><span class="p">,</span>
+                                                            <span class="n">model_data_obj</span><span class="o">.</span><span class="n">input_col</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">output_col</span><span class="p">,</span>
+                                                            <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_folder_name</span> <span class="o">+</span> <span class="s1">&#39;/baseline_projection_plot-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Wrapper</span><span class="o">.</span><span class="n">global_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessed_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># User provided their own dataframe, i.e. they did not use preprocessed_data()</span>
@@ -758,10 +775,10 @@
                                     <span class="n">rename_col</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OAT&#39;</span><span class="p">,</span><span class="s1">&#39;RelHum_Avg&#39;</span><span class="p">,</span> <span class="s1">&#39;CHW_Elec&#39;</span><span class="p">,</span> <span class="s1">&#39;Elec&#39;</span><span class="p">,</span> <span class="s1">&#39;Gas&#39;</span><span class="p">,</span> <span class="s1">&#39;HW_Heat&#39;</span><span class="p">],</span>
                                     <span class="n">drop_col</span><span class="o">=</span><span class="s1">&#39;Elec&#39;</span><span class="p">)</span>
 
-    <span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">wrapper_obj</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">var_to_expand</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tod&#39;</span><span class="p">,</span><span class="s1">&#39;week&#39;</span><span class="p">])</span>
+    <span class="n">preprocessed_data</span> <span class="o">=</span> <span class="n">wrapper_obj</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tod</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">wrapper_obj</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">preprocessed_data</span><span class="p">,</span> <span class="n">dep_col</span><span class="o">=</span><span class="s1">&#39;HW_Heat&#39;</span><span class="p">,</span> <span class="n">alphas</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
-                   <span class="n">time_period</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2014-01&quot;</span><span class="p">,</span><span class="s2">&quot;2014-12&quot;</span><span class="p">,</span> <span class="s2">&quot;2015-01&quot;</span><span class="p">,</span><span class="s2">&quot;2015-12&quot;</span><span class="p">,</span> <span class="s2">&quot;2016-01&quot;</span><span class="p">,</span><span class="s2">&quot;2016-12&quot;</span><span class="p">],</span>
+                   <span class="n">baseline_period</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2014-01&quot;</span><span class="p">,</span><span class="s2">&quot;2014-12&quot;</span><span class="p">],</span> <span class="n">projection_period</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2015-01&quot;</span><span class="p">,</span><span class="s2">&quot;2015-12&quot;</span><span class="p">,</span> <span class="s2">&quot;2016-01&quot;</span><span class="p">,</span><span class="s2">&quot;2016-12&quot;</span><span class="p">],</span>
                    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                    <span class="n">exclude_time_period</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;2014-06&#39;</span><span class="p">,</span> <span class="s1">&#39;2014-07&#39;</span><span class="p">],</span>
                    <span class="n">custom_model_func</span><span class="o">=</span><span class="n">func</span><span class="p">)</span>

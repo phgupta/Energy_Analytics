@@ -800,19 +800,14 @@ dataframe even if the response has no results</p>
 <div class="section" id="module-Energy_Analytics.Model_Data">
 <span id="energy-analytics-model-data-module"></span><h2>Energy_Analytics.Model_Data module<a class="headerlink" href="#module-Energy_Analytics.Model_Data" title="Permalink to this headline">¶</a></h2>
 <p>This script splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots.</p>
-<p>Last modified: September 30 2018</p>
-<p>To Do</p>
-<ol class="arabic simple">
-<li>Break down time_period into baseline_period and projection_period.</li>
-<li>Extend exlude_time_period to allow multiple periods.</li>
-</ol>
+<p>Last modified: October 12 2018</p>
 <p>Authors</p>
 <p>&#64;author Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</p>
 <dl class="class">
 <dt id="Energy_Analytics.Model_Data.Model_Data">
-<em class="property">class </em><code class="descclassname">Energy_Analytics.Model_Data.</code><code class="descname">Model_Data</code><span class="sig-paren">(</span><em>df</em>, <em>input_col</em>, <em>output_col</em>, <em>time_period</em>, <em>exclude_time_period</em>, <em>alphas</em>, <em>cv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">Energy_Analytics.Model_Data.</code><code class="descname">Model_Data</code><span class="sig-paren">(</span><em>df</em>, <em>input_col</em>, <em>output_col</em>, <em>alphas</em>, <em>cv</em>, <em>exclude_time_period</em>, <em>baseline_period</em>, <em>projection_period=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>This script splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots.</p>
+<p>This class splits the data into baseline and projection periods, runs models on them and displays metrics &amp; plots.</p>
 <dl class="attribute">
 <dt id="Energy_Analytics.Model_Data.Model_Data.figure_count">
 <code class="descname">figure_count</code><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.figure_count" title="Permalink to this definition">¶</a></dt>
@@ -845,14 +840,27 @@ dataframe even if the response has no results</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="Energy_Analytics.Model_Data.Model_Data.ann">
+<code class="descname">ann</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.ann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.ann" title="Permalink to this definition">¶</a></dt>
+<dd><p>Artificial Neural Network.</p>
+<p>This function runs ANN and stores the,
+1. Model
+2. Model name
+3. Max score
+4. Metrics</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="Energy_Analytics.Model_Data.Model_Data.best_model_fit">
-<code class="descname">best_model_fit</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.best_model_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.best_model_fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit data to optimal model.</p>
+<code class="descname">best_model_fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.best_model_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.best_model_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit data to optimal model and return its metrics.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>sklearn estimator</em>) – Sklearn model</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Best model’s metrics</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
 </tr>
 </tbody>
 </table>
@@ -879,53 +887,13 @@ dataframe even if the response has no results</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="Energy_Analytics.Model_Data.Model_Data.display_metrics">
-<code class="descname">display_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.display_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.display_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display metrics of best model.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Best model’s metrics</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Energy_Analytics.Model_Data.Model_Data.display_plots">
-<code class="descname">display_plots</code><span class="sig-paren">(</span><em>figsize</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.display_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.display_plots" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display plots.</p>
-<p>This function displays two figures,
-1. Alphas v/s Mean cross validated score
-2. Baseline and projection plots</p>
-<p>To Do,
-1. Change hardcoding of for loop range.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li><em>matplotlib.figure</em> – Alphas v/s Mean cross validated score</li>
-<li><em>matplotlib.figure</em> – Baseline and projection plots</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="Energy_Analytics.Model_Data.Model_Data.elastic_net_regression">
 <code class="descname">elastic_net_regression</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.elastic_net_regression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.elastic_net_regression" title="Permalink to this definition">¶</a></dt>
 <dd><p>ElasticNet Regression.</p>
 <p>This function runs elastic net regression and stores the,
 1. Model
 2. Model name
-2. Mean score of cross validation
-3. Scores for each alpha
+3. Max score
 4. Metrics</p>
 </dd></dl>
 
@@ -941,8 +909,7 @@ dataframe even if the response has no results</p>
 <p>This function runs lasso regression and stores the,
 1. Model
 2. Model name
-2. Mean score of cross validation
-3. Scores for each alpha
+3. Max score
 4. Metrics</p>
 </dd></dl>
 
@@ -953,15 +920,20 @@ dataframe even if the response has no results</p>
 <p>This function runs linear regression and stores the,
 1. Model
 2. Model name
-2. Mean score of cross validation
-3. Alpha score (=0, since linear regression doesn’t use alpha. However, storing alpha helps in indexing problems while plotting)
+3. Mean score of cross validation
 4. Metrics</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Model_Data.Model_Data.random_forest">
 <code class="descname">random_forest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.random_forest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.random_forest" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Random Forest.</p>
+<p>This function runs random forest and stores the,
+1. Model
+2. Model name
+3. Max score
+4. Metrics</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="Energy_Analytics.Model_Data.Model_Data.ridge_regression">
@@ -970,8 +942,7 @@ dataframe even if the response has no results</p>
 <p>This function runs ridge regression and stores the,
 1. Model
 2. Model name
-2. Mean score of cross validation
-3. Scores for each alpha
+3. Max score
 4. Metrics</p>
 </dd></dl>
 
@@ -996,7 +967,7 @@ dataframe even if the response has no results</p>
 <dl class="method">
 <dt id="Energy_Analytics.Model_Data.Model_Data.split_data">
 <code class="descname">split_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Model_Data.html#Model_Data.split_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Model_Data.Model_Data.split_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Split data according to time_period values</p>
+<dd><p>Split data according to baseline and projection time period values</p>
 </dd></dl>
 
 </dd></dl>
@@ -1075,17 +1046,15 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="Energy_Analytics.Preprocess_Data.Preprocess_Data.create_dummies">
-<code class="descname">create_dummies</code><span class="sig-paren">(</span><em>var_to_expand=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Preprocess_Data.html#Preprocess_Data.create_dummies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Preprocess_Data.Preprocess_Data.create_dummies" title="Permalink to this definition">¶</a></dt>
-<dd><p>One-hot encode time features.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var_to_expand</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Variables to one-hot encode, e.g. var_to_expand=[‘tod’, ‘dow’, ‘year’].</td>
-</tr>
-</tbody>
-</table>
+<dt id="Energy_Analytics.Preprocess_Data.Preprocess_Data.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Preprocess_Data.html#Preprocess_Data.normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Preprocess_Data.Preprocess_Data.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Preprocess_Data.Preprocess_Data.standardize">
+<code class="descname">standardize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Preprocess_Data.html#Preprocess_Data.standardize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Preprocess_Data.Preprocess_Data.standardize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standardize data.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1094,7 +1063,7 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <div class="section" id="module-Energy_Analytics.Wrapper">
 <span id="energy-analytics-wrapper-module"></span><h2>Energy_Analytics.Wrapper module<a class="headerlink" href="#module-Energy_Analytics.Wrapper" title="Permalink to this headline">¶</a></h2>
 <p>This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</p>
-<p>Last modified: September 30 2018</p>
+<p>Last modified: October 12 2018</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ol class="arabic simple">
@@ -1104,6 +1073,14 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 </ol>
 <p>To Do</p>
 <ol class="arabic">
+<li><p class="first">Import</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Integrate InfluxData and Skyspark client.</li>
+<li>Run analysis on XBOS data.</li>
+</ol>
+</div></blockquote>
+</li>
 <li><p class="first">Clean</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -1114,25 +1091,33 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li><p class="first">Model</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Add TimeSeriesSplit, ANN, SVM, ARIMA.</li>
+<li>Add ARIMA. Checkout Gaussian processes.</li>
+<li>Add param_dict parameter.</li>
+<li>Extend exlude_time_period to allow multiple periods.</li>
+</ol>
+</div></blockquote>
+</li>
+<li><p class="first">Plot</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Project onto exisiting years &amp; future.</li>
 </ol>
 </div></blockquote>
 </li>
 <li><p class="first">Wrapper</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Add option to standardize/normalize data before fitting to model (Preprocess?)</li>
-<li>Add Pearson’s correlation coefficient.</li>
 <li>Give user the option to run specific models.</li>
+<li>Add cost savings.</li>
 </ol>
 </div></blockquote>
 </li>
 <li><p class="first">All</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Ensure Python2.7 compatibility.</li>
 <li>Change SystemError to specific errors.</li>
-<li>Update python and all libraries to ensure similar results are replicated in different systems.</li>
+<li>Look into adding other plots.</li>
+<li>Write documentation from user’s perspective.</li>
 </ol>
 </div></blockquote>
 </li>
@@ -1144,6 +1129,14 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li>Run pylint on all files.</li>
 <li>Structure code to publish to PyPI.</li>
 <li>Docker.</li>
+<li>Ensure results are replicated in different systems.</li>
+</ol>
+</div></blockquote>
+</li>
+<li><p class="first">Optimize</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Delete self.imported_data, self.cleaned_data, self.preprocessed_data.</li>
 </ol>
 </div></blockquote>
 </li>
@@ -1243,7 +1236,7 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 
 <dl class="method">
 <dt id="Energy_Analytics.Wrapper.Wrapper.model">
-<code class="descname">model</code><span class="sig-paren">(</span><em>data, ind_col=None, dep_col=None, time_period=[None, None], exclude_time_period=[None, None], alphas=array([1.00000000e-04, 1.48735211e-04, 2.21221629e-04, 3.29034456e-04,        4.89390092e-04, 7.27895384e-04, 1.08263673e-03, 1.61026203e-03,        2.39502662e-03, 3.56224789e-03, 5.29831691e-03, 7.88046282e-03,        1.17210230e-02, 1.74332882e-02, 2.59294380e-02, 3.85662042e-02,        5.73615251e-02, 8.53167852e-02, 1.26896100e-01, 1.88739182e-01,        2.80721620e-01, 4.17531894e-01, 6.21016942e-01, 9.23670857e-01,        1.37382380e+00, 2.04335972e+00, 3.03919538e+00, 4.52035366e+00,        6.72335754e+00, 1.00000000e+01]), cv=3, plot=True, figsize=None, custom_model_func=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">model</code><span class="sig-paren">(</span><em>data, ind_col=None, dep_col=None, baseline_period=[None, None], projection_period=[None, None], exclude_time_period=[None, None], alphas=array([1.00000000e-04, 1.48735211e-04, 2.21221629e-04, 3.29034456e-04,        4.89390092e-04, 7.27895384e-04, 1.08263673e-03, 1.61026203e-03,        2.39502662e-03, 3.56224789e-03, 5.29831691e-03, 7.88046282e-03,        1.17210230e-02, 1.74332882e-02, 2.59294380e-02, 3.85662042e-02,        5.73615251e-02, 8.53167852e-02, 1.26896100e-01, 1.88739182e-01,        2.80721620e-01, 4.17531894e-01, 6.21016942e-01, 9.23670857e-01,        1.37382380e+00, 2.04335972e+00, 3.03919538e+00, 4.52035366e+00,        6.72335754e+00, 1.00000000e+01]), cv=3, plot=True, figsize=None, custom_model_func=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split data into baseline and projection periods, run models on them and display metrics &amp; plots.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1253,7 +1246,8 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to model.</li>
 <li><strong>ind_col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Independent column(s) of dataframe. Defaults to all columns except the last.</li>
 <li><strong>dep_col</strong> (<em>str</em>) – Dependent column of dataframe.</li>
-<li><strong>time_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to split the data into baseline and projection periods. It needs to have a start and an end date.</li>
+<li><strong>baseline_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to split the data into baseline periods. It needs to have a start and an end date.</li>
+<li><strong>projection_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to split the data into projection periods. It needs to have a start and an end date.</li>
 <li><strong>exclude_time_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to exclude for modeling.</li>
 <li><strong>alphas</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – List of alphas to run regression on.</li>
 <li><strong>cv</strong> (<em>int</em>) – Number of folds for cross-validation.</li>
@@ -1275,7 +1269,7 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 
 <dl class="method">
 <dt id="Energy_Analytics.Wrapper.Wrapper.preprocess_data">
-<code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>data</em>, <em>hdh_cpoint=65</em>, <em>cdh_cpoint=65</em>, <em>col_hdh_cdh='OAT'</em>, <em>col_degree=None</em>, <em>degree=None</em>, <em>year=False</em>, <em>month=False</em>, <em>week=False</em>, <em>tod=False</em>, <em>dow=False</em>, <em>var_to_expand=None</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.preprocess_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.preprocess_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>data</em>, <em>hdh_cpoint=65</em>, <em>cdh_cpoint=65</em>, <em>col_hdh_cdh='OAT'</em>, <em>col_degree=None</em>, <em>degree=None</em>, <em>standardize=False</em>, <em>normalize=False</em>, <em>year=False</em>, <em>month=False</em>, <em>week=False</em>, <em>tod=False</em>, <em>dow=False</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.preprocess_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.preprocess_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Preprocesses dataframe according to user specifications and stores result in self.preprocessed_data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1288,12 +1282,13 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <li><strong>col_hdh_cdh</strong> (<em>str</em>) – Column name which contains the outdoor air temperature.</li>
 <li><strong>col_degree</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Column to exponentiate.</li>
 <li><strong>degree</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Exponentiation degree.</li>
+<li><strong>standardize</strong> (<em>bool</em>) – Standardize data.</li>
+<li><strong>normalize</strong> (<em>bool</em>) – Normalize data.</li>
 <li><strong>year</strong> (<em>bool</em>) – Year.</li>
 <li><strong>month</strong> (<em>bool</em>) – Month.</li>
 <li><strong>week</strong> (<em>bool</em>) – Week.</li>
 <li><strong>tod</strong> (<em>bool</em>) – Time of Day.</li>
 <li><strong>dow</strong> (<em>bool</em>) – Day of Week.</li>
-<li><strong>var_to_expand</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Variables to one-hot encode, e.g. var_to_expand=[‘tod’, ‘dow’, ‘year’].</li>
 <li><strong>save_file</strong> (<em>bool</em>) – Specifies whether to save file or not. Defaults to True.</li>
 </ul>
 </td>
@@ -1310,7 +1305,7 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 
 <dl class="method">
 <dt id="Energy_Analytics.Wrapper.Wrapper.read_json">
-<code class="descname">read_json</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.read_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.read_json" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_json</code><span class="sig-paren">(</span><em>file_name=None</em>, <em>input_json=None</em>, <em>imported_data=Empty DataFrame Columns: [] Index: []</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Energy_Analytics/Wrapper.html#Wrapper.read_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.read_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read input json file.</p>
 <p class="rubric">Notes</p>
 <p>The input json file should include ALL parameters.</p>
@@ -1318,7 +1313,12 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_name</strong> (<em>str</em>) – Filename to be read.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_name</strong> (<em>str</em>) – Filename to be read.</li>
+<li><strong>input_json</strong> (<em>dict</em>) – JSON object to be read.</li>
+<li><strong>imported_data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Pandas Dataframe containing data.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1339,8 +1339,6 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>file_name</strong> (<em>str</em>) – Optional json file to read parameters.</li>
 <li><strong>imported_data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Pandas Dataframe containing data.</li>
-<li><strong>resample_freq</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Resampling frequencies to test.</li>
-<li><strong>time_freq</strong> (<em>dict</em>) – Time features to test.</li>
 </ul>
 </td>
 </tr>
