@@ -115,25 +115,28 @@ class Plot_Data:
 
         # Display projection plots
         num_plot = 2
-        for i in range(2, len(projection_period), 2):
+        for i in range(0, len(projection_period), 2):
             ax = fig.add_subplot(nrows, 1, num_plot)
             period = (slice(projection_period[i], projection_period[i+1]))
-            project_df = pd.DataFrame()    
-            project_df['y_true'] = data.loc[period, output_col]
-            project_df['y_pred'] = model.predict(data.loc[period, input_col])
+            project_df = pd.DataFrame()
+            
+            try:    
+                project_df['y_true'] = data.loc[period, output_col]
+                project_df['y_pred'] = model.predict(data.loc[period, input_col])
+
+                # Set all negative values to zero since energy > 0
+                project_df['y_pred'][project_df['y_pred'] < 0] = 0
+
+                project_df.plot(ax=ax, figsize=self.figsize, title='Projection Period ({}-{})'.format(projection_period[i], projection_period[i+1]))
+                num_plot += 1
+                fig.tight_layout()
+
+                Plot_Data.count += 1
+                return fig
+            except:
+                raise SystemError("If projecting into the future, please specify project_ind_col that has data available in the future time period requested.")
            
-            # Set all negative values to zero since energy > 0
-            project_df['y_pred'][project_df['y_pred'] < 0] = 0
-
-            project_df.plot(ax=ax, figsize=self.figsize,
-                title='Projection Period ({}-{})'.format(projection_period[i], projection_period[i+1]))
-            num_plot += 1
-        fig.tight_layout()
-
-        Plot_Data.count += 1
-        return fig
-
-
+            
 if __name__ == '__main__':
 
     obj = Plot_Data()

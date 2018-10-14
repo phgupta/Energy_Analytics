@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: October 12 2018
+Last modified: October 13 2018
 
 Note
 ----
@@ -17,24 +17,21 @@ To Do \n
 3. Model \n
     \t 1. Add ARIMA. Checkout Gaussian processes.
     \t 2. Add param_dict parameter.
-    \t 3. Extend exlude_time_period to allow multiple periods.
-4. Plot \n
-    \t 1. Project onto exisiting years & future.
-5. Wrapper \n
+4. Wrapper \n
     \t 1. Give user the option to run specific models.
     \t 2. Add cost savings.
-6. All \n
+5. All \n
     \t 1. Change SystemError to specific errors.
     \t 2. Look into adding other plots.
     \t 3. Write documentation from user's perspective.
-7. Cleanup \n
+6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
     \t 4. Structure code to publish to PyPI.
     \t 5. Docker.
     \t 6. Ensure results are replicated in different systems.
-8. Optimize \n
+7. Optimize \n
     \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
 Authors \n
@@ -47,15 +44,16 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-from Energy_Analytics import Import_Data
-from Energy_Analytics import Clean_Data
-from Energy_Analytics import Preprocess_Data
-from Energy_Analytics import Model_Data
-# from Import_Data import *
-# from Clean_Data import *
-# from Preprocess_Data import *
-# from Model_Data import *
-# from Plot_Data import *
+# from Energy_Analytics import Import_Data
+# from Energy_Analytics import Clean_Data
+# from Energy_Analytics import Preprocess_Data
+# from Energy_Analytics import Model_Data
+# from Energy_Analytics import Plot_Data
+from Import_Data import *
+from Clean_Data import *
+from Preprocess_Data import *
+from Model_Data import *
+from Plot_Data import *
 
 
 class Wrapper:
@@ -520,8 +518,9 @@ class Wrapper:
 
 
     def model(self, data,
-            ind_col=None, dep_col=None, 
-            baseline_period=[None,None], projection_period=[None,None], exclude_time_period=[None,None], 
+            ind_col=None, dep_col=None,
+            project_ind_col=None,
+            baseline_period=[None,None], projection_period=[None,None], exclude_time_period=[None,None],
             alphas=np.logspace(-4,1,30),
             cv=3, plot=True, figsize=None,
             custom_model_func=None):
@@ -535,6 +534,8 @@ class Wrapper:
             Independent column(s) of dataframe. Defaults to all columns except the last.
         dep_col                 : str
             Dependent column of dataframe.
+        project_ind_col         : list(str)
+            Independent column(s) to use for projection. If none, use ind_col.
         baseline_period         : list(str)
             List of time periods to split the data into baseline periods. It needs to have a start and an end date.
         projection_period       : list(str)
@@ -594,11 +595,14 @@ class Wrapper:
         self.result['Model']['Optimal Model\'s Metrics'] = model_data_obj.best_model_fit()
 
         if plot:
+
+            # Use project_ind_col if projecting into the future (no input data other than weather data)
+            input_col = model_data_obj.input_col if not project_ind_col else project_ind_col
             fig = self.plot_data_obj.baseline_projection_plot(model_data_obj.y_true, model_data_obj.y_pred, 
                                                             model_data_obj.baseline_period, model_data_obj.projection_period,
                                                             model_data_obj.best_model_name, model_data_obj.best_metrics['adj_r2'],
                                                             model_data_obj.original_data,
-                                                            model_data_obj.input_col, model_data_obj.output_col,
+                                                            input_col, model_data_obj.output_col,
                                                             model_data_obj.best_model)
             fig.savefig(self.results_folder_name + '/baseline_projection_plot-' + str(Wrapper.global_count) + '.png')
 

@@ -1,6 +1,6 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-Last modified: October 12 2018
+Last modified: October 13 2018
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
@@ -111,17 +111,18 @@ class Model_Data:
     def split_data(self):
         """ Split data according to baseline and projection time period values """
 
-        time_period1 = (slice(self.baseline_period[0], self.baseline_period[1]))
-        exclude_time_period1 = (slice(self.exclude_time_period[0], self.exclude_time_period[1]))
         try:
             # Extract data ranging in time_period1
+            time_period1 = (slice(self.baseline_period[0], self.baseline_period[1]))
             self.baseline_in = self.original_data.loc[time_period1, self.input_col]
             self.baseline_out = self.original_data.loc[time_period1, self.output_col]
 
-            if self.exclude_time_period[0] and self.exclude_time_period[1]:
+            for i in range(0, len(self.exclude_time_period), 2):
                 # Drop data ranging in exclude_time_period1
+                exclude_time_period1 = (slice(self.exclude_time_period[i], self.exclude_time_period[i+1]))
                 self.baseline_in.drop(self.baseline_in.loc[exclude_time_period1].index, axis=0, inplace=True)
                 self.baseline_out.drop(self.baseline_out.loc[exclude_time_period1].index, axis=0, inplace=True)
+        
         except Exception as e:
             raise e
 
