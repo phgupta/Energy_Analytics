@@ -1,3 +1,8 @@
 # Energy Analytics
 
 Data Analytics tool for building energy meter data.
+
+
+# Documentation
+
+https://phgupta.github.io/Energy_Analytics/

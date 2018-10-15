@@ -24,6 +24,7 @@ To Do \n
     \t 1. Change SystemError to specific errors.
     \t 2. Look into adding other plots.
     \t 3. Write documentation from user's perspective.
+    \t 4. Add plot_data in documentation.
 6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
