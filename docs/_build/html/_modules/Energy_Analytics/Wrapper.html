@@ -149,7 +149,7 @@
   <h1>Source code for Energy_Analytics.Wrapper</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</span>
 
-<span class="sd">Last modified: October 12 2018</span>
+<span class="sd">Last modified: October 13 2018</span>
 
 <span class="sd">Note</span>
 <span class="sd">----</span>
@@ -166,24 +166,21 @@
 <span class="sd">3. Model \n</span>
 <span class="sd">    \t 1. Add ARIMA. Checkout Gaussian processes.</span>
 <span class="sd">    \t 2. Add param_dict parameter.</span>
-<span class="sd">    \t 3. Extend exlude_time_period to allow multiple periods.</span>
-<span class="sd">4. Plot \n</span>
-<span class="sd">    \t 1. Project onto exisiting years &amp; future.</span>
-<span class="sd">5. Wrapper \n</span>
+<span class="sd">4. Wrapper \n</span>
 <span class="sd">    \t 1. Give user the option to run specific models.</span>
 <span class="sd">    \t 2. Add cost savings.</span>
-<span class="sd">6. All \n</span>
+<span class="sd">5. All \n</span>
 <span class="sd">    \t 1. Change SystemError to specific errors.</span>
 <span class="sd">    \t 2. Look into adding other plots.</span>
 <span class="sd">    \t 3. Write documentation from user&#39;s perspective.</span>
-<span class="sd">7. Cleanup \n</span>
+<span class="sd">6. Cleanup \n</span>
 <span class="sd">    \t 1. Documentation.</span>
 <span class="sd">    \t 2. Unit Tests.</span>
 <span class="sd">    \t 3. Run pylint on all files.</span>
 <span class="sd">    \t 4. Structure code to publish to PyPI.</span>
 <span class="sd">    \t 5. Docker.</span>
 <span class="sd">    \t 6. Ensure results are replicated in different systems.</span>
-<span class="sd">8. Optimize \n</span>
+<span class="sd">7. Optimize \n</span>
 <span class="sd">    \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.</span>
 
 <span class="sd">Authors \n</span>
@@ -200,11 +197,12 @@
 <span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Clean_Data</span>
 <span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Preprocess_Data</span>
 <span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Model_Data</span>
-<span class="c1"># from Import_Data import *</span>
-<span class="c1"># from Clean_Data import *</span>
-<span class="c1"># from Preprocess_Data import *</span>
-<span class="c1"># from Model_Data import *</span>
-<span class="c1"># from Plot_Data import *</span>
+<span class="kn">from</span> <span class="nn">Energy_Analytics</span> <span class="k">import</span> <span class="n">Plot_Data</span>
+<span class="c1">#from Import_Data import *</span>
+<span class="c1">#from Clean_Data import *</span>
+<span class="c1">#from Preprocess_Data import *</span>
+<span class="c1">#from Model_Data import *</span>
+<span class="c1">#from Plot_Data import *</span>
 
 
 <div class="viewcode-block" id="Wrapper"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper">[docs]</a><span class="k">class</span> <span class="nc">Wrapper</span><span class="p">:</span>
@@ -669,8 +667,9 @@
 
 
 <div class="viewcode-block" id="Wrapper.model"><a class="viewcode-back" href="../../source/Energy_Analytics.html#Energy_Analytics.Wrapper.Wrapper.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
-            <span class="n">ind_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dep_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-            <span class="n">baseline_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">projection_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">exclude_time_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> 
+            <span class="n">ind_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dep_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">project_ind_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">baseline_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">projection_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="n">exclude_time_period</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span>
             <span class="n">alphas</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span>
             <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">custom_model_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -684,6 +683,8 @@
 <span class="sd">            Independent column(s) of dataframe. Defaults to all columns except the last.</span>
 <span class="sd">        dep_col                 : str</span>
 <span class="sd">            Dependent column of dataframe.</span>
+<span class="sd">        project_ind_col         : list(str)</span>
+<span class="sd">            Independent column(s) to use for projection. If none, use ind_col.</span>
 <span class="sd">        baseline_period         : list(str)</span>
 <span class="sd">            List of time periods to split the data into baseline periods. It needs to have a start and an end date.</span>
 <span class="sd">        projection_period       : list(str)</span>
@@ -743,11 +744,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">][</span><span class="s1">&#39;Optimal Model</span><span class="se">\&#39;</span><span class="s1">s Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model_fit</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+
+            <span class="c1"># Use project_ind_col if projecting into the future (no input data other than weather data)</span>
+            <span class="n">input_col</span> <span class="o">=</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">input_col</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">project_ind_col</span> <span class="k">else</span> <span class="n">project_ind_col</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_data_obj</span><span class="o">.</span><span class="n">baseline_projection_plot</span><span class="p">(</span><span class="n">model_data_obj</span><span class="o">.</span><span class="n">y_true</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">y_pred</span><span class="p">,</span> 
                                                             <span class="n">model_data_obj</span><span class="o">.</span><span class="n">baseline_period</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">projection_period</span><span class="p">,</span>
                                                             <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model_name</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_metrics</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">],</span>
                                                             <span class="n">model_data_obj</span><span class="o">.</span><span class="n">original_data</span><span class="p">,</span>
-                                                            <span class="n">model_data_obj</span><span class="o">.</span><span class="n">input_col</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">output_col</span><span class="p">,</span>
+                                                            <span class="n">input_col</span><span class="p">,</span> <span class="n">model_data_obj</span><span class="o">.</span><span class="n">output_col</span><span class="p">,</span>
                                                             <span class="n">model_data_obj</span><span class="o">.</span><span class="n">best_model</span><span class="p">)</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_folder_name</span> <span class="o">+</span> <span class="s1">&#39;/baseline_projection_plot-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Wrapper</span><span class="o">.</span><span class="n">global_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
 
