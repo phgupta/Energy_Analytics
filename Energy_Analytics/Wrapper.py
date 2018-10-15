@@ -45,16 +45,16 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-from Energy_Analytics import Import_Data
-from Energy_Analytics import Clean_Data
-from Energy_Analytics import Preprocess_Data
-from Energy_Analytics import Model_Data
-from Energy_Analytics import Plot_Data
-#from Import_Data import *
-#from Clean_Data import *
-#from Preprocess_Data import *
-#from Model_Data import *
-#from Plot_Data import *
+# from Energy_Analytics import Import_Data
+# from Energy_Analytics import Clean_Data
+# from Energy_Analytics import Preprocess_Data
+# from Energy_Analytics import Model_Data
+# from Energy_Analytics import Plot_Data
+from Import_Data import *
+from Clean_Data import *
+from Preprocess_Data import *
+from Model_Data import *
+from Plot_Data import *
 
 
 class Wrapper:
@@ -166,6 +166,7 @@ class Wrapper:
 
         model_json = input_json['Model']
         model_data = self.model(preprocessed_data, ind_col=model_json['Independent Col'], dep_col=model_json['Dependent Col'],
+                                project_ind_col=model_json['Projection Independent Col'],
                                 baseline_period=model_json['Baseline Period'], projection_period=model_json['Projection Period'],
                                 exclude_time_period=model_json['Exclude Time Period'],
                                 alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
@@ -575,6 +576,7 @@ class Wrapper:
         self.result['Model'] = {
             'Independent Col': ind_col,
             'Dependent Col': dep_col,
+            'Projection Independent Col': project_ind_col,
             'Baseline Period': baseline_period,
             'Projection Period': projection_period,
             'Exclude Time Period': exclude_time_period,

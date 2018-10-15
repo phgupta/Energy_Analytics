@@ -46,9 +46,9 @@
 	"Model": {
 		"Independent Col": null,
 		"Dependent Col": "HW_Heat",
+		"Projection Independent Col": "",
 		"Baseline Period": ["2014-01","2014-12"], 
 		"Projection Period": ["2015-01","2015-12", "2016-01","2016-12"],
-		"Time Period": ["2014-01", "2014-12", "2015-01", "2015-12", "2016-01", "2016-12"],
 		"Exclude Time Period": ["2014-06", "2014-07"],
 		"Alphas": [0.0001, 0.0017782794100389228, 0.03162277660168379, 0.5623413251903491, 10.0],
 		"CV": 5,
