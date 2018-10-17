@@ -1,6 +1,6 @@
 """ This script preprocesses a dataframe according to user specifications.
 
-Last modified: September 15 2018
+Last modified: October 17 2018
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com>

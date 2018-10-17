@@ -1,6 +1,6 @@
 """ This script contains functions for displaying various plots.
 
-Last modified: October 12 2018
+Last modified: October 17 2018
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
@@ -102,7 +102,10 @@ class Plot_Data:
         fig = plt.figure(Plot_Data.count)
         
         # Number of plots to display
-        nrows = len(baseline_period) + len(projection_period) / 2
+        if projection_period:
+            nrows = len(baseline_period) + len(projection_period) / 2
+        else:
+            nrows = len(baseline_period) / 2
         
         # Plot 1 - Baseline
         base_df = pd.DataFrame()
@@ -113,29 +116,33 @@ class Plot_Data:
             title='Baseline Period ({}-{}). \nBest Model: {}. \nBaseline Adj R2: {}'.format(baseline_period[0], baseline_period[1], 
                                                                                 model_name, adj_r2))
 
-        # Display projection plots
-        num_plot = 2
-        for i in range(0, len(projection_period), 2):
-            ax = fig.add_subplot(nrows, 1, num_plot)
-            period = (slice(projection_period[i], projection_period[i+1]))
-            project_df = pd.DataFrame()
-            
-            try:    
-                project_df['y_true'] = data.loc[period, output_col]
-                project_df['y_pred'] = model.predict(data.loc[period, input_col])
+        if projection_period:
+            # Display projection plots
+            num_plot = 2
+            for i in range(0, len(projection_period), 2):
+                ax = fig.add_subplot(nrows, 1, num_plot)
+                period = (slice(projection_period[i], projection_period[i+1]))
+                project_df = pd.DataFrame()
+                
+                try:    
+                    project_df['y_true'] = data.loc[period, output_col]
+                    project_df['y_pred'] = model.predict(data.loc[period, input_col])
 
-                # Set all negative values to zero since energy > 0
-                project_df['y_pred'][project_df['y_pred'] < 0] = 0
+                    # Set all negative values to zero since energy > 0
+                    project_df['y_pred'][project_df['y_pred'] < 0] = 0
 
-                project_df.plot(ax=ax, figsize=self.figsize, title='Projection Period ({}-{})'.format(projection_period[i], projection_period[i+1]))
-                num_plot += 1
-                fig.tight_layout()
+                    project_df.plot(ax=ax, figsize=self.figsize, title='Projection Period ({}-{})'.format(projection_period[i], 
+                                                                                                        projection_period[i+1]))
+                    num_plot += 1
+                    fig.tight_layout()
 
-                Plot_Data.count += 1
-                return fig
-            except:
-                raise SystemError("If projecting into the future, please specify project_ind_col that has data available in the future time period requested.")
+                    Plot_Data.count += 1
+                    return fig
+                except:
+                    raise SystemError("If projecting into the future, please specify project_ind_col that has data available \
+                                        in the future time period requested.")
            
+        return fig
             
 if __name__ == '__main__':
 

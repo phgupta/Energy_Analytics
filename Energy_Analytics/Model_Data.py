@@ -1,6 +1,6 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-Last modified: October 13 2018
+Last modified: October 17 2018
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
@@ -86,13 +86,19 @@ class Model_Data:
         else:
             self.alphas = alphas
 
-        if (len(exclude_time_period) % 2 != 0) or (len(baseline_period) % 2 != 0) or (len(projection_period) % 2 != 0):
-            raise SystemError('all time periods need to be a multiple of 2 (i.e. have a start and end date)')
+        if (len(baseline_period) % 2 != 0):
+            raise SystemError('baseline period needs to be a multiple of 2 (i.e. have a start and end date)')
+        else:
+            self.baseline_period = baseline_period
+        if exclude_time_period and (len(exclude_time_period) % 2 != 0):
+            raise SystemError('exclude time period needs to be a multiple of 2 (i.e. have a start and end date)')
         else:
             self.exclude_time_period = exclude_time_period
-            self.baseline_period = baseline_period
+        if projection_period and (len(projection_period) % 2 != 0):
+            raise SystemError('projection period needs to be a multiple of 2 (i.e. have a start and end date)')
+        else:
             self.projection_period = projection_period
-        
+
         self.baseline_in        = pd.DataFrame()    # Baseline's indepndent columns
         self.baseline_out       = pd.DataFrame()    # Baseline's dependent column
 
@@ -117,24 +123,25 @@ class Model_Data:
             self.baseline_in = self.original_data.loc[time_period1, self.input_col]
             self.baseline_out = self.original_data.loc[time_period1, self.output_col]
 
-            for i in range(0, len(self.exclude_time_period), 2):
-                # Drop data ranging in exclude_time_period1
-                exclude_time_period1 = (slice(self.exclude_time_period[i], self.exclude_time_period[i+1]))
-                self.baseline_in.drop(self.baseline_in.loc[exclude_time_period1].index, axis=0, inplace=True)
-                self.baseline_out.drop(self.baseline_out.loc[exclude_time_period1].index, axis=0, inplace=True)
-        
+            if self.exclude_time_period:
+                for i in range(0, len(self.exclude_time_period), 2):
+                    # Drop data ranging in exclude_time_period1
+                    exclude_time_period1 = (slice(self.exclude_time_period[i], self.exclude_time_period[i+1]))
+                    self.baseline_in.drop(self.baseline_in.loc[exclude_time_period1].index, axis=0, inplace=True)
+                    self.baseline_out.drop(self.baseline_out.loc[exclude_time_period1].index, axis=0, inplace=True)
         except Exception as e:
             raise e
 
         # CHECK: Can optimize this part
         # Error checking to ensure time_period values are valid
-        for i in range(0, len(self.projection_period), 2):
-            period = (slice(self.projection_period[i], self.projection_period[i+1]))
-            try:
-                self.original_data.loc[period, self.input_col]
-                self.original_data.loc[period, self.output_col]
-            except Exception as e:
-                raise e
+        if self.projection_period:
+            for i in range(0, len(self.projection_period), 2):
+                period = (slice(self.projection_period[i], self.projection_period[i+1]))
+                try:
+                    self.original_data.loc[period, self.input_col]
+                    self.original_data.loc[period, self.output_col]
+                except Exception as e:
+                    raise e
 
 
     def adj_r2(self, r2, n, k):

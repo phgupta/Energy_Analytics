@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: October 13 2018
+Last modified: October 17 2018
 
 Note
 ----
@@ -10,29 +10,30 @@ Note
 
 To Do \n
 1. Import \n
-    \t 1. Integrate InfluxData and Skyspark client.
-    \t 2. Run analysis on XBOS data.
-2. Clean \n
-    \t 1. Check cleaned_data.csv resampling (should start from 1 instead of 1:15pm)
-3. Model \n
-    \t 1. Add ARIMA. Checkout Gaussian processes.
+    \t 1. Integrate InfluxData, Skyspark & XBOS client.
+    \t 2. Check if file_name or folder_name is of type unicode -> convert to string.
+2. Preprocess \n
+    \t 1. Add option to not calculate CDH HDH.
+2. Model \n
+    \t 1. Add ARIMA, Gaussian processes?
     \t 2. Add param_dict parameter.
-4. Wrapper \n
+3. Wrapper \n
     \t 1. Give user the option to run specific models.
     \t 2. Add cost savings.
-5. All \n
+4. All \n
     \t 1. Change SystemError to specific errors.
     \t 2. Look into adding other plots.
     \t 3. Write documentation from user's perspective.
     \t 4. Add plot_data in documentation.
-6. Cleanup \n
+    \t 5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
+5. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
     \t 4. Structure code to publish to PyPI.
     \t 5. Docker.
     \t 6. Ensure results are replicated in different systems.
-7. Optimize \n
+6. Optimize \n
     \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
 Authors \n
@@ -423,7 +424,7 @@ class Wrapper:
 
 
     def preprocess_data(self, data,
-                        hdh_cpoint=65, cdh_cpoint=65, col_hdh_cdh='OAT',
+                        hdh_cpoint=65, cdh_cpoint=65, col_hdh_cdh=None,
                         col_degree=None, degree=None,
                         standardize=False, normalize=False,
                         year=False, month=False, week=False, tod=False, dow=False,
@@ -474,7 +475,8 @@ class Wrapper:
         
         # Create instance
         preprocess_data_obj = Preprocess_Data(data)
-        preprocess_data_obj.add_degree_days(col=col_hdh_cdh, hdh_cpoint=hdh_cpoint, cdh_cpoint=cdh_cpoint)
+        if col_hdh_cdh:
+            preprocess_data_obj.add_degree_days(col=col_hdh_cdh, hdh_cpoint=hdh_cpoint, cdh_cpoint=cdh_cpoint)
         preprocess_data_obj.add_col_features(col=col_degree, degree=degree)
 
         if standardize:
@@ -522,7 +524,7 @@ class Wrapper:
     def model(self, data,
             ind_col=None, dep_col=None,
             project_ind_col=None,
-            baseline_period=[None,None], projection_period=[None,None], exclude_time_period=[None,None],
+            baseline_period=[None, None], projection_period=None, exclude_time_period=None,
             alphas=np.logspace(-4,1,30),
             cv=3, plot=True, figsize=None,
             custom_model_func=None):

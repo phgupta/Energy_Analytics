@@ -15,7 +15,7 @@ Authors \n
 @author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
 @author Pranav Gupta <phgupta@ucdavis.edu> \n
 
-Last modified: September 15 2018 \n
+Last modified: October 17 2018 \n
 
 """
 
@@ -23,6 +23,7 @@ import os
 import glob
 import numpy as np
 import pandas as pd
+import dataclient
 
 
 class Import_Data:
@@ -97,7 +98,7 @@ class Import_Data:
             # Current implementation can't accept,
             # 1. file_name of type str and folder_name of type list(str)
             # 2. file_name and folder_name both of type list(str)
-            raise SystemError
+            raise SystemError("Filename and Folder name can't both be of type list.")
 
 
     def _load_csv(self, file_name, folder_name, head_row, index_col, convert_col, concat_files):
@@ -169,3 +170,151 @@ class Import_Data:
                     data[col] = pd.to_numeric(data[col], errors="coerce")
 
         return data
+
+
+class Import_XBOS(Import_Data):
+
+    """ This class imports data from XBOS """
+
+    def __init__(self):
+        """ Constructor.
+
+        This class stores the imported data.
+
+        """
+        self.weather_data = pd.DataFrame()
+        self.power_data = pd.DataFrame()
+        self.temp_data = pd.DataFrame()
+        self.hsp_data = pd.DataFrame()
+        self.csp_data = pd.DataFrame()
+
+
+    def get_weather_power_tstat(self, site, start, end, data_type='all'):
+        """ Get weather and power data.
+
+        Parameters
+        ----------
+        site        : str
+            Site name.
+        start       : str
+            Start date.
+        end         : str
+            End date.
+        data_type   : str
+            Type of data needed (all, weather, power, temperature, hsp, csp)
+
+        """
+
+        m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
+
+        request = {
+            "Variables": {
+                "greenbutton": {
+                    "Definition": """SELECT ?meter ?meter_uuid FROM %s WHERE {
+                        ?meter rdf:type brick:Green_Button_Meter .
+                        ?meter bf:uuid ?meter_uuid
+                    };""" % site,
+                },
+                "weather": {
+                    "Definition": """SELECT ?t ?t_uuid FROM %s WHERE {
+                        ?t rdf:type/rdfs:subClassOf* brick:Weather_Temperature_Sensor .
+                        ?t bf:uuid ?t_uuid
+                    };""" % site,
+                },
+                "tstat_state": {
+                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
+                        ?t rdf:type/rdfs:subClassOf* brick:Thermostat_Status .
+                        ?t bf:uuid ?t_uuid
+                        ?t bf:isPointOf ?tstat .
+                        ?tstat rdf:type brick:Thermostat
+                    };""" % site,
+                },
+                "tstat_hsp": {
+                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
+                        ?t rdf:type/rdfs:subClassOf* brick:Supply_Air_Temperature_Heating_Setpoint .
+                        ?t bf:uuid ?t_uuid .
+                        ?t bf:isPointOf ?tstat .
+                        ?tstat rdf:type brick:Thermostat
+                    };""" % site,
+                },
+                "tstat_csp": {
+                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
+                        ?t rdf:type/rdfs:subClassOf* brick:Supply_Air_Temperature_Cooling_Setpoint .
+                        ?t bf:uuid ?t_uuid .
+                        ?t bf:isPointOf ?tstat .
+                        ?tstat rdf:type brick:Thermostat
+                    };""" % site,
+                },
+                "tstat_temp": {
+                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
+                        ?t rdf:type/rdfs:subClassOf* brick:Temperature_Sensor .
+                        ?t bf:uuid ?t_uuid .
+                        ?t bf:isPointOf ?tstat .
+                        ?tstat rdf:type brick:Thermostat
+                    };""" % site,
+                },
+            },
+        }
+
+        # outside air temp
+        request['Composition'] = ['weather']
+        request['Aggregation'] = {'weather': ['MEAN']}
+        request['Time'] = {
+            'Start': start,
+            'End': end,
+            'Window': '15m',
+            'Aligned': True
+        }
+        resp_weather = m.query(request)
+        self.weather_data = resp_weather.df
+
+        # power
+        request['Composition'] = ['greenbutton']
+        request['Aggregation'] = {'greenbutton': ['MEAN']}
+        resp_power = m.query(request)
+        self.power_data = resp_power.df
+
+        # tstat temperature
+        request['Composition'] = ['tstat_temp', 'tstat_hsp', 'tstat_csp']
+        request['Aggregation'] = {'tstat_temp': ['MEAN']}
+        resp_temp  = m.query(request)
+        self.temp_data = resp_temp
+
+        # tstat heat setpoint
+        request['Composition'] = ['tstat_hsp']
+        request['Aggregation'] = {'tstat_hsp': ['MAX']}
+        resp_hsp = m.query(request)
+        self.hsp_data = resp_hsp
+
+        # tstat cool setpoint
+        request['Composition'] = ['tstat_csp']
+        request['Aggregation'] = {'tstat_csp': ['MAX']}
+        resp_csp = m.query(request)
+        self.csp_data = resp_csp
+
+        if data_type == 'all':
+            self.data = resp_weather.df
+            self.data = self.data.join(resp_power.df)
+            self.data = self.data.join(resp_temp.df)
+            self.data = self.data.join(resp_hsp.df)
+            self.data = self.data.join(resp_csp.df)
+        elif data_type == 'weather':
+            self.data = resp_weather.df
+        elif data_type == 'power':
+            self.data = resp_power.df
+        elif data_type == 'temperature':
+            self.data = resp_temp.df
+        elif data_type == 'hsp':
+            self.data = resp_hsp.df
+        elif data_type == 'csp':
+            self.data = resp_csp.df
+        else:
+            raise SystemError("Undefined data_type (Make sure all characters are lowercase)")
+
+        # return {
+        #     'weather': resp_weather,
+        #     'power': resp_power,
+        #     'temperature': resp_temp, 
+        #     'heat setpoint': resp_hsp,
+        #     'cool setpoint': resp_csp
+        # }
