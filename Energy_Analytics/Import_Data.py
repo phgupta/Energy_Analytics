@@ -23,7 +23,7 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-import dataclient
+# import dataclient
 
 
 class Import_Data:
@@ -189,7 +189,7 @@ class Import_XBOS(Import_Data):
         self.csp_data = pd.DataFrame()
 
 
-    def get_weather_power_tstat(self, site, start, end, data_type='all'):
+    def get_weather_power_tstat(self, site, start, end, data_type=['power', 'temperature']):
         """ Get weather and power data.
 
         Parameters
@@ -292,29 +292,43 @@ class Import_XBOS(Import_Data):
         resp_csp = m.query(request)
         self.csp_data = resp_csp
 
-        if data_type == 'all':
-            self.data = resp_weather.df
-            self.data = self.data.join(resp_power.df)
-            self.data = self.data.join(resp_temp.df)
-            self.data = self.data.join(resp_hsp.df)
-            self.data = self.data.join(resp_csp.df)
-        elif data_type == 'weather':
-            self.data = resp_weather.df
-        elif data_type == 'power':
-            self.data = resp_power.df
-        elif data_type == 'temperature':
-            self.data = resp_temp.df
-        elif data_type == 'hsp':
-            self.data = resp_hsp.df
-        elif data_type == 'csp':
-            self.data = resp_csp.df
-        else:
-            raise SystemError("Undefined data_type (Make sure all characters are lowercase)")
+        mapping = {
+            'weather': resp_weather,
+            'power': resp_power,
+            'temperature': resp_temp, 
+            'hsp': resp_hsp,
+            'csp': resp_csp
+        }
 
-        # return {
-        #     'weather': resp_weather,
-        #     'power': resp_power,
-        #     'temperature': resp_temp, 
-        #     'heat setpoint': resp_hsp,
-        #     'cool setpoint': resp_csp
-        # }
+        first = True
+        for dat in data_type:
+            if first:
+                try:
+                    self.data = mapping[dat]
+                    first = False
+                except:
+                    raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
+            else:
+                try:
+                    self.data = self.data.join(mapping[dat])
+                except:
+                    raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
+
+        # if data_type == 'all':
+        #     self.data = resp_weather.df
+        #     self.data = self.data.join(resp_power.df)
+        #     self.data = self.data.join(resp_temp.df)
+        #     self.data = self.data.join(resp_hsp.df)
+        #     self.data = self.data.join(resp_csp.df)
+        # elif data_type == 'weather':
+        #     self.data = resp_weather.df
+        # elif data_type == 'power':
+        #     self.data = resp_power.df
+        # elif data_type == 'temperature':
+        #     self.data = resp_temp.df
+        # elif data_type == 'hsp':
+        #     self.data = resp_hsp.df
+        # elif data_type == 'csp':
+        #     self.data = resp_csp.df
+        # else:
+        #     raise SystemError("Undefined data_type (Make sure all characters are lowercase)")

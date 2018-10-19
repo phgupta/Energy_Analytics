@@ -137,12 +137,12 @@ class Plot_Data:
                     fig.tight_layout()
 
                     Plot_Data.count += 1
-                    return fig
+                    return fig, project_df['y_true'], project_df['y_pred']
                 except:
                     raise SystemError("If projecting into the future, please specify project_ind_col that has data available \
                                         in the future time period requested.")
            
-        return fig
+        return fig, None, None
             
 if __name__ == '__main__':
 

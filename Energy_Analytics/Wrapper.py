@@ -603,13 +603,21 @@ class Wrapper:
 
             # Use project_ind_col if projecting into the future (no input data other than weather data)
             input_col = model_data_obj.input_col if not project_ind_col else project_ind_col
-            fig = self.plot_data_obj.baseline_projection_plot(model_data_obj.y_true, model_data_obj.y_pred, 
+            fig, y_true, y_pred = self.plot_data_obj.baseline_projection_plot(model_data_obj.y_true, model_data_obj.y_pred, 
                                                             model_data_obj.baseline_period, model_data_obj.projection_period,
                                                             model_data_obj.best_model_name, model_data_obj.best_metrics['adj_r2'],
                                                             model_data_obj.original_data,
                                                             input_col, model_data_obj.output_col,
                                                             model_data_obj.best_model)
             fig.savefig(self.results_folder_name + '/baseline_projection_plot-' + str(Wrapper.global_count) + '.png')
+            
+            if not y_true.empty and not y_pred.empty:
+                savings = ((y_pred - y_true).sum() / y_pred.sum()) * 100
+                self.result['Savings'] = float(savings)
+            else:
+                print('y_true: ', y_true)
+                print('y_pred: ', y_pred)
+                self.result['Savings'] = float(-1.0)
 
         if self.preprocessed_data.empty:
             self.result['Model']['Source'] = '' # User provided their own dataframe, i.e. they did not use preprocessed_data()

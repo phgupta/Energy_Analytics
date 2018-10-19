@@ -339,11 +339,11 @@ class Model_Data:
         """
 
         self.linear_regression()
-        self.lasso_regression()
-        self.ridge_regression()
-        self.elastic_net_regression()
-        self.random_forest()
-        self.ann()
+        # self.lasso_regression()
+        # self.ridge_regression()
+        # self.elastic_net_regression()
+        # self.random_forest()
+        # self.ann()
 
         # Index of the model with max score
         best_model_index = self.max_scores.index(max(self.max_scores))
