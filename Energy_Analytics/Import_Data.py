@@ -304,13 +304,13 @@ class Import_XBOS(Import_Data):
         for dat in data_type:
             if first:
                 try:
-                    self.data = mapping[dat]
+                    self.data = mapping[dat].df
                     first = False
                 except:
                     raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
             else:
                 try:
-                    self.data = self.data.join(mapping[dat])
+                    self.data = self.data.join(mapping[dat].df)
                 except:
                     raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
 
