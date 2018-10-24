@@ -11,7 +11,7 @@
 
 	"Clean": {
 		"Rename Col": ["OAT", "RelHum_Avg", "CHW_Elec", "Elec", "Gas", "HW_Heat"],
-		"Drop Col": "Elec",
+		"Drop Col": "",
 		"Resample": true,
 		"Frequency": "h",
 		"Interpolate": true,
@@ -30,16 +30,16 @@
 	"Preprocess": {
 		"HDH CPoint": 65,
 		"CDH CPoint": 65,
-		"HDH CDH Calc Col": "OAT",
+		"HDH CDH Calc Col": "",
 		"Col Degree": null,
 		"Degree": null,
 		"Standardize": false,
-		"Normalize": true,
+		"Normalize": false,
 		"Year": false,
 		"Month": false,
 		"Week": true,
 		"Time of Day": true,
-		"Day of Week": false,
+		"Day of Week": true,
 		"Save File": false
 	},
 
@@ -49,7 +49,7 @@
 		"Projection Independent Col": "",
 		"Baseline Period": ["2014-01","2014-12"], 
 		"Projection Period": ["2015-01","2015-12", "2016-01","2016-12"],
-		"Exclude Time Period": ["2014-06", "2014-07"],
+		"Exclude Time Period": [],
 		"Alphas": [0.0001, 0.0017782794100389228, 0.03162277660168379, 0.5623413251903491, 10.0],
 		"CV": 5,
 		"Plot": true,

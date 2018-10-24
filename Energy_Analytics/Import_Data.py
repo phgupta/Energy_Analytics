@@ -23,7 +23,7 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-# import dataclient
+import dataclient
 
 
 class Import_Data:
@@ -313,6 +313,8 @@ class Import_XBOS(Import_Data):
                     self.data = self.data.join(mapping[dat].df)
                 except:
                     raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
+
+        return mapping
 
         # if data_type == 'all':
         #     self.data = resp_weather.df
