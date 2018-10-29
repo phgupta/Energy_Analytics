@@ -125,7 +125,7 @@ class Preprocess_Data:
         self.preprocessed_data = data
 
 
-    def add_time_features(self, year=False, month=False, week=True, tod=True, dow=True):
+    def add_time_features(self, year=False, month=False, week=False, tod=False, dow=False):
         """ Add time features to dataframe.
 
         Parameters

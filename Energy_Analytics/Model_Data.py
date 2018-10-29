@@ -176,8 +176,14 @@ class Model_Data:
 
         """
 
-        model = LinearRegression(normalize=True)
-        scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+        model = LinearRegression()
+        scores = []
+
+        kfold = KFold(n_splits=self.cv, shuffle=True, random_state=42)
+        for i, (train, test) in enumerate(kfold.split(self.baseline_in, self.baseline_out)):
+            model.fit(self.baseline_in.iloc[train], self.baseline_out.iloc[train])
+            scores.append(model.score(self.baseline_in.iloc[test], self.baseline_out.iloc[test]))
+
         mean_score = sum(scores) / len(scores)
         
         self.models.append(model)
@@ -202,17 +208,25 @@ class Model_Data:
         best_alpha = None
 
         for alpha in self.alphas:
-            model = Lasso(normalize=True, alpha=alpha, max_iter=5000)
+            # model = Lasso(normalize=True, alpha=alpha, max_iter=5000)
+            model = Lasso(alpha=alpha, max_iter=5000)
             model.fit(self.baseline_in, self.baseline_out.values.ravel())
-            scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+
+            scores = []
+            kfold = KFold(n_splits=self.cv, shuffle=True, random_state=42)
+            for i, (train, test) in enumerate(kfold.split(self.baseline_in, self.baseline_out)):
+                model.fit(self.baseline_in.iloc[train], self.baseline_out.iloc[train])
+                scores.append(model.score(self.baseline_in.iloc[test], self.baseline_out.iloc[test]))
             mean_score = np.mean(scores)
+
             score_list.append(mean_score)
             
             if mean_score > max_score:
                 max_score = mean_score
                 best_alpha = alpha
 
-        self.models.append(Lasso(normalize=True, alpha=best_alpha, max_iter=5000))
+        # self.models.append(Lasso(normalize=True, alpha=best_alpha, max_iter=5000))
+        self.models.append(Lasso(alpha=best_alpha, max_iter=5000))
         self.model_names.append('Lasso Regression')
         self.max_scores.append(max_score)
         self.metrics['Lasso Regression'] = score_list
@@ -234,16 +248,24 @@ class Model_Data:
         best_alpha = None
 
         for alpha in self.alphas:
-            model = Ridge(normalize=True, alpha=alpha, max_iter=5000)
+            # model = Ridge(normalize=True, alpha=alpha, max_iter=5000)
+            model = Ridge(alpha=alpha, max_iter=5000)
             model.fit(self.baseline_in, self.baseline_out.values.ravel())
-            scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+
+            scores = []
+            kfold = KFold(n_splits=self.cv, shuffle=True, random_state=42)
+            for i, (train, test) in enumerate(kfold.split(self.baseline_in, self.baseline_out)):
+                model.fit(self.baseline_in.iloc[train], self.baseline_out.iloc[train])
+                scores.append(model.score(self.baseline_in.iloc[test], self.baseline_out.iloc[test]))
             mean_score = np.mean(scores)
+
             score_list.append(mean_score)
             
             if mean_score > max_score:
                 max_score = mean_score
                 best_alpha = alpha
 
+        # self.models.append(Ridge(normalize=True, alpha=best_alpha, max_iter=5000))
         self.models.append(Ridge(alpha=best_alpha, max_iter=5000))
         self.model_names.append('Ridge Regression')
         self.max_scores.append(max_score)
@@ -267,10 +289,17 @@ class Model_Data:
 
         for alpha in self.alphas:
             # CHECK: tol value too large?
-            model = ElasticNet(normalize=True, alpha=alpha, max_iter=5000, tol=0.01)
+            # model = ElasticNet(normalize=True, alpha=alpha, max_iter=5000, tol=0.01)
+            model = ElasticNet(alpha=alpha, max_iter=5000, tol=0.01)            
             model.fit(self.baseline_in, self.baseline_out.values.ravel())
-            scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+
+            scores = []
+            kfold = KFold(n_splits=self.cv, shuffle=True, random_state=42)
+            for i, (train, test) in enumerate(kfold.split(self.baseline_in, self.baseline_out)):
+                model.fit(self.baseline_in.iloc[train], self.baseline_out.iloc[train])
+                scores.append(model.score(self.baseline_in.iloc[test], self.baseline_out.iloc[test]))
             mean_score = np.mean(scores)
+
             score_list.append(mean_score)
             
             if mean_score > max_score:
@@ -278,6 +307,7 @@ class Model_Data:
                 best_alpha = alpha
 
         # CHECK: tol value too large?
+        # self.models.append(ElasticNet(normalize=True, alpha=best_alpha, max_iter=5000, tol=0.01))
         self.models.append(ElasticNet(alpha=best_alpha, max_iter=5000, tol=0.01))
         self.model_names.append('ElasticNet Regression')
         self.max_scores.append(max_score)
@@ -296,7 +326,12 @@ class Model_Data:
         """
 
         model = RandomForestRegressor(random_state=42)
-        scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+
+        scores = []
+        kfold = KFold(n_splits=self.cv, shuffle=True, random_state=42)
+        for i, (train, test) in enumerate(kfold.split(self.baseline_in, self.baseline_out)):
+            model.fit(self.baseline_in.iloc[train], self.baseline_out.iloc[train])
+            scores.append(model.score(self.baseline_in.iloc[test], self.baseline_out.iloc[test]))
         mean_score = np.mean(scores)
 
         self.models.append(model)
@@ -317,7 +352,12 @@ class Model_Data:
         """
         
         model = MLPRegressor()
-        scores = cross_val_score(model, self.baseline_in, self.baseline_out, cv=self.cv)
+
+        scores = []
+        kfold = KFold(n_splits=self.cv, shuffle=True, random_state=42)
+        for i, (train, test) in enumerate(kfold.split(self.baseline_in, self.baseline_out)):
+            model.fit(self.baseline_in.iloc[train], self.baseline_out.iloc[train])
+            scores.append(model.score(self.baseline_in.iloc[test], self.baseline_out.iloc[test]))
         mean_score = np.mean(scores)
 
         self.models.append(model)
@@ -339,11 +379,11 @@ class Model_Data:
         """
 
         self.linear_regression()
-        # self.lasso_regression()
-        # self.ridge_regression()
-        # self.elastic_net_regression()
-        # self.random_forest()
-        # self.ann()
+        self.lasso_regression()
+        self.ridge_regression()
+        self.elastic_net_regression()
+        self.random_forest()
+        self.ann()
 
         # Index of the model with max score
         best_model_index = self.max_scores.index(max(self.max_scores))

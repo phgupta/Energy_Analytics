@@ -15,7 +15,7 @@ Authors \n
 @author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
 @author Pranav Gupta <phgupta@ucdavis.edu> \n
 
-Last modified: October 17 2018 \n
+Last modified: October 29 2018 \n
 
 """
 
@@ -23,7 +23,7 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-import dataclient
+# import dataclient
 
 
 class Import_Data:
@@ -190,7 +190,8 @@ class Import_XBOS(Import_Data):
 
 
     def get_weather_power_tstat(self, site, start, end, data_type=['power', 'temperature']):
-        """ Get weather and power data.
+        """ Get weather and power data and store the info in self.data
+        Integrated John Layden's code from - https://github.com/jleyden/building-analysis
 
         Parameters
         ----------
@@ -202,6 +203,11 @@ class Import_XBOS(Import_Data):
             End date.
         data_type   : str
             Type of data needed (all, weather, power, temperature, hsp, csp)
+
+        Returns
+        -------
+        dict
+            Dictionary of mappings.
 
         """
 
