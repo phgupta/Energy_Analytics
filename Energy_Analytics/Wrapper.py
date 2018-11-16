@@ -17,12 +17,9 @@ To Do \n
 3. Preprocess \n
     \t 1. Remove SettingWithCopying Warning.
 3. Model \n
-    \t 1. Add ARIMA, Gaussian processes?
-    \t 2. Add param_dict parameter.
-    \t 3. For baseline period, if no start_date, use first row.
-    \t 4. For projection period, if no end_date, use last row.
-    \t 5. Use GridSearchCV.
-    \t 6. Change SystemError to specific errors.
+    \t 1. Add param_dict parameter.
+    \t 2. For baseline/projection period, if no start/end date, use first/last row.
+    \t 3. Change SystemError to specific errors.
 4. Wrapper \n
     \t 1. Give user the option to run specific models.
     \t 2. Change SystemError to specific errors.
@@ -31,14 +28,12 @@ To Do \n
     \t 3. Write documentation from user's perspective.
     \t 4. Add plot_data in documentation.
     \t 5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
-    \t 6. Add user comment in result.json.
 6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
-    \t 4. Structure code to publish to PyPI.
-    \t 5. Docker.
-    \t 6. Ensure results are replicated in different systems.
+    \t 4. Docker.
+    \t 5. Ensure results are replicated in different systems.
 7. Optimize \n
     \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
@@ -52,16 +47,16 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-from Energy_Analytics import Import_Data
-from Energy_Analytics import Clean_Data
-from Energy_Analytics import Preprocess_Data
-from Energy_Analytics import Model_Data
-from Energy_Analytics import Plot_Data
-# from Import_Data import *
-# from Clean_Data import *
-# from Preprocess_Data import *
-# from Model_Data import *
-# from Plot_Data import *
+# from Energy_Analytics import Import_Data
+# from Energy_Analytics import Clean_Data
+# from Energy_Analytics import Preprocess_Data
+# from Energy_Analytics import Model_Data
+# from Energy_Analytics import Plot_Data
+from Import_Data import *
+from Clean_Data import *
+from Preprocess_Data import *
+from Model_Data import *
+from Plot_Data import *
 
 
 class Wrapper:
@@ -101,7 +96,7 @@ class Wrapper:
         self.project_df             = pd.DataFrame()
 
         # Create instance of Plot_Data 
-        self.plot_data_obj          = Plot_Data.Plot_Data()
+        self.plot_data_obj          = Plot_Data()
         
         # Store UTC Time
         self.result['Time (UTC)']   = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
@@ -136,6 +131,48 @@ class Wrapper:
 
         with open(self.results_folder_name + '/results-' + str(Wrapper.global_count) + '.json', 'a') as f:
             json.dump(self.result, f)
+
+
+    def site_analysis(self, folder_name, site_install_mapping, end_date):
+        """ Summarize site data into a single table.
+
+        folder_name         : str
+            Folder where all site data resides.
+        site_event_mapping  : dic
+            Dictionary of site name to date of installation.
+        end_date            : str
+            End date of data collected.
+
+        """
+
+        if not folder_name or not isinstance(folder_name, str):
+            raise TypeError("folder_name should be type string")
+        else:
+            list_json_files = []
+            df      = pd.DataFrame()
+            temp_df = pd.DataFrame()
+
+            json_files = [f for f in os.listdir(folder_name) if f.endswith('.json')]
+            
+            for json_file in json_files:
+                with open(folder_name + json_file) as f:
+                    js = json.load(f)
+                    temp_df = pd.DataFrame({
+                        'Site': js['Site'],
+                        '#Days since Pelican Installation': count_number_of_days_updated(js['Site']),
+                        'Energy Savings (%)': round(js['Energy Savings (%)'], 2),
+                        'Energy Savings (kWh)': round(js['Energy Savings (absolute)'] / 1000, 2),
+                        'Dollar Savings (%)': round(js['User Comments']['Dollar Savings (%)'], 2),
+                        'Dollar Savings ($)': round(js['User Comments']['Dollar Savings (absolute)'], 2),
+                        'Best Model': js['Model']['Optimal Model\'s Metrics']['name'],
+                        'Adj R2': round(js['Model']['Optimal Model\'s Metrics']['adj_r2'], 2),
+                        'RMSE': round(js['Model']['Optimal Model\'s Metrics']['rmse'], 2),
+                        'MAPE': js['Model']['Optimal Model\'s Metrics']['mape']
+                }, index=[0])
+
+            df = df.append(temp_df)
+            df.set_index('Site', inplace=True)
+            return df
 
 
     def read_json(self, file_name=None, input_json=None, imported_data=pd.DataFrame()):
@@ -424,6 +461,7 @@ class Wrapper:
             'Drop Col': drop_col,
             'Resample': resample,
             'Frequency': freq,
+            'Resampler': resampler,
             'Interpolate': interpolate,
             'Limit': limit,
             'Method': method,
