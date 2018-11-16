@@ -1,39 +1,45 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: October 17 2018
+Last modified: October 23 2018
 
 Note
 ----
-1. df.loc[(slice(None, None, None)), ...] is equivalent to "df.loc[:,...]"
-2. df.resample(freq='h').mean() drops all non-float/non-int columns
-3. os._exit(1) exits the program without calling cleanup handlers.
+1. For MAPE, all rows with 0 are dropped in baseline_out.
+2. df.loc[(slice(None, None, None)), ...] is equivalent to "df.loc[:,...]"
+3. df.resample(freq='h').mean() drops all non-float/non-int columns
+4. os._exit(1) exits the program without calling cleanup handlers.
 
 To Do \n
 1. Import \n
-    \t 1. Integrate InfluxData, Skyspark & XBOS client.
-    \t 2. Check if file_name or folder_name is of type unicode -> convert to string.
-2. Preprocess \n
-    \t 1. Add option to not calculate CDH HDH.
-2. Model \n
+    \t 1. Check if file_name or folder_name is of type unicode -> convert to string.
+2. Clean \n
+    \t 1. Clean each column differently.
+3. Preprocess \n
+    \t 1. Remove SettingWithCopying Warning.
+3. Model \n
     \t 1. Add ARIMA, Gaussian processes?
     \t 2. Add param_dict parameter.
-3. Wrapper \n
+    \t 3. For baseline period, if no start_date, use first row.
+    \t 4. For projection period, if no end_date, use last row.
+    \t 5. Use GridSearchCV.
+    \t 6. Change SystemError to specific errors.
+4. Wrapper \n
     \t 1. Give user the option to run specific models.
-    \t 2. Add cost savings.
-4. All \n
-    \t 1. Change SystemError to specific errors.
+    \t 2. Change SystemError to specific errors.
+5. All \n
     \t 2. Look into adding other plots.
     \t 3. Write documentation from user's perspective.
     \t 4. Add plot_data in documentation.
     \t 5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
-5. Cleanup \n
+    \t 6. Add user comment in result.json.
+6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
     \t 3. Run pylint on all files.
     \t 4. Structure code to publish to PyPI.
     \t 5. Docker.
     \t 6. Ensure results are replicated in different systems.
-6. Optimize \n
+7. Optimize \n
     \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
 
 Authors \n
@@ -46,16 +52,16 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
-# from Energy_Analytics import Import_Data
-# from Energy_Analytics import Clean_Data
-# from Energy_Analytics import Preprocess_Data
-# from Energy_Analytics import Model_Data
-# from Energy_Analytics import Plot_Data
-from Import_Data import *
-from Clean_Data import *
-from Preprocess_Data import *
-from Model_Data import *
-from Plot_Data import *
+from Energy_Analytics import Import_Data
+from Energy_Analytics import Clean_Data
+from Energy_Analytics import Preprocess_Data
+from Energy_Analytics import Model_Data
+from Energy_Analytics import Plot_Data
+# from Import_Data import *
+# from Clean_Data import *
+# from Preprocess_Data import *
+# from Model_Data import *
+# from Plot_Data import *
 
 
 class Wrapper:
@@ -73,7 +79,7 @@ class Wrapper:
     global_count = 1
 
 
-    def __init__(self, results_folder_name='results'):
+    def __init__(self, results_folder_name='results', site_name='Undefined'):
         """ Constructor.
 
         Initializes variables and creates results directory.
@@ -92,20 +98,42 @@ class Wrapper:
         self.imported_data          = pd.DataFrame()
         self.cleaned_data           = pd.DataFrame()
         self.preprocessed_data      = pd.DataFrame()
+        self.project_df             = pd.DataFrame()
 
         # Create instance of Plot_Data 
-        self.plot_data_obj          = Plot_Data()
+        self.plot_data_obj          = Plot_Data.Plot_Data()
         
         # Store UTC Time
         self.result['Time (UTC)']   = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Store site name
+        self.result['Site'] = site_name
 
         # Create results folder if it doesn't exist
         if not os.path.isdir(self.results_folder_name):
             os.makedirs(self.results_folder_name)
 
 
+    def add_comments(self, dic):
+        """ Add comments to results json file
+
+        dic     : dict
+            Dictionary of key,value pairs added to result
+
+        """
+
+        self.result['User Comments'] = {}
+        self.result['User Comments'].update(dic)
+
+
     def write_json(self):
         """ Dump data into json file """
+
+        # Check current number of json files in results directory and dump current json in new file
+        path_to_json = self.results_folder_name + '/'
+        json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
+        Wrapper.global_count = len(json_files) + 1
+
         with open(self.results_folder_name + '/results-' + str(Wrapper.global_count) + '.json', 'a') as f:
             json.dump(self.result, f)
 
@@ -148,7 +176,7 @@ class Wrapper:
 
         clean_json = input_json['Clean']
         cleaned_data = self.clean_data(imported_data, rename_col=clean_json['Rename Col'], drop_col=clean_json['Drop Col'],
-                                        resample=clean_json['Resample'], freq=clean_json['Frequency'],
+                                        resample=clean_json['Resample'], freq=clean_json['Frequency'], resampler=clean_json['Resampler'],
                                         interpolate=clean_json['Interpolate'], limit=clean_json['Limit'],
                                         method=clean_json['Method'], remove_na=clean_json['Remove NA'],
                                         remove_na_how=clean_json['Remove NA How'], remove_outliers=clean_json['Remove Outliers'],
@@ -172,7 +200,7 @@ class Wrapper:
                                 exclude_time_period=model_json['Exclude Time Period'],
                                 alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
 
-        self.write_json()
+        # self.write_json()
 
 
     # CHECK: Modify looping of time_freq
@@ -294,7 +322,6 @@ class Wrapper:
 
         # Logging
         self.result['Import'] = {
-            'Source': 'CSV', # import_data() supports only csv files currently
             'File Name': file_name,
             'Folder Name': folder_name,
             'Head Row': head_row,
@@ -315,7 +342,7 @@ class Wrapper:
 
 
     def clean_data(self, data, rename_col=None, drop_col=None,
-                    resample=True, freq='h',
+                    resample=True, freq='h', resampler='mean',
                     interpolate=True, limit=1, method='linear',
                     remove_na=True, remove_na_how='any',
                     remove_outliers=True, sd_val=3,
@@ -335,6 +362,8 @@ class Wrapper:
             Indicates whether to resample data or not.
         freq                    : str
             Resampling frequency i.e. d, h, 15T... 
+        resampler               : str
+            Resampling type i.e. mean, max.
         interpolate             : bool
             Indicates whether to interpolate data or not.
         limit                   : int
@@ -371,15 +400,15 @@ class Wrapper:
         
         # Create instance and clean the data
         clean_data_obj = Clean_Data(data)
-        clean_data_obj.clean_data(resample=resample, freq=freq, interpolate=interpolate,
-                                limit=limit, remove_na=remove_na, remove_na_how=remove_na_how,
+        clean_data_obj.clean_data(resample=resample, freq=freq, resampler=resampler,
+                                interpolate=interpolate, limit=limit, method=method,
+                                remove_na=remove_na, remove_na_how=remove_na_how,
                                 remove_outliers=remove_outliers, sd_val=sd_val,
-                                remove_out_of_bounds=remove_out_of_bounds,
-                                low_bound=low_bound, high_bound=high_bound)
+                                remove_out_of_bounds=remove_out_of_bounds, low_bound=low_bound, high_bound=high_bound)
 
         # Correlation plot
-        fig = self.plot_data_obj.correlation_plot(clean_data_obj.cleaned_data)
-        fig.savefig(self.results_folder_name + '/correlation_plot-' + str(Wrapper.global_count) + '.png')
+        # fig = self.plot_data_obj.correlation_plot(clean_data_obj.cleaned_data)
+        # fig.savefig(self.results_folder_name + '/correlation_plot-' + str(Wrapper.global_count) + '.png')
 
         if rename_col:  # Rename columns of dataframe
             clean_data_obj.rename_columns(rename_col)
@@ -407,11 +436,6 @@ class Wrapper:
             'High Bound': str(high_bound) if high_bound == float('inf') else high_bound,
             'Save File': save_file
         }
-
-        if self.imported_data.empty:
-            self.result['Clean']['Source'] = '' # User provided their own dataframe, i.e. they did not use import_data()
-        else:
-            self.result['Clean']['Source'] = self.results_folder_name + '/imported_data-' + str(Wrapper.global_count) + '.csv'
 
         if save_file:
             f = self.results_folder_name + '/cleaned_data-' + str(Wrapper.global_count) + '.csv'
@@ -505,11 +529,6 @@ class Wrapper:
             'Day of Week': dow,
             'Save File': save_file
         }
-
-        if self.cleaned_data.empty:
-            self.result['Preprocess']['Source'] = '' # User provided their own dataframe, i.e. they did not use cleaned_data()
-        else:
-            self.result['Preprocess']['Source'] = self.results_folder_name + '/cleaned_data-' + str(Wrapper.global_count) + '.csv'
 
         if save_file:
             f = self.results_folder_name + '/preprocessed_data-' + str(Wrapper.global_count) + '.csv'
@@ -608,21 +627,25 @@ class Wrapper:
                                                             model_data_obj.best_model_name, model_data_obj.best_metrics['adj_r2'],
                                                             model_data_obj.original_data,
                                                             input_col, model_data_obj.output_col,
-                                                            model_data_obj.best_model)
+                                                            model_data_obj.best_model,
+                                                            self.result['Site'])
             fig.savefig(self.results_folder_name + '/baseline_projection_plot-' + str(Wrapper.global_count) + '.png')
             
             if not y_true.empty and not y_pred.empty:
-                savings = ((y_pred - y_true).sum() / y_pred.sum()) * 100
-                self.result['Savings'] = float(savings)
+                saving_absolute = (y_pred - y_true).sum()
+                saving_perc = (saving_absolute / y_pred.sum()) * 100
+                self.result['Energy Savings (%)'] = float(saving_perc)
+                self.result['Energy Savings (absolute)'] = saving_absolute
+
+                # Temporary
+                self.project_df['true'] = y_true
+                self.project_df['pred'] = y_pred
             else:
                 print('y_true: ', y_true)
                 print('y_pred: ', y_pred)
-                self.result['Savings'] = float(-1.0)
-
-        if self.preprocessed_data.empty:
-            self.result['Model']['Source'] = '' # User provided their own dataframe, i.e. they did not use preprocessed_data()
-        else:
-            self.result['Model']['Source'] = self.results_folder_name + '/preprocessed_data-' + str(Wrapper.global_count) + '.csv'
+                print('Error: y_true and y_pred are empty. Default to -1.0 savings.')
+                self.result['Energy Savings (%)'] = float(-1.0)
+                self.result['Energy Savings (absolute)'] = float(-1.0)
         
         return self.best_metrics
 

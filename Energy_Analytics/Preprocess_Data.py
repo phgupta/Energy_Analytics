@@ -1,6 +1,6 @@
 """ This script preprocesses a dataframe according to user specifications.
 
-Last modified: October 17 2018
+Last modified: November 15 2018
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com>
@@ -10,6 +10,7 @@ Authors \n
 
 import pandas as pd
 from sklearn import preprocessing
+
 
 class Preprocess_Data:
 
@@ -85,7 +86,9 @@ class Preprocess_Data:
         else:
             if isinstance(col, list) and isinstance(degree, list):
                 if len(col) != len(degree):
-                    raise SystemError('col and degree should have equal length.')
+                    print('col len: ', len(col))
+                    print('degree len: ', len(degree))
+                    raise ValueError('col and degree should have equal length.')
                 else:
                     if self.preprocessed_data.empty:
                         data = self.original_data
@@ -97,7 +100,7 @@ class Preprocess_Data:
                     
                     self.preprocessed_data = data
             else:
-                raise SystemError('col and degree should be lists.')
+                raise TypeError('col and degree should be lists.')
 
 
     def standardize(self):
@@ -125,7 +128,7 @@ class Preprocess_Data:
         self.preprocessed_data = data
 
 
-    def add_time_features(self, year=False, month=False, week=False, tod=False, dow=False):
+    def add_time_features(self, year=False, month=False, week=True, tod=True, dow=True):
         """ Add time features to dataframe.
 
         Parameters

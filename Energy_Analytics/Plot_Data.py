@@ -65,7 +65,8 @@ class Plot_Data:
     def baseline_projection_plot(self, y_true, y_pred, 
                                 baseline_period, projection_period,
                                 model_name, adj_r2,
-                                data, input_col, output_col, model):
+                                data, input_col, output_col, model,
+                                site):
         """ Create baseline and projection plots.
 
         Parameters
@@ -113,8 +114,8 @@ class Plot_Data:
         base_df['y_pred'] = y_pred
         ax1 = fig.add_subplot(nrows, 1, 1)
         base_df.plot(ax=ax1, figsize=self.figsize,
-            title='Baseline Period ({}-{}). \nBest Model: {}. \nBaseline Adj R2: {}'.format(baseline_period[0], baseline_period[1], 
-                                                                                model_name, adj_r2))
+            title='Baseline Period ({}-{}). \nBest Model: {}. \nBaseline Adj R2: {}. \nSite: {}.'.format(baseline_period[0], baseline_period[1], 
+                                                                                                            model_name, adj_r2, site))
 
         if projection_period:
             # Display projection plots

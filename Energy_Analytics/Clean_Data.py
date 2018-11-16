@@ -1,6 +1,6 @@
 """ This script cleans a dataframe according to user specifications.
 
-Last modified: September 15 2018
+Last modified: November 15 2018
 
 To Do \n
 1. For remove_outliers() - may need a different boundary for each column.
@@ -65,22 +65,23 @@ class Clean_Data:
             raise e
 
 
-    def resample_data(self, data, freq):
+    def resample_data(self, data, freq, resampler='mean'):
         """ Resample dataframe.
 
         Note
         ----
-        1. Also need to deal with energy quantities where resampling is .sum()
-        2. Figure out how to apply different functions to different columns .apply()
-        3. This theoretically work in upsampling too, check docs
+        1. Figure out how to apply different functions to different columns .apply()
+        2. This theoretically work in upsampling too, check docs
             http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.resample.html 
 
         Parameters
         ----------
-        data    : pd.DataFrame()
+        data        : pd.DataFrame()
             Dataframe to resample
-        freq    : str
-            Resampling frequency i.e. d, h, 15T... 
+        freq        : str
+            Resampling frequency i.e. d, h, 15T...
+        resampler   : str
+            Resampling type i.e. mean, max.
 
         Returns
         -------
@@ -88,7 +89,14 @@ class Clean_Data:
             Dataframe containing resampled data
 
         """
-        data = data.resample(freq).mean()
+
+        if resampler == 'mean':
+            data = data.resample(freq).mean()
+        elif resampler == 'max':
+            data = data.resample(freq).max()
+        else:
+            raise ValueError('Resampler can be \'mean\' or \'max\' only.')
+        
         return data
 
 
@@ -187,7 +195,7 @@ class Clean_Data:
         return data
 
 
-    def clean_data(self, resample=True, freq='h',
+    def clean_data(self, resample=True, freq='h', resampler='mean',
                     interpolate=True, limit=1, method='linear',
                     remove_na=True, remove_na_how='any', 
                     remove_outliers=True, sd_val=3, 
@@ -199,7 +207,9 @@ class Clean_Data:
         resample                : bool
             Indicates whether to resample data or not.
         freq                    : str
-            Resampling frequency i.e. d, h, 15T... 
+            Resampling frequency i.e. d, h, 15T...
+        resampler               : str
+            Resampling type i.e. mean, max.
         interpolate             : bool
             Indicates whether to interpolate data or not.
         limit                   : int
@@ -228,7 +238,7 @@ class Clean_Data:
 
         if resample:
             try:
-                data = self.resample_data(data, freq)
+                data = self.resample_data(data, freq, resampler)
             except Exception as e:
                 raise e
 

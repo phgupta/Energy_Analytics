@@ -2,20 +2,20 @@
 
 Note
 ----
-1. If only folder is specified and no filename, all csv's will be read in sorted order by name. \n
-2. Doesn't handle cases when user provides \n
+1. CSV - If only folder is specified and no filename, all csv's will be read in sorted order by name. \n
+2. CSV - Doesn't handle cases when user provides \n
     \t 1. file_name of type str and folder_name of type list(str) \n
     \t 2. file_name and folder_name both of type list(str)
 
 To Do \n
-1. Import data from InfluxDB, MongoDB and SkySpark.
+    \t 1. Remove Import_XBOS from Import_Data.
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com> \n
 @author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
 @author Pranav Gupta <phgupta@ucdavis.edu> \n
 
-Last modified: October 29 2018 \n
+Last modified: November 12 2018 \n
 
 """
 
@@ -23,7 +23,6 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-# import dataclient
 
 
 class Import_Data:
@@ -50,9 +49,9 @@ class Import_Data:
         Parameters
         ----------
         file_name       : str
-            CSV file to be imported. Defaults to '\*' - all csv files in the folder.
+            CSV file to be imported. Defaults to '\*', i.e. all csv files in the folder.
         folder_name     : str
-            Folder where file resides. Defaults to '.' - current directory.
+            Folder where file resides. Defaults to '.', i.e. current directory.
         head_row        : int
             Skips all rows from 0 to head_row-1
         index_col       : int
@@ -98,7 +97,7 @@ class Import_Data:
             # Current implementation can't accept,
             # 1. file_name of type str and folder_name of type list(str)
             # 2. file_name and folder_name both of type list(str)
-            raise SystemError("Filename and Folder name can't both be of type list.")
+            raise NotImplementedError("Filename and Folder name can't both be of type list.")
 
 
     def _load_csv(self, file_name, folder_name, head_row, index_col, convert_col, concat_files):
@@ -130,12 +129,12 @@ class Import_Data:
         if file_name == "*":
 
             if not os.path.isdir(folder_name):
-                raise SystemError('Folder does not exist.')
+                raise OSError('Folder does not exist.')
             else:
                 file_name_list = sorted(glob.glob(folder_name + '*.csv'))
 
                 if not file_name_list:
-                    raise SystemError('Either the folder does not contain any csv files or invalid folder provided.')
+                    raise OSError('Either the folder does not contain any csv files or invalid folder provided.')
                 else:
                     # Call previous function again with parameters changed (file_name=file_name_list, folder_name=None)
                     # Done to reduce redundancy of code
@@ -145,7 +144,7 @@ class Import_Data:
 
         else:
             if not os.path.isdir(folder_name):
-                raise SystemError('Folder does not exist.')
+                raise OSError('Folder does not exist.')
             else:
                 path = os.path.join(folder_name, file_name)
 
@@ -179,9 +178,11 @@ class Import_XBOS(Import_Data):
     def __init__(self):
         """ Constructor.
 
-        This class stores the imported data.
+        This class imports the dataclient module & stores the imported data.
 
         """
+
+        import dataclient
         self.weather_data = pd.DataFrame()
         self.power_data = pd.DataFrame()
         self.temp_data = pd.DataFrame()
@@ -189,9 +190,8 @@ class Import_XBOS(Import_Data):
         self.csp_data = pd.DataFrame()
 
 
-    def get_weather_power_tstat(self, site, start, end, data_type=['power', 'temperature']):
-        """ Get weather and power data and store the info in self.data
-        Integrated John Layden's code from - https://github.com/jleyden/building-analysis
+    def get_weather_power_tstat(self, site, start, end, data_type=['weather', 'power']):
+        """ Get weather and power data.
 
         Parameters
         ----------
@@ -203,11 +203,6 @@ class Import_XBOS(Import_Data):
             End date.
         data_type   : str
             Type of data needed (all, weather, power, temperature, hsp, csp)
-
-        Returns
-        -------
-        dict
-            Dictionary of mappings.
 
         """
 
@@ -321,22 +316,3 @@ class Import_XBOS(Import_Data):
                     raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
 
         return mapping
-
-        # if data_type == 'all':
-        #     self.data = resp_weather.df
-        #     self.data = self.data.join(resp_power.df)
-        #     self.data = self.data.join(resp_temp.df)
-        #     self.data = self.data.join(resp_hsp.df)
-        #     self.data = self.data.join(resp_csp.df)
-        # elif data_type == 'weather':
-        #     self.data = resp_weather.df
-        # elif data_type == 'power':
-        #     self.data = resp_power.df
-        # elif data_type == 'temperature':
-        #     self.data = resp_temp.df
-        # elif data_type == 'hsp':
-        #     self.data = resp_hsp.df
-        # elif data_type == 'csp':
-        #     self.data = resp_csp.df
-        # else:
-        #     raise SystemError("Undefined data_type (Make sure all characters are lowercase)")

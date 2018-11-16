@@ -1,6 +1,6 @@
 """ This script splits the data into baseline and projection periods, runs models on them and displays metrics & plots.
 
-Last modified: October 17 2018
+Last modified: October 30 2018
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>
@@ -189,7 +189,10 @@ class Model_Data:
         self.models.append(model)
         self.model_names.append('Linear Regression')
         self.max_scores.append(mean_score)
-        self.metrics['Linear Regression'] = mean_score
+
+        self.metrics['Linear Regression'] = {}
+        self.metrics['Linear Regression']['R2'] = mean_score
+        self.metrics['Linear Regression']['Adj R2'] = self.adj_r2(mean_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
 
     def lasso_regression(self):
@@ -229,7 +232,10 @@ class Model_Data:
         self.models.append(Lasso(alpha=best_alpha, max_iter=5000))
         self.model_names.append('Lasso Regression')
         self.max_scores.append(max_score)
-        self.metrics['Lasso Regression'] = score_list
+        
+        self.metrics['Lasso Regression'] = {}
+        self.metrics['Lasso Regression']['R2'] = max_score
+        self.metrics['Lasso Regression']['Adj R2'] = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
 
     def ridge_regression(self):
@@ -269,7 +275,10 @@ class Model_Data:
         self.models.append(Ridge(alpha=best_alpha, max_iter=5000))
         self.model_names.append('Ridge Regression')
         self.max_scores.append(max_score)
-        self.metrics['Ridge Regression'] = score_list
+        
+        self.metrics['Ridge Regression'] = {}
+        self.metrics['Ridge Regression']['R2'] = max_score
+        self.metrics['Ridge Regression']['Adj R2'] = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
 
     def elastic_net_regression(self):
@@ -311,7 +320,11 @@ class Model_Data:
         self.models.append(ElasticNet(alpha=best_alpha, max_iter=5000, tol=0.01))
         self.model_names.append('ElasticNet Regression')
         self.max_scores.append(max_score)
-        self.metrics['ElasticNet Regression'] = score_list
+        
+
+        self.metrics['ElasticNet Regression'] = {}
+        self.metrics['ElasticNet Regression']['R2'] = max_score
+        self.metrics['ElasticNet Regression']['Adj R2'] = self.adj_r2(max_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
 
     def random_forest(self):
@@ -337,7 +350,10 @@ class Model_Data:
         self.models.append(model)
         self.model_names.append('Random Forest Regressor')
         self.max_scores.append(mean_score)
-        self.metrics['Random Forest Regressor'] = mean_score
+        
+        self.metrics['Random Forest Regressor'] = {}
+        self.metrics['Random Forest Regressor']['R2'] = mean_score
+        self.metrics['Random Forest Regressor']['Adj R2'] = self.adj_r2(mean_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
 
     def ann(self):
@@ -363,9 +379,12 @@ class Model_Data:
         self.models.append(model)
         self.model_names.append('Artificial Neural Network')
         self.max_scores.append(mean_score)
-        self.metrics['Artificial Neural Network'] = mean_score
-  
+        
+        self.metrics['Artificial Neural Network'] = {}
+        self.metrics['Artificial Neural Network']['R2'] = mean_score
+        self.metrics['Artificial Neural Network']['Adj R2'] = self.adj_r2(mean_score, self.baseline_in.shape[0], self.baseline_in.shape[1])
 
+  
     def run_models(self):
         """ Run all models.
 
@@ -436,19 +455,45 @@ class Model_Data:
 
         """
 
-        X_train, X_test, y_train, y_test = train_test_split(self.baseline_in, self.baseline_out, 
-                                                            test_size=0.30, random_state=42)
+        # X_train, X_test, y_train, y_test = train_test_split(self.baseline_in, self.baseline_out, 
+        #                                                     test_size=0.30, random_state=42)
 
-        self.best_model.fit(X_train, y_train)
-        self.y_true = y_test                        # Pandas Series
-        self.y_pred = self.best_model.predict(X_test)    # numpy.ndarray
+        # self.best_model.fit(X_train, y_train)
+        # self.y_true = y_test                        # Pandas Series
+        # self.y_pred = self.best_model.predict(X_test)    # numpy.ndarray
+
+        # # Set all negative values to zero since energy > 0
+        # self.y_pred[self.y_pred < 0] = 0
+        
+        # # n and k values for adj r2 score
+        # self.n_test = X_test.shape[0]   # Number of points in data sample
+        # self.k_test = X_test.shape[1]   # Number of variables in model, excluding the constant
+
+        # # Store best model's metrics
+        # self.best_metrics['name']   = self.best_model_name
+        # self.best_metrics['r2']     = r2_score(self.y_true, self.y_pred)
+        # self.best_metrics['mse']    = mean_squared_error(self.y_true, self.y_pred)
+        # self.best_metrics['rmse']   = math.sqrt(self.best_metrics['mse'])
+        # self.best_metrics['adj_r2'] = self.adj_r2(self.best_metrics['r2'], self.n_test, self.k_test)
+
+        # # Normalized Mean Bias Error
+        # numerator = sum(self.y_true - self.y_pred)
+        # denominator = (self.n_test - self.k_test) * (sum(self.y_true) / len(self.y_true))
+        # self.best_metrics['nmbe'] = numerator / denominator
+
+        # return self.best_metrics
+
+        self.best_model.fit(self.baseline_in, self.baseline_out)
+
+        self.y_true = self.baseline_out                             # Pandas Series
+        self.y_pred = self.best_model.predict(self.baseline_in)     # numpy.ndarray
 
         # Set all negative values to zero since energy > 0
         self.y_pred[self.y_pred < 0] = 0
-        
+
         # n and k values for adj r2 score
-        self.n_test = X_test.shape[0]   # Number of points in data sample
-        self.k_test = X_test.shape[1]   # Number of variables in model, excluding the constant
+        self.n_test = self.baseline_in.shape[0]   # Number of points in data sample
+        self.k_test = self.baseline_in.shape[1]   # Number of variables in model, excluding the constant
 
         # Store best model's metrics
         self.best_metrics['name']   = self.best_model_name
@@ -460,6 +505,14 @@ class Model_Data:
         # Normalized Mean Bias Error
         numerator = sum(self.y_true - self.y_pred)
         denominator = (self.n_test - self.k_test) * (sum(self.y_true) / len(self.y_true))
-        self.best_metrics['nmbe'] = numerator / denominator
+        self.best_metrics['nmbe']   = numerator / denominator
+
+
+        # MAPE can't have 0 values in baseline_out -> divide by zero error
+        self.baseline_out_copy  = self.baseline_out[self.baseline_out != 0]
+        self.baseline_in_copy   = self.baseline_in[self.baseline_in.index.isin(self.baseline_out_copy.index)]
+        self.y_true_copy = self.baseline_out_copy                             # Pandas Series
+        self.y_pred_copy = self.best_model.predict(self.baseline_in_copy)     # numpy.ndarray
+        self.best_metrics['mape']   = np.mean(np.abs((self.y_true_copy - self.y_pred_copy) / self.y_true_copy)) * 100
 
         return self.best_metrics
