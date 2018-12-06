@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: October 23 2018
+Last modified: December 4 2018
 
 Note
 ----
@@ -47,6 +47,8 @@ import json
 import datetime
 import numpy as np
 import pandas as pd
+from scipy import stats
+from datetime import date
 # from Energy_Analytics import Import_Data
 # from Energy_Analytics import Clean_Data
 # from Energy_Analytics import Preprocess_Data
@@ -109,6 +111,23 @@ class Wrapper:
             os.makedirs(self.results_folder_name)
 
 
+    def get_global_count(self):
+        """ Return global count (used for naming of .json and .png files) 
+
+        Returns
+        -------
+        int
+            Global count
+
+        """
+        
+        # Check current number of json files in results directory and dump current json in new file
+        path_to_json = self.results_folder_name + '/'
+        json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
+        Wrapper.global_count = len(json_files) + 1
+        return Wrapper.global_count
+
+
     def add_comments(self, dic):
         """ Add comments to results json file
 
@@ -124,12 +143,7 @@ class Wrapper:
     def write_json(self):
         """ Dump data into json file """
 
-        # Check current number of json files in results directory and dump current json in new file
-        path_to_json = self.results_folder_name + '/'
-        json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
-        Wrapper.global_count = len(json_files) + 1
-
-        with open(self.results_folder_name + '/results-' + str(Wrapper.global_count) + '.json', 'a') as f:
+        with open(self.results_folder_name + '/results-' + str(self.get_global_count()) + '.json', 'a') as f:
             json.dump(self.result, f)
 
 
@@ -145,32 +159,79 @@ class Wrapper:
 
         """
 
+        def count_number_of_days(site, end_date):
+            """
+            Counts the number of days between two dates.
+
+            Parameters
+            ----------
+            site        : str
+                Key to a dic containing site_name -> pelican installation date.
+            end_date    : str
+                End date.
+
+            Returns
+            -------
+            int
+                Number of days
+
+            """
+            
+            start_date = site_install_mapping[site]
+            start_date = start_date.split('-')
+            start = date(int(start_date[0]), int(start_date[1]), int(start_date[2]))
+            
+            end_date = end_date.split('-')
+            end = date(int(end_date[0]), int(end_date[1]), int(end_date[2]))
+            
+            delta = end - start
+            return delta.days
+
+
         if not folder_name or not isinstance(folder_name, str):
             raise TypeError("folder_name should be type string")
         else:
             list_json_files = []
             df      = pd.DataFrame()
             temp_df = pd.DataFrame()
-
             json_files = [f for f in os.listdir(folder_name) if f.endswith('.json')]
             
             for json_file in json_files:
+                
                 with open(folder_name + json_file) as f:
                     js = json.load(f)
+                    num_days = count_number_of_days(js['Site'], end_date)
+                
+                    e_abs_sav = round(js['Energy Savings (absolute)'] / 1000, 2) # Energy Absolute Savings
+                    e_perc_sav = round(js['Energy Savings (%)'], 2) # Energy Percent Savings
+                    ann_e_abs_sav = (e_abs_sav / num_days) * 365 # Annualized Energy Absolute Savings
+                    
+                    d_abs_sav = round(js['User Comments']['Dollar Savings (absolute)'], 2) # Dollar Absolute Savings
+                    d_perc_sav = round(js['User Comments']['Dollar Savings (%)'], 2) # Dollar Percent Savings
+                    ann_d_abs_sav = (d_abs_sav / num_days) * 365 # Annualized Dollar Absolute Savings
+
                     temp_df = pd.DataFrame({
                         'Site': js['Site'],
-                        '#Days since Pelican Installation': count_number_of_days_updated(js['Site']),
-                        'Energy Savings (%)': round(js['Energy Savings (%)'], 2),
-                        'Energy Savings (kWh)': round(js['Energy Savings (absolute)'] / 1000, 2),
-                        'Dollar Savings (%)': round(js['User Comments']['Dollar Savings (%)'], 2),
-                        'Dollar Savings ($)': round(js['User Comments']['Dollar Savings (absolute)'], 2),
-                        'Best Model': js['Model']['Optimal Model\'s Metrics']['name'],
-                        'Adj R2': round(js['Model']['Optimal Model\'s Metrics']['adj_r2'], 2),
-                        'RMSE': round(js['Model']['Optimal Model\'s Metrics']['rmse'], 2),
-                        'MAPE': js['Model']['Optimal Model\'s Metrics']['mape']
-                }, index=[0])
+                        '#Days since Pelican Installation': num_days,
 
-            df = df.append(temp_df)
+                        'Energy Savings (%)': e_perc_sav,
+                        'Energy Savings (kWh)': e_abs_sav,
+                        'Annualized Energy Savings (kWh)': ann_e_abs_sav,
+                        
+                        'Dollar Savings (%)': d_perc_sav,
+                        'Dollar Savings ($)': d_abs_sav,
+                        'Annualized Dollar Savings ($)': ann_d_abs_sav,
+                        
+                        'Best Model': js['Model']['Optimal Model\'s Metrics']['name'],
+                        'Adj R2': round(js['Model']['Optimal Model\'s Metrics']['adj_cross_val_score'], 2),
+                        
+                        'RMSE': round(js['Model']['Optimal Model\'s Metrics']['rmse'], 2),
+                        'MAPE': js['Model']['Optimal Model\'s Metrics']['mape'],
+                        'Uncertainity': js['Uncertainity'],
+                    }, index=[0])
+                
+                df = df.append(temp_df)
+
             df.set_index('Site', inplace=True)
             return df
 
@@ -305,9 +366,9 @@ class Wrapper:
                     # Keep track of highest adj_r2 score
                     if self.result['Model']['Optimal Model\'s Metrics']['adj_r2'] > optimal_score:
                         optimal_score = self.result['Model']['Optimal Model\'s Metrics']['adj_r2']
-                        optimal_model_file_name = self.results_folder_name + '/results-' + str(Wrapper.global_count) + '.json'
+                        optimal_model_file_name = self.results_folder_name + '/results-' + str(self.get_global_count()) + '.json'
 
-                    Wrapper.global_count += 1
+                    # Wrapper.global_count += 1
 
         print('Most optimal model: ', optimal_model_file_name)
         freq = self.result['Comment'].split(' ')[1][:-1]
@@ -369,7 +430,7 @@ class Wrapper:
         }
         
         if save_file:
-            f = self.results_folder_name + '/imported_data-' + str(Wrapper.global_count) + '.csv'
+            f = self.results_folder_name + '/imported_data-' + str(self.get_global_count()) + '.csv'
             self.imported_data.to_csv(f)
             self.result['Import']['Saved File'] = f
         else:
@@ -476,7 +537,7 @@ class Wrapper:
         }
 
         if save_file:
-            f = self.results_folder_name + '/cleaned_data-' + str(Wrapper.global_count) + '.csv'
+            f = self.results_folder_name + '/cleaned_data-' + str(self.get_global_count()) + '.csv'
             self.cleaned_data.to_csv(f)
             self.result['Clean']['Saved File'] = f
         else:
@@ -569,7 +630,7 @@ class Wrapper:
         }
 
         if save_file:
-            f = self.results_folder_name + '/preprocessed_data-' + str(Wrapper.global_count) + '.csv'
+            f = self.results_folder_name + '/preprocessed_data-' + str(self.get_global_count()) + '.csv'
             self.preprocessed_data.to_csv(f)
             self.result['Preprocess']['Saved File'] = f
         else:
@@ -667,7 +728,8 @@ class Wrapper:
                                                             input_col, model_data_obj.output_col,
                                                             model_data_obj.best_model,
                                                             self.result['Site'])
-            fig.savefig(self.results_folder_name + '/baseline_projection_plot-' + str(Wrapper.global_count) + '.png')
+
+            fig.savefig(self.results_folder_name + '/baseline_projection_plot-' + str(self.get_global_count()) + '.png')
             
             if not y_true.empty and not y_pred.empty:
                 saving_absolute = (y_pred - y_true).sum()
@@ -678,6 +740,10 @@ class Wrapper:
                 # Temporary
                 self.project_df['true'] = y_true
                 self.project_df['pred'] = y_pred
+
+                # Calculate uncertainity of savings
+                self.result['Uncertainity'] = self.uncertainity_equation(model_data_obj, y_true, y_pred, 0.9)
+            
             else:
                 print('y_true: ', y_true)
                 print('y_pred: ', y_pred)
@@ -688,27 +754,51 @@ class Wrapper:
         return self.best_metrics
 
 
-if __name__ == '__main__':
+    def uncertainity_equation(self, model_data_obj, E_measured, E_predicted, confidence_level):
+        """
+        model_data_obj      : Model_Data()
+            An instance of Model_Data() which is a user defined class.
+        E_measured          : pd.Series()
+            Actual values of energy in the post-retrofit period.
+        E_predicted         : pd.Series()
+            Predicted values of energy in the post-retrofit period.
+        confidence_level    : float
+            Confidence level of uncertainity in decimal, i.e. 90% = 0.9
+
+        """
         
-    ################ IMPORT DATA FROM CSV FILES #################
-    def func(X, y):
-        from sklearn.linear_model import LinearRegression
-        from sklearn.model_selection import cross_val_score
-        model = LinearRegression()
-        model.fit(X, y)
-        return model.predict(X)
+        # Number of rows in baseline period
+        n = model_data_obj.baseline_in.shape[0]
 
-    wrapper_obj = Wrapper()
-    imported_data = wrapper_obj.import_data(folder_name='../../../../Desktop/LBNL/Data/', head_row=[5,5,0])
-    cleaned_data = wrapper_obj.clean_data(imported_data, high_bound=9998,
-                                    rename_col=['OAT','RelHum_Avg', 'CHW_Elec', 'Elec', 'Gas', 'HW_Heat'],
-                                    drop_col='Elec')
+        # Number of columns in baseline period
+        p = model_data_obj.baseline_in.shape[1]
+        
+        # Number of rows in post period
+        m = E_measured.count()
+        
+        # t-stats value
+        # CHECK: degrees of freedom = E_predicted.count() - 1?
+        t = stats.t.ppf(confidence_level, E_predicted.count() - 1)
 
-    preprocessed_data = wrapper_obj.preprocess_data(cleaned_data, week=True, tod=True)
+        # Rho - Autocorrelation coefficient
+        residuals = E_measured - E_predicted 
+        auto_corr = residuals.autocorr(lag=1)
+        rho = pow(auto_corr, 0.5)
 
-    wrapper_obj.model(preprocessed_data, dep_col='HW_Heat', alphas=np.logspace(-4,1,5), figsize=(18,5),
-                   baseline_period=["2014-01","2014-12"], projection_period=["2015-01","2015-12", "2016-01","2016-12"],
-                   cv=5,
-                   exclude_time_period=['2014-06', '2014-07'],
-                   custom_model_func=func)
-    wrapper_obj.write_json()
+        # Effective number of points after accounting for autocorrelation
+        n_prime = n * ((1 - rho) / (1 + rho))
+        
+        # Coefficient of variation of RMSE
+        # CHECK: Is the denominator correct?
+        cv_rmse = pow(sum(pow(E_measured - E_predicted, 2) / (n - p)), 0.5) / (sum(E_measured) / E_measured.count())
+        
+        # Bracket in the numerator - refer to page 20
+        numerator_bracket = pow((n / n_prime) * (1 + (2 / n_prime)) * (1 / m), 0.5)
+        
+        # Esave should be absolute value? 
+        f = abs(sum(E_measured - E_predicted) / sum(model_data_obj.y_true))
+           
+        # Main equation 
+        uncertainity = t * ((1.26 * cv_rmse * numerator_bracket) / f)
+        
+        return uncertainity
