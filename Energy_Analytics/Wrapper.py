@@ -1,6 +1,6 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: December 4 2018
+Last modified: Feb 4 2019
 
 Note
 ----
@@ -14,13 +14,12 @@ To Do \n
     \t 1. Check if file_name or folder_name is of type unicode -> convert to string.
 2. Clean \n
     \t 1. Clean each column differently.
+    \t 2. Test all functions from TS_Util.py
 3. Model \n
     \t 1. Add param_dict parameter.
     \t 2. For baseline/projection period, if no start/end date, use first/last row.
-    \t 3. Change SystemError to specific errors.
 4. Wrapper \n
     \t 1. Give user the option to run specific models.
-    \t 2. Change SystemError to specific errors.
 5. All \n
     \t 2. Look into adding other plots.
     \t 3. Write documentation from user's perspective.
@@ -124,7 +123,7 @@ class Wrapper:
 
 
     def add_comments(self, dic):
-        """ Add comments to results json file
+        """ Add comments to results json file.
 
         dic     : dict
             Dictionary of key,value pairs added to result
@@ -136,7 +135,7 @@ class Wrapper:
 
 
     def write_json(self):
-        """ Dump data into json file """
+        """ Dump data into json file. """
 
         with open(self.results_folder_name + '/results-' + str(self.get_global_count()) + '.json', 'a') as f:
             json.dump(self.result, f)
@@ -155,8 +154,7 @@ class Wrapper:
         """
 
         def count_number_of_days(site, end_date):
-            """
-            Counts the number of days between two dates.
+            """ Counts the number of days between two dates.
 
             Parameters
             ----------
@@ -250,12 +248,12 @@ class Wrapper:
         """
 
         if not file_name and not input_json or file_name and input_json:
-            raise SystemError('Provide either json file or json object to read.')
+            raise TypeError('Provide either json file or json object to read.')
         
         # Read json file
         if file_name:
             if not isinstance(file_name, str) or not file_name.endswith('.json') or not os.path.isfile('./'+file_name):
-                raise SystemError('File name should be a valid .json file residing in current directory.')
+                raise TypeError('File name should be a valid .json file residing in current directory.')
             else:
                 f = open(file_name)
                 input_json = json.load(f)
@@ -292,8 +290,6 @@ class Wrapper:
                                 baseline_period=model_json['Baseline Period'], projection_period=model_json['Projection Period'],
                                 exclude_time_period=model_json['Exclude Time Period'],
                                 alphas=model_json['Alphas'], cv=model_json['CV'], plot=model_json['Plot'], figsize=model_json['Fig Size'])
-
-        # self.write_json()
 
 
     # CHECK: Modify looping of time_freq
@@ -489,7 +485,7 @@ class Wrapper:
 
         # Check to ensure data is a pandas dataframe
         if not isinstance(data, pd.DataFrame):
-            raise SystemError('data has to be a pandas dataframe.')
+            raise TypeError('data has to be a pandas dataframe.')
         
         # Create instance and clean the data
         clean_data_obj = Clean_Data(data)
@@ -589,7 +585,7 @@ class Wrapper:
 
         # Check to ensure data is a pandas dataframe
         if not isinstance(data, pd.DataFrame):
-            raise SystemError('data has to be a pandas dataframe.')
+            raise TypeError('data has to be a pandas dataframe.')
         
         # Create instance
         preprocess_data_obj = Preprocess_Data(data)
@@ -679,7 +675,7 @@ class Wrapper:
 
         # Check to ensure data is a pandas dataframe
         if not isinstance(data, pd.DataFrame):
-            raise SystemError('data has to be a pandas dataframe.')
+            raise TypeError('data has to be a pandas dataframe.')
         
         # Create instance
         model_data_obj = Model_Data(data, ind_col, dep_col, alphas, cv, exclude_time_period, baseline_period, projection_period)

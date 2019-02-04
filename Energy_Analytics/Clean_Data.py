@@ -3,7 +3,7 @@
 Last modified: Feb 3 2019
 
 To Do \n
-1. For remove_outliers() - may need a different boundary for each column.
+1. For remove_outlier() - may need a different boundary for each column.
 2. remove_start_NaN() - issues with multi-column df.
 
 Authors \n
@@ -143,7 +143,7 @@ class Clean_Data:
         return data
 
 
-    def remove_outliers(self, data, sd_val):
+    def remove_outlier(self, data, sd_val):
         """ Remove outliers from dataframe.
 
         Note
@@ -257,7 +257,7 @@ class Clean_Data:
 
         if remove_outliers:
             try:
-                data = self.remove_outliers(data, sd_val)
+                data = self.remove_outlier(data, sd_val)
             except Exception as e:
                 raise e
 

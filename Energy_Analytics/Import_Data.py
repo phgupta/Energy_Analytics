@@ -1,4 +1,4 @@
-""" This script imports data from csv files and returns a dataframe. 
+""" This script imports data from csv files, MDAL and returns a dataframe. 
 
 Note
 ----
@@ -8,14 +8,14 @@ Note
     \t 2. file_name and folder_name both of type list(str)
 
 To Do \n
-    \t 1. Remove Import_XBOS from Import_Data.
+    \t 1. Extract RAW data from MDAL.
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com> \n
 @author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
 @author Pranav Gupta <phgupta@ucdavis.edu> \n
 
-Last modified: Feb 3 2019 \n
+Last modified: Feb 4 2019 \n
 
 """
 
@@ -27,14 +27,10 @@ import pandas as pd
 
 class Import_Data:
 
-    """ This class imports data from csv files """
+    """ This class imports data from csv files. """
 
     def __init__(self):
-        """ Constructor.
-
-        This class stores the imported data.
-
-        """
+        """ Constructor: Store the imported data. """
         self.data = pd.DataFrame()
 
 
@@ -171,15 +167,49 @@ class Import_Data:
         return data
 
 
+
 class Import_MDAL(Import_Data):
 
-    def __init__(self):
+    """ This class imports data from MDAL. """
 
+    def __init__(self):
+        """ Constructor. """
+        
         import dataclient
         self.m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
 
 
-    def get_meter(self, site, start, end, point_type='Green_Button_Meter', var="meter", agg='MEAN', window='24h', aligned=True, return_names=True):
+    def get_meter(self, site, start, end, point_type='Green_Button_Meter',
+                    var="meter", agg='MEAN', window='24h', aligned=True, return_names=True):
+        """ Get meter data from MDAL.
+
+        Parameters
+        ----------
+        site            : str
+            Building name.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        point_type      : str
+            Type of data, i.e. Green_Button_Meter, Building_Electric_Meter...
+        var             : str
+            Variable - "meter", "weather"...
+        agg             : str
+            Aggregation - MEAN, SUM, RAW...
+        window          : str
+            Size of the moving window.
+        aligned         : bool
+            ???
+        return_names    : bool
+            ???
+
+        Returns
+        -------
+        (df, mapping, context)
+            ???
+
+        """
     
         request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
         resp = self.m.query(request)
@@ -190,7 +220,37 @@ class Import_MDAL(Import_Data):
         return resp
 
 
-    def get_weather(self, site, start, end, point_type='Weather_Temperature_Sensor', var="weather", agg='MEAN', window='24h', aligned=True, return_names=True):
+    def get_weather(self, site, start, end, point_type='Weather_Temperature_Sensor', 
+                    var="weather", agg='MEAN', window='24h', aligned=True, return_names=True):
+        """ Get weather data from MDAL.
+
+        Parameters
+        ----------
+        site            : str
+            Building name.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        point_type      : str
+            Type of data, i.e. Green_Button_Meter, Building_Electric_Meter...
+        var             : str
+            Variable - "meter", "weather"...
+        agg             : str
+            Aggregation - MEAN, SUM, RAW...
+        window          : str
+            Size of the moving window.
+        aligned         : bool
+            ???
+        return_names    : bool
+            ???
+
+        Returns
+        -------
+        (df, mapping, context)
+            ???
+
+        """
 
         request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
         resp = self.m.query(request)
@@ -201,12 +261,41 @@ class Import_MDAL(Import_Data):
         return resp
 
 
-    def get_tstat(self, site, start, end,  var="tstat_temp", agg='MEAN', window='24h', aligned=True, return_names=True):
+    def get_tstat(self, site, start, end, var="tstat_temp", agg='MEAN', window='24h', aligned=True, return_names=True):
+        """ Get thermostat data from MDAL.
+
+        Parameters
+        ----------
+        site            : str
+            Building name.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        var             : str
+            Variable - "meter", "weather"...
+        agg             : str
+            Aggregation - MEAN, SUM, RAW...
+        window          : str
+            Size of the moving window.
+        aligned         : bool
+            ???
+        return_names    : bool
+            ???
+
+        Returns
+        -------
+        (df, mapping, context)
+            ???
+
+        """
     
-        point_map = {"tstat_state" : "Thermostat_Status", 
-                     "tstat_hsp" : "Supply_Air_Temperature_Heating_Setpoint", 
-                     "tstat_csp" : "Supply_Air_Temperature_Cooling_Setpoint", 
-                     "tstat_temp": "Temperature_Sensor" } 
+        point_map = {
+            "tstat_state" : "Thermostat_Status", 
+            "tstat_hsp" : "Supply_Air_Temperature_Heating_Setpoint", 
+            "tstat_csp" : "Supply_Air_Temperature_Cooling_Setpoint", 
+            "tstat_temp": "Temperature_Sensor" 
+        }
         
         if isinstance(var,list):
             point_type = [point_map[point_type] for point_type in var] # list of all the point names using BRICK classes
@@ -222,17 +311,48 @@ class Import_MDAL(Import_Data):
         return resp
 
 
-    def compose_MDAL_dic(self, point_type, site, start, end,  var, agg, window, aligned, points=None, return_names=False):
+    def compose_MDAL_dic(self, site, point_type, 
+                        start, end,  var, agg, window, aligned, points=None, return_names=False):
+        """ Create dictionary for MDAL request.
+
+        Parameters
+        ----------
+        site            : str
+            Building name.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        point_type      : str
+            Type of data, i.e. Green_Button_Meter, Building_Electric_Meter...
+        var             : str
+            Variable - "meter", "weather"...
+        agg             : str
+            Aggregation - MEAN, SUM, RAW...
+        window          : str
+            Size of the moving window.
+        aligned         : bool
+            ???
+        return_names    : bool
+            ???
+
+        Returns
+        -------
+        (df, mapping, context)
+            ???
+
+        """
     
         request = {} 
-        # add Time Details - single set for one or multiple series
+        
+        # Add Time Details - single set for one or multiple series
         request['Time'] = {
             'Start': start,
             'End': end,
             'Window': window,
             'Aligned': aligned
                            }
-        # define Variables 
+        # Define Variables 
         request["Variables"] = {}
         request['Composition'] = []
         request['Aggregation'] = {}
@@ -253,11 +373,25 @@ class Import_MDAL(Import_Data):
                 elif isinstance(agg, list): # if agg is a list -> expected one agg per point
                     request['Aggregation'][var[idx]] = [agg[idx]]
         
-        #pprint.pprint(request)
         return request
 
 
-    def compose_BRICK_query(self, point_type,site):
+    def compose_BRICK_query(self, point_type, site):
+        """ Compose the BRICK query.
+
+        Parameters
+        ----------
+        site            : str
+            Building name.
+        point_type      : str
+            Type of data, i.e. Green_Button_Meter, Building_Electric_Meter...
+
+        Returns
+        -------
+        dict
+            BRICK query.
+
+        """
     
         if point_type == "Green_Button_Meter" or point_type == 'Building_Electric_Meter':
             BRICK_query = {"Definition": """SELECT ?point ?uuid FROM %s WHERE {
@@ -265,6 +399,7 @@ class Import_MDAL(Import_Data):
                                                         ?point bf:uuid ?uuid                
                                                                               };""" % (site,point_type)
                           }
+
         if point_type == "Weather_Temperature_Sensor":
             BRICK_query = {"Definition": """SELECT ?point ?uuid FROM %s WHERE {
                                                    ?point rdf:type/rdfs:subClassOf* brick:%s .
@@ -285,23 +420,75 @@ class Import_MDAL(Import_Data):
 
 
     def parse_context(self, context):
+        """ Parse context.
+
+        Parameters
+        ----------
+        context     : ???
+            ???
+
+        Returns
+        -------
+        pd.DataFrame()
+            Pandas dataframe containing metadata.
+
+        """
     
         metadata_table = pd.DataFrame(context).T
         return metadata_table
 
 
     def strip_point_name(self, col):
-        return col.str.split("#",expand=True)[1]
+        """ Strip point name.
+
+        Parameters
+        ----------
+        col     : ???
+            ???
+
+        Returns
+        -------
+        ???
+            ???
+
+        """
+        return col.str.split("#", expand=True)[1]
 
 
     def get_point_name(self, context):
+        """ Get point name.
+
+        Parameters
+        ----------
+        context     : ???
+            ???
+
+        Returns
+        -------
+        ???
+            ???
+
+        """
         
         metadata_table = self.parse_context(context)
         return metadata_table.apply(self.strip_point_name, axis=1)
 
 
     def replace_uuid_w_names(self, resp):
+        """ Replace the uuid's with names.
+
+        Parameters
+        ----------
+        resp     : ???
+            ???
+
+        Returns
+        -------
+        ???
+            ???
+
+        """
         
         col_mapper = self.get_point_name(resp.context)["?point"].to_dict()
-        resp.df.rename(columns = col_mapper, inplace=True)
+        resp.df.rename(columns=col_mapper, inplace=True)
         return resp
