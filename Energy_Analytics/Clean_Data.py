@@ -1,9 +1,10 @@
 """ This script cleans a dataframe according to user specifications.
 
-Last modified: November 15 2018
+Last modified: Feb 3 2019
 
 To Do \n
 1. For remove_outliers() - may need a different boundary for each column.
+2. remove_start_NaN() - issues with multi-column df.
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com>
@@ -267,3 +268,669 @@ class Clean_Data:
                 raise e
 
         self.cleaned_data = data
+
+
+    def _set_TS_index(self, data):
+        """ Convert index to datetime and all other columns to numeric
+
+        Parameters
+        ----------
+        data    : pd.DataFrame()
+            Input dataframe. 
+
+        Returns
+        -------
+        pd.DataFrame()
+            Modified dataframe.
+
+        """
+        
+        # Set index
+        data.index = pd.to_datetime(data.index, error= "ignore")
+
+        # Format types to numeric
+        for col in data.columns:
+            data[col] = pd.to_numeric(data[col], errors="coerce")
+
+        return data
+
+
+    def _utc_to_local(self, data, local_zone="America/Los_Angeles"):
+        """ Adjust index of dataframe according to timezone that is requested by user.
+
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Pandas dataframe of json timeseries response from server.
+
+        local_zone  : str
+            pytz.timezone string of specified local timezone to change index to.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Pandas dataframe with timestamp index adjusted for local timezone.
+        """
+
+        # Accounts for localtime shift
+        data.index = data.index.tz_localize(pytz.utc).tz_convert(local_zone)
+        
+        # Gets rid of extra offset information so can compare with csv data
+        data.index = data.index.tz_localize(None)
+
+        return data
+
+
+    def _local_to_utc(self, timestamp, local_zone="America/Los_Angeles"):
+        """ Convert local timestamp to UTC.
+
+        Parameters
+        ----------
+        timestamp   : pd.DataFrame()
+            Input Pandas dataframe whose index needs to be changed.
+        local_zone  : str
+            Name of local zone. Defaults to PST.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe with UTC timestamps.
+        
+        """
+
+        timestamp_new = pd.to_datetime(timestamp, infer_datetime_format=True, errors='coerce')
+        timestamp_new = timestamp_new.tz_localize(local_zone).tz_convert(pytz.utc)
+        timestamp_new = timestamp_new.strftime('%Y-%m-%d %H:%M:%S')
+        return timestamp_new
+
+
+    def remove_start_NaN(self, data, var=None):
+        """ Remove start NaN.
+        
+        CHECK: Note issue with multi-column df.
+        
+        Parameters
+        ----------
+        data    : pd.DataFrame()
+            Input dataframe.
+        var     : list(str)
+            List that specifies specific columns of dataframe.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe starting from its first valid index.
+       
+        """
+
+        # Limit to one or some variables
+        if var:
+            start_ok_data = data[var].first_valid_index()
+        else:
+            start_ok_data = data.first_valid_index()
+      
+        data = data.loc[start_ok_data:, :]
+        return data
+
+
+    def remove_end_NaN(self, data, var=None):
+        """ Remove end NaN.
+        
+        CHECK: Note issue with multi-column df.
+        
+        Parameters
+        ----------
+        data    : pd.DataFrame()
+            Input dataframe.
+        var     : list(str)
+            List that specifies specific columns of dataframe.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe starting from its last valid index.
+       
+        """
+        
+        # Limit to one or some variables
+        if var:
+            end_ok_data = data[var].last_valid_index()
+        else:
+            end_ok_data = data.last_valid_index()
+
+        data = data.loc[:end_ok_data, :]
+        return data
+
+
+    def _find_missing_return_frame(self, data):
+        """ Find missing values in each column of dataframe.
+
+        Parameters
+        ----------
+        data    : pd.DataFrame()
+            Input dataframe.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe with boolean values indicating if missing data or not.
+
+        """
+        return data.isnull()
+
+
+    def _find_missing(self, data, return_bool=False):
+        """ ???
+
+        Parameters
+        ----------
+        data            : pd.DataFrame()
+            Input dataframe.
+        return_bool     : bool
+            ???
+
+        Returns
+        -------
+        pd.DataFrame()
+            ???
+
+        """
+
+        # This returns the full table with True where the condition is true
+        if return_bool == False:
+            data = self._find_missing_return_frame(data)
+            return data
+
+        # This returns a bool selector if any of the column is True
+        elif return_bool == "any":
+            bool_sel = self._find_missing_return_frame(data).any(axis=0)
+            return bool_sel
+
+        # This returns a bool selector if all of the column are True
+        elif return_bool == "all":
+            bool_sel = self._find_missing_return_frame(data).all(axis=0)
+            return bool_sel
+        
+        else:
+            print("error in multi_col_how input")
+
+
+    def display_missing(self, data, return_bool="any"):
+        """ ???
+        
+        Parameters
+        ----------
+        data            : pd.DataFrame()
+            Input dataframe.
+        return_bool     : bool
+            ???
+
+        Returns
+        -------
+        pd.DataFrame()
+            ???
+
+        """
+
+        if return_bool == "any":
+            bool_sel = self._find_missing(data, return_bool="any")
+
+        elif return_bool == "all":
+            bool_sel = self._find_missing(data, return_bool="all")
+
+        return data[bool_sel]
+
+
+    def count_missing(self, data, output="number"):
+        """ ???
+        
+        Parameters
+        ----------
+        data    : pd.DataFrame()
+            Input dataframe.
+        output  : str
+            Sting indicating the output of function (number or percent)
+
+        Returns
+        -------
+        int/float
+            Count of missing data (int or float)
+
+        """
+
+        count = self._find_missing(data,return_bool=False).sum()
+
+        if output == "number":
+            return count
+        elif output == "percent":
+            return ((count / (data.shape[0])) * 100)
+
+
+    def remove_missing(self, data, return_bool="any"):
+        """ ??? 
+        
+        Parameters
+        ----------
+        data            : pd.DataFrame()
+            Input dataframe.
+        return_bool     : bool
+            ???
+
+        Returns
+        -------
+        pd.DataFrame()
+            ???
+
+        """
+
+        if return_bool == "any":
+            bool_sel = self._find_missing(data,return_bool="any")
+        elif return_bool == "all":
+            bool_sel = self._find_missing(data,return_bool="all")
+
+        return data[~bool_sel]
+
+
+    def _find_outOfBound(self, data, lowBound, highBound):
+        """ Mask for selecting data that is out of bounds. 
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        lowBound    : float
+            Lower bound for dataframe.
+        highBound   : float
+            Higher bound for dataframe.
+
+        Returns
+        -------
+        ???   
+
+        """
+
+        data = ((data < lowBound) | (data > highBound))
+        return data
+
+
+    def display_outOfBound(self, data, lowBound, highBound):
+        """ Select data that is out of bounds. 
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        lowBound    : float
+            Lower bound for dataframe.
+        highBound   : float
+            Higher bound for dataframe.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe containing data that is out of bounds.    
+
+        """
+
+        data = data[self._find_outOfBound(data, lowBound, highBound).any(axis=1)]
+        return data
+
+
+    def count_outOfBound(self, data, lowBound, highBound, output):
+        """ Count the number of out of bounds data.
+    
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        lowBound    : float
+            Lower bound for dataframe.
+        highBound   : float
+            Higher bound for dataframe.
+        output      : str
+            Sting indicating the output of function (number or percent)
+
+        Returns
+        -------
+        int/float
+            Count of out of bounds data (int or float)    
+
+        """
+
+        count = self._find_outOfBound(data, lowBound, highBound).sum()
+        
+        if output == "number":
+            return count
+        elif output == "percent":
+            return count / (data.shape[0]) * 1.0 * 100
+
+
+    def remove_outOfBound(self, data, lowBound, highBound):
+        """ Remove out of bounds data from input dataframe.
+    
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        lowBound    : float
+            Lower bound for dataframe.
+        highBound   : float
+            Higher bound for dataframe.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe with no out of bounds data.    
+
+        """
+
+        data = data[~self._find_outOfBound(data, lowBound, highBound).any(axis=1)]
+        return data
+
+
+    def _calc_outliers_bounds(self, data, method, coeff, window):
+        """ Calculate the lower and higher bound for outlier detection.  
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        method      : str
+            Method to use for calculating the lower and higher bounds.
+        coeff       : int
+            Coefficient to use in calculation.
+        window      : int
+            Size of the moving window.
+
+        Returns
+        -------
+        (float, float)
+            Lower and higher bound for detecting outliers.
+
+        """
+       
+        if method == "std":
+            lowBound = (data.mean(axis=0) - coeff * data.std(axis=0)).values[0]
+            highBound = (data.mean(axis=0) + coeff * data.std(axis=0)).values[0]
+
+        elif method == "rstd":
+            rl_mean=data.rolling(window=window).mean(how=any)
+            rl_std = data.rolling(window=window).std(how=any).fillna(method='bfill').fillna(method='ffill')
+            
+            lowBound = rl_mean - coeff * rl_std
+            highBound = rl_mean + coeff * rl_std
+
+        elif method == "rmedian":
+            rl_med = data.rolling(window=window, center=True).median().fillna(
+                method='bfill').fillna(method='ffill')
+
+            lowBound =  rl_med - coeff
+            highBound = rl_med + coeff
+
+        # Coeff is multip for std and IQR or threshold for rolling median
+        elif method == "iqr":
+            Q1 = data.quantile(.25) # Coeff is multip for std or % of quartile
+            Q3 = data.quantile(.75)
+            IQR = Q3 - Q1
+
+            lowBound = Q1 - coeff * IQR
+            highBound = Q3 + coeff * IQR
+
+        elif method == "qtl":
+            lowBound = data.quantile(.005)
+            highBound = data.quantile(.995)
+
+        else:
+            print ("Method chosen does not exist")
+            lowBound = None
+            highBound = None
+
+        return lowBound, highBound
+
+
+    def display_outliers(self, data, method, coeff, window=10):
+        """ Returns dataframe with outliers.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        method      : str
+            Method to use for calculating the lower and higher bounds.
+        coeff       : int
+            Coefficient to use in calculation.
+        window      : int
+            Size of the moving window.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe containing outliers.
+
+        """
+        
+        lowBound, highBound = self._calc_outliers_bounds(data, method, coeff, window)
+        data = self.display_outOfBound(data, lowBound, highBound)
+        return data
+
+
+    def count_outliers(self, data, method, coeff, output, window=10):
+        """ Count the number of outliers in dataframe.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        method      : str
+            Method to use for calculating the lower and higher bounds.
+        coeff       : int
+            Coefficient to use in calculation.
+        output      : str
+            Sting indicating the output of function (number or percent)
+        window      : int
+            Size of the moving window.
+
+        Returns
+        -------
+        int/float
+            Count of out of bounds data (int or float)
+
+        """
+        
+        lowBound, highBound = self._calc_outliers_bounds(data, method, coeff, window)
+        count = self.count_outOfBound(data, lowBound, highBound, output=output)
+        return count
+
+
+    def remove_outliers(self, data, method, coeff, window=10):
+        """ Remove the outliers in dataframe.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        method      : str
+            Method to use for calculating the lower and higher bounds.
+        coeff       : int
+            Coefficient to use in calculation.
+        window      : int
+            Size of the moving window.
+
+        Returns
+        -------
+        pd.DataFrame()
+            Dataframe with its outliers removed.
+
+        """
+        
+        lowBound, highBound = self._calc_outliers_bounds(data, method, coeff, window)
+        data = self.remove_outOfBound(data, lowBound, highBound)
+        return data
+
+
+    def _find_equal_to_values(self, data, val):
+        """ Mask for selecting data that is equal to val.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        val         : float
+            Value.
+
+        Returns
+        -------
+        ???
+            Array of bools - true if equal to val, else false.
+
+        """
+
+        bool_sel = (data == val)
+        return bool_sel
+
+
+    def _find_greater_than_values(self, data, val):
+        """ Mask for selecting data that is greater than val.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        val         : float
+            Value.
+
+        Returns
+        -------
+        ???
+            Array of bools - true if greater than val, else false.
+
+        """                 
+        
+        bool_sel = (data > val)   
+        return bool_sel
+
+
+    def _find_less_than_values(self, data, val):
+        """ Mask for selecting data that is less than val.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        val         : float
+            Value.
+
+        Returns
+        -------
+        ???
+            Array of bools - true if less than val, else false.
+
+        """                     
+        
+        bool_sel = (data < val)    
+        return bool_sel
+
+
+    def _find_greater_than_or_equal_to_values(self, data, val):
+        """ Mask for selecting data that is greater than or equal to val.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        val         : float
+            Value.
+
+        Returns
+        -------
+        ???
+            Array of bools - true if greater than or equal to val, else false.
+
+        """  
+
+        bool_sel = (data >= val)  
+        return bool_sel
+
+
+    def _find_less_than_or_equal_to_values(self, data, val):
+        """ Mask for selecting data that is less than or equal to val.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        val         : float
+            Value.
+
+        Returns
+        -------
+        ???
+            Array of bools - true if less than or equal to val, else false.
+
+        """        
+       
+        bool_sel = (data <= val)  
+        return bool_sel
+
+
+    def _find_different_from_values(self, data, val):
+        """ Mask for selecting data that is not equal to val.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        val         : float
+            Value.
+
+        Returns
+        -------
+        ???
+            Array of bools - true if not equal to val, else false.
+
+        """         
+        
+        bool_sel = ~(data == val)   
+        return bool_sel
+
+
+    def count_if(self, data, condition, val, output="number"):
+        """ Count the number of values that match the condition.
+        
+        Parameters
+        ----------
+        data        : pd.DataFrame()
+            Input dataframe.
+        condition   : str
+            Condition to match.
+        val         : float
+            Value to compare against.
+        output      : str
+            Sting indicating the output of function (number or percent)
+
+        Returns
+        -------
+        int/float
+            Count of values that match the condition (int or float)
+
+        """ 
+        
+        if condition == "=":
+            count = self._find_equal_to_values(data,val).sum()
+        elif condition == ">":
+            count = self._find_greater_than_values(data,val).sum()
+        elif condition == "<":
+            count = self._find_less_than_values(data,val).sum()
+        elif condition == ">=":
+            count = self._find_greater_than_or_equal_to_values(data,val).sum()
+        elif condition == "<=":
+            count = self._find_less_than_or_equal_to_values(data,val).sum()
+        elif condition == "!=":
+            count = self._find_different_from_values(data,val).sum()
+        
+        if output == "number":
+            return count
+        elif output == "percent":
+            return count/data.shape[0]*1.0*100
+
+        return count

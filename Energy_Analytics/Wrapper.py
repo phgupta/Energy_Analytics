@@ -14,8 +14,6 @@ To Do \n
     \t 1. Check if file_name or folder_name is of type unicode -> convert to string.
 2. Clean \n
     \t 1. Clean each column differently.
-3. Preprocess \n
-    \t 1. Remove SettingWithCopying Warning.
 3. Model \n
     \t 1. Add param_dict parameter.
     \t 2. For baseline/projection period, if no start/end date, use first/last row.
@@ -31,11 +29,8 @@ To Do \n
 6. Cleanup \n
     \t 1. Documentation.
     \t 2. Unit Tests.
-    \t 3. Run pylint on all files.
-    \t 4. Docker.
-    \t 5. Ensure results are replicated in different systems.
-7. Optimize \n
-    \t 1. Delete self.imported_data, self.cleaned_data, self.preprocessed_data.
+    \t 3. Docker.
+    \t 4. Ensure results are replicated in different systems.
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>

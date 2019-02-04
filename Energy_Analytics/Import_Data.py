@@ -15,7 +15,7 @@ Authors \n
 @author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
 @author Pranav Gupta <phgupta@ucdavis.edu> \n
 
-Last modified: November 12 2018 \n
+Last modified: Feb 3 2019 \n
 
 """
 
@@ -171,148 +171,137 @@ class Import_Data:
         return data
 
 
-class Import_XBOS(Import_Data):
-
-    """ This class imports data from XBOS """
+class Import_MDAL(Import_Data):
 
     def __init__(self):
-        """ Constructor.
-
-        This class imports the dataclient module & stores the imported data.
-
-        """
 
         import dataclient
-        self.weather_data = pd.DataFrame()
-        self.power_data = pd.DataFrame()
-        self.temp_data = pd.DataFrame()
-        self.hsp_data = pd.DataFrame()
-        self.csp_data = pd.DataFrame()
+        self.m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
 
 
-    def get_weather_power_tstat(self, site, start, end, data_type=['weather', 'power']):
-        """ Get weather and power data.
+    def get_meter(self, site, start, end, point_type='Green_Button_Meter', var="meter", agg='MEAN', window='24h', aligned=True, return_names=True):
+    
+        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
+        resp = self.m.query(request)
+        
+        if return_names:
+            resp = self.replace_uuid_w_names(resp)
+        
+        return resp
 
-        Parameters
-        ----------
-        site        : str
-            Site name.
-        start       : str
-            Start date.
-        end         : str
-            End date.
-        data_type   : str
-            Type of data needed (all, weather, power, temperature, hsp, csp)
 
-        """
+    def get_weather(self, site, start, end, point_type='Weather_Temperature_Sensor', var="weather", agg='MEAN', window='24h', aligned=True, return_names=True):
 
-        m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
+        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
+        resp = self.m.query(request)
 
-        request = {
-            "Variables": {
-                "greenbutton": {
-                    "Definition": """SELECT ?meter ?meter_uuid FROM %s WHERE {
-                        ?meter rdf:type brick:Green_Button_Meter .
-                        ?meter bf:uuid ?meter_uuid
-                    };""" % site,
-                },
-                "weather": {
-                    "Definition": """SELECT ?t ?t_uuid FROM %s WHERE {
-                        ?t rdf:type/rdfs:subClassOf* brick:Weather_Temperature_Sensor .
-                        ?t bf:uuid ?t_uuid
-                    };""" % site,
-                },
-                "tstat_state": {
-                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
-                        ?t rdf:type/rdfs:subClassOf* brick:Thermostat_Status .
-                        ?t bf:uuid ?t_uuid
-                        ?t bf:isPointOf ?tstat .
-                        ?tstat rdf:type brick:Thermostat
-                    };""" % site,
-                },
-                "tstat_hsp": {
-                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
-                        ?t rdf:type/rdfs:subClassOf* brick:Supply_Air_Temperature_Heating_Setpoint .
-                        ?t bf:uuid ?t_uuid .
-                        ?t bf:isPointOf ?tstat .
-                        ?tstat rdf:type brick:Thermostat
-                    };""" % site,
-                },
-                "tstat_csp": {
-                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
-                        ?t rdf:type/rdfs:subClassOf* brick:Supply_Air_Temperature_Cooling_Setpoint .
-                        ?t bf:uuid ?t_uuid .
-                        ?t bf:isPointOf ?tstat .
-                        ?tstat rdf:type brick:Thermostat
-                    };""" % site,
-                },
-                "tstat_temp": {
-                    "Definition": """SELECT ?t ?t_uuid ?tstat FROM %s WHERE {
-                        ?t rdf:type/rdfs:subClassOf* brick:Temperature_Sensor .
-                        ?t bf:uuid ?t_uuid .
-                        ?t bf:isPointOf ?tstat .
-                        ?tstat rdf:type brick:Thermostat
-                    };""" % site,
-                },
-            },
-        }
+        if return_names:
+            resp = self.replace_uuid_w_names(resp)
 
-        # outside air temp
-        request['Composition'] = ['weather']
-        request['Aggregation'] = {'weather': ['MEAN']}
+        return resp
+
+
+    def get_tstat(self, site, start, end,  var="tstat_temp", agg='MEAN', window='24h', aligned=True, return_names=True):
+    
+        point_map = {"tstat_state" : "Thermostat_Status", 
+                     "tstat_hsp" : "Supply_Air_Temperature_Heating_Setpoint", 
+                     "tstat_csp" : "Supply_Air_Temperature_Cooling_Setpoint", 
+                     "tstat_temp": "Temperature_Sensor" } 
+        
+        if isinstance(var,list):
+            point_type = [point_map[point_type] for point_type in var] # list of all the point names using BRICK classes
+        else:
+            point_type = point_map[var] # single value using BRICK classes
+        
+        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
+        resp = self.m.query(request)
+        
+        if return_names:
+            resp = self.replace_uuid_w_names(resp)
+
+        return resp
+
+
+    def compose_MDAL_dic(self, point_type, site, start, end,  var, agg, window, aligned, points=None, return_names=False):
+    
+        request = {} 
+        # add Time Details - single set for one or multiple series
         request['Time'] = {
             'Start': start,
             'End': end,
-            'Window': '15m',
-            'Aligned': True
-        }
-        resp_weather = m.query(request)
-        self.weather_data = resp_weather.df
+            'Window': window,
+            'Aligned': aligned
+                           }
+        # define Variables 
+        request["Variables"] = {}
+        request['Composition'] = []
+        request['Aggregation'] = {}
+        
+        if isinstance(point_type, str): # if point_type is a string -> single type of point requested
+            request["Variables"][var] =  self.compose_BRICK_query(point_type=point_type,site=site) # pass one point type at the time
+            request['Composition'] = [var]
+            request['Aggregation'][var] = [agg]
+            
+        elif isinstance(point_type, list): # loop through all the point_types and create one section of the brick query at the time
 
-        # power
-        request['Composition'] = ['greenbutton']
-        request['Aggregation'] = {'greenbutton': ['MEAN']}
-        resp_power = m.query(request)
-        self.power_data = resp_power.df
+            for idx, point in enumerate(point_type): 
+                request["Variables"][var[idx]] =  self.compose_BRICK_query(point_type=point,site=site) # pass one point type at the time
+                request['Composition'].append(var[idx])
+                
+                if isinstance(agg, str): # if agg is a string -> single type of aggregation requested
+                    request['Aggregation'][var[idx]] = [agg]
+                elif isinstance(agg, list): # if agg is a list -> expected one agg per point
+                    request['Aggregation'][var[idx]] = [agg[idx]]
+        
+        #pprint.pprint(request)
+        return request
 
-        # tstat temperature
-        request['Composition'] = ['tstat_temp', 'tstat_hsp', 'tstat_csp']
-        request['Aggregation'] = {'tstat_temp': ['MEAN']}
-        resp_temp  = m.query(request)
-        self.temp_data = resp_temp
 
-        # tstat heat setpoint
-        request['Composition'] = ['tstat_hsp']
-        request['Aggregation'] = {'tstat_hsp': ['MAX']}
-        resp_hsp = m.query(request)
-        self.hsp_data = resp_hsp
+    def compose_BRICK_query(self, point_type,site):
+    
+        if point_type == "Green_Button_Meter" or point_type == 'Building_Electric_Meter':
+            BRICK_query = {"Definition": """SELECT ?point ?uuid FROM %s WHERE {
+                                                        ?point rdf:type brick:%s .
+                                                        ?point bf:uuid ?uuid                
+                                                                              };""" % (site,point_type)
+                          }
+        if point_type == "Weather_Temperature_Sensor":
+            BRICK_query = {"Definition": """SELECT ?point ?uuid FROM %s WHERE {
+                                                   ?point rdf:type/rdfs:subClassOf* brick:%s .
+                                                   ?point bf:uuid ?uuid
+                                                                            };""" % (site,point_type)
+                          }
+            
+        if point_type in ["Thermostat_Status","Supply_Air_Temperature_Heating_Setpoint",
+                          "Supply_Air_Temperature_Cooling_Setpoint","Temperature_Sensor"]: ##  "tstat_state","tstat_hsp","tstat_csp","tstat_temp": 
+            BRICK_query = {"Definition": """SELECT ?point ?uuid ?equip FROM %s WHERE {
+                                            ?point rdf:type/rdfs:subClassOf* brick:%s .
+                                            ?point bf:uuid ?uuid .
+                                            ?point bf:isPointOf ?equip .
+                                            ?equip rdf:type brick:Thermostat };""" % (site,point_type)
+                          }
+        
+        return BRICK_query
 
-        # tstat cool setpoint
-        request['Composition'] = ['tstat_csp']
-        request['Aggregation'] = {'tstat_csp': ['MAX']}
-        resp_csp = m.query(request)
-        self.csp_data = resp_csp
 
-        mapping = {
-            'weather': resp_weather,
-            'power': resp_power,
-            'temperature': resp_temp, 
-            'hsp': resp_hsp,
-            'csp': resp_csp
-        }
+    def parse_context(self, context):
+    
+        metadata_table = pd.DataFrame(context).T
+        return metadata_table
 
-        first = True
-        for dat in data_type:
-            if first:
-                try:
-                    self.data = mapping[dat].df
-                    first = False
-                except:
-                    raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
-            else:
-                try:
-                    self.data = self.data.join(mapping[dat].df)
-                except:
-                    raise SystemError('Undefined data_type (Make sure all characters are lowercase)')
 
-        return mapping
+    def strip_point_name(self, col):
+        return col.str.split("#",expand=True)[1]
+
+
+    def get_point_name(self, context):
+        
+        metadata_table = self.parse_context(context)
+        return metadata_table.apply(self.strip_point_name, axis=1)
+
+
+    def replace_uuid_w_names(self, resp):
+        
+        col_mapper = self.get_point_name(resp.context)["?point"].to_dict()
+        resp.df.rename(columns = col_mapper, inplace=True)
+        return resp
