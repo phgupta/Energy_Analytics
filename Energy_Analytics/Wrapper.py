@@ -18,18 +18,25 @@ To Do \n
 3. Model \n
     \t 1. Add param_dict parameter.
     \t 2. For baseline/projection period, if no start/end date, use first/last row.
+    \t 3. Save best model.
+    \t 4. Add SVR, ANN.
 4. Wrapper \n
     \t 1. Give user the option to run specific models.
+    \t 2. Change search()
 5. All \n
-    \t 2. Look into adding other plots.
-    \t 3. Write documentation from user's perspective.
-    \t 4. Add plot_data in documentation.
-    \t 5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
+    \t 1. Update sphinx documentation.
+    \t 2. Add new section for user documentation.
+    \t 3. Look into adding other plots.
+    \t 4. Write documentation from user's perspective.
+    \t 5. Add plot_data in documentation.
+    \t 6. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
+    \t 7. Fix imports - "from Energy_Analytics import Import_Data" v/s "from Import_Data import *"
 6. Cleanup \n
-    \t 1. Documentation.
-    \t 2. Unit Tests.
-    \t 3. Docker.
-    \t 4. Ensure results are replicated in different systems.
+    \t 1. Pylint. 
+    \t 2. Documentation.
+    \t 3. Unit Tests.
+    \t 4. Docker.
+    \t 5. Update Energy_Analytics, XBOS_Data_Analytics, XBOS.
 
 Authors \n
 @author Pranav Gupta <phgupta@ucdavis.edu>

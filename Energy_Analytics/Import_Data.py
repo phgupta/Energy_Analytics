@@ -9,6 +9,7 @@ Note
 
 To Do \n
     \t 1. Extract RAW data from MDAL.
+    \t 2. Figure out parameter/return types of functions (do a search on "???")
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com> \n

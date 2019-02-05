@@ -3,8 +3,9 @@
 Last modified: Feb 3 2019
 
 To Do \n
-1. For remove_outlier() - may need a different boundary for each column.
-2. remove_start_NaN() - issues with multi-column df.
+    \t 1. For remove_outlier() - may need a different boundary for each column.
+    \t 2. remove_start_NaN() - issues with multi-column df.
+    \t 3. Figure out parameter/return types of functions (do a search on "???")
 
 Authors \n
 @author Marco Pritoni <marco.pritoni@gmail.com>
