@@ -1,0 +1,290 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>README &mdash; Energy_Analytics 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Energy_Analytics package" href="Energy_Analytics.html" />
+    <link rel="prev" title="Energy_Analytics" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Energy_Analytics
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">README</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Energy_Analytics.html">Energy_Analytics package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Energy_Analytics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>README</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/readme.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="readme">
+<h1>README<a class="headerlink" href="#readme" title="Permalink to this headline">¶</a></h1>
+<p>This is the official documentation for Energy_Analytics - a data analytics tool for building energy meter data.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Anaconda (Python 3)</li>
+<li>Python 3.6</li>
+</ol>
+<p>For the full list of requirements, check environment.yml</p>
+</div>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Install the requirements.</li>
+<li>Clone the repository.</li>
+<li>Run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">environment.yml</span></code> This creates a new python environment called “mortar”.</li>
+<li>Run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">mortar`</span> <span class="pre">(windows)</span> <span class="pre">or</span></code> source activate mortar` (macOS/Linux) to start the environment shell.</li>
+</ol>
+</div>
+<div class="section" id="structure">
+<h2>Structure<a class="headerlink" href="#structure" title="Permalink to this headline">¶</a></h2>
+<p>The primary purpose of the library is to create baselines of building energy meter data and calculate the cost &amp; energy savings post retrofit.
+Energy_Analytics/Energy_Analytics/ contains 9 files,</p>
+<ol class="arabic simple">
+<li><dl class="first docutils">
+<dt>Import_Data.py</dt>
+<dd>This script contains two classes, Import_Data &amp; Import_MDAL to extract data from csv files and MDAL respectively. Note - In order to extract data from MDAL, you need to run the mortar environment.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Clean_Data.py</dt>
+<dd>This script contains functions for cleaning the data, such as outlier detection, removing out-of-bounds data, resampling, interpolation…</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Preprocess_Data.py</dt>
+<dd>This script contains functions for processing the cleaned data, such as adding time features (year, month, day, time-of-day, day-of-week), standardizing &amp; normalizing data…</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Model_Data.py</dt>
+<dd>This script contains functions for modeling the processed data with different Machine Learning algorithms like linear, lasso, ridge regression, random forest… and selecting the one with the best fit.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Plot_Data.py</dt>
+<dd>This script contains functions for creating plots.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Wrapper.py</dt>
+<dd>This script is a wrapper around the above scripts. User should use this to conduct data analysis. ADD EXPLANATION &amp; USE CASES.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Main.ipynb</dt>
+<dd>This is a jupyter notebook that demonstrates how to use the library.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>input.json</dt>
+<dd>This is a sample json file that the user can use to modify the parameters.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>sample.json</dt>
+<dd>This is a sample output of the library.</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>You can find the complete documentation at - <a class="reference external" href="https://phgupta.github.io/Energy_Analytics/">https://phgupta.github.io/Energy_Analytics/</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Energy_Analytics.html" class="btn btn-neutral float-right" title="Energy_Analytics package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Energy_Analytics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Pranav Gupta
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

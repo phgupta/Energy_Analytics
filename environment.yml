@@ -46,9 +46,9 @@ dependencies:
 - markupsafe=1.0=py36h1de35cc_1
 - matplotlib=3.0.0=py36h54f8f79_0
 - mistune=0.8.3=py36h1de35cc_1
-#- mkl=2019.0=118
-#- mkl_fft=1.0.6=py36hb8a8100_0
-#- mkl_random=1.0.1=py36h5d10147_1
+- mkl=2019.0=118
+- mkl_fft=1.0.6=py36hb8a8100_0
+- mkl_random=1.0.1=py36h5d10147_1
 - nb_conda=2.2.1=py36_0
 - nb_conda_kernels=2.1.1=py36_1
 - nbconvert=5.3.1=py36_0
@@ -72,6 +72,7 @@ dependencies:
 - pytz=2018.5=py36_0
 - pyzmq=17.1.2=py36h1de35cc_0
 - readline=7.0=h1de35cc_5
+- seaborn==0.8.1
 - send2trash=1.5.0=py36_0
 - simplegeneric=0.8.1=py36_2
 - sqlite=3.25.2=ha441bb4_0

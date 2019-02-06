@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Energy_Analytics.Plot_Data &mdash; Energy_Analytics 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Energy_Analytics
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html#setup">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html#structure">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Energy_Analytics.html">Energy_Analytics package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Energy_Analytics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>Energy_Analytics.Plot_Data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Energy_Analytics.Plot_Data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; This script contains functions for displaying various plots.</span>
+
+<span class="sd">Last modified: Feb 4 2019</span>
+
+<span class="sd">Authors \n</span>
+<span class="sd">@author Pranav Gupta &lt;phgupta@ucdavis.edu&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="Plot_Data"><a class="viewcode-back" href="../../Energy_Analytics.html#Energy_Analytics.Plot_Data.Plot_Data">[docs]</a><span class="k">class</span> <span class="nc">Plot_Data</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot; This class contains functions for displaying various plots.</span>
+<span class="sd">   </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    count    : int</span>
+<span class="sd">        Keeps track of the number of figures.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Static variable to keep count of number of figures</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">5</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot; Constructor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        figsize : tuple</span>
+<span class="sd">            Size of figure.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="n">figsize</span>
+
+
+<div class="viewcode-block" id="Plot_Data.correlation_plot"><a class="viewcode-back" href="../../Energy_Analytics.html#Energy_Analytics.Plot_Data.Plot_Data.correlation_plot">[docs]</a>    <span class="k">def</span> <span class="nf">correlation_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create heatmap of Pearson&#39;s correlation coefficient.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data    : pd.DataFrame()</span>
+<span class="sd">            Data to display.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.figure</span>
+<span class="sd">            Heatmap.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># CHECK: Add saved filename in result.json</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">Plot_Data</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">corr</span><span class="p">)</span>
+
+        <span class="n">Plot_Data</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="Plot_Data.baseline_projection_plot"><a class="viewcode-back" href="../../Energy_Analytics.html#Energy_Analytics.Plot_Data.Plot_Data.baseline_projection_plot">[docs]</a>    <span class="k">def</span> <span class="nf">baseline_projection_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> 
+                                <span class="n">baseline_period</span><span class="p">,</span> <span class="n">projection_period</span><span class="p">,</span>
+                                <span class="n">model_name</span><span class="p">,</span> <span class="n">adj_r2</span><span class="p">,</span>
+                                <span class="n">data</span><span class="p">,</span> <span class="n">input_col</span><span class="p">,</span> <span class="n">output_col</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span>
+                                <span class="n">site</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create baseline and projection plots.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        y_true              : pd.Series()</span>
+<span class="sd">            Actual y values.</span>
+<span class="sd">        y_pred              : np.ndarray</span>
+<span class="sd">            Predicted y values.</span>
+<span class="sd">        baseline_period     : list(str)</span>
+<span class="sd">            Baseline period.</span>
+<span class="sd">        projection_period   : list(str)</span>
+<span class="sd">            Projection periods.</span>
+<span class="sd">        model_name          : str</span>
+<span class="sd">            Optimal model&#39;s name.</span>
+<span class="sd">        adj_r2              : float</span>
+<span class="sd">            Adjusted R2 score of optimal model.</span>
+<span class="sd">        data                : pd.Dataframe()</span>
+<span class="sd">            Data containing real values.</span>
+<span class="sd">        input_col           : list(str)</span>
+<span class="sd">            Predictor column(s).</span>
+<span class="sd">        output_col          : str</span>
+<span class="sd">            Target column.</span>
+<span class="sd">        model               : func</span>
+<span class="sd">            Optimal model.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.figure</span>
+<span class="sd">            Baseline plot</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Baseline and projection plots</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">Plot_Data</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+        
+        <span class="c1"># Number of plots to display</span>
+        <span class="k">if</span> <span class="n">projection_period</span><span class="p">:</span>
+            <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">baseline_period</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">projection_period</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">baseline_period</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        
+        <span class="c1"># Plot 1 - Baseline</span>
+        <span class="n">base_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">base_df</span><span class="p">[</span><span class="s1">&#39;y_true&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_true</span>
+        <span class="n">base_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_pred</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">base_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Baseline Period (</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">). </span><span class="se">\n</span><span class="s1">Best Model: </span><span class="si">{}</span><span class="s1">. </span><span class="se">\n</span><span class="s1">Baseline Adj R2: </span><span class="si">{}</span><span class="s1">. </span><span class="se">\n</span><span class="s1">Site: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">baseline_period</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">baseline_period</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+                                                                                                            <span class="n">model_name</span><span class="p">,</span> <span class="n">adj_r2</span><span class="p">,</span> <span class="n">site</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">projection_period</span><span class="p">:</span>
+            <span class="c1"># Display projection plots</span>
+            <span class="n">num_plot</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">projection_period</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_plot</span><span class="p">)</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">projection_period</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">projection_period</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">project_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+                
+                <span class="k">try</span><span class="p">:</span>    
+                    <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_true&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="n">output_col</span><span class="p">]</span>
+                    <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="n">input_col</span><span class="p">])</span>
+
+                    <span class="c1"># Set all negative values to zero since energy &gt; 0</span>
+                    <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">][</span><span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="n">project_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">figsize</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Projection Period (</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">projection_period</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
+                                                                                                        <span class="n">projection_period</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">num_plot</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+                    <span class="n">Plot_Data</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_true&#39;</span><span class="p">],</span> <span class="n">project_df</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;If projecting into the future, please specify project_ind_col that has data available </span><span class="se">\</span>
+<span class="s2">                                        in the future time period requested.&quot;</span><span class="p">)</span>
+           
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">Plot_Data</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Pranav Gupta
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
