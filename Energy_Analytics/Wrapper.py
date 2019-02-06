@@ -31,7 +31,7 @@ To Do
     3. Look into adding other plots.
     4. Add plot_data in documentation.
     5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
-    6. Fix imports - "from Energy_Analytics import Import_Data" v/s "from Import_Data import *"
+    6. Fix imports.
 6. Cleanup
     1. Pylint.
     2. Documentation.
@@ -53,16 +53,12 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from datetime import date
-# from Energy_Analytics import Import_Data
-# from Energy_Analytics import Clean_Data
-# from Energy_Analytics import Preprocess_Data
-# from Energy_Analytics import Model_Data
-# from Energy_Analytics import Plot_Data
-from Import_Data import *
-from Clean_Data import *
-from Preprocess_Data import *
-from Model_Data import *
-from Plot_Data import *
+
+from Energy_Analytics.Import_Data import Import_Data
+from Energy_Analytics.Clean_Data import Clean_Data
+from Energy_Analytics.Preprocess_Data import Preprocess_Data
+from Energy_Analytics.Model_Data import Model_Data
+from Energy_Analytics.Plot_Data import Plot_Data
 
 
 class Wrapper:

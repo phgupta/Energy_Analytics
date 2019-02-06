@@ -2,8 +2,9 @@ import unittest
 import pandas as pd
 
 import sys
-sys.path.append("..")
-from Energy_Analytics import Wrapper
+sys.path.append('..')
+from Energy_Analytics.Wrapper import Wrapper
+
 
 class TestImport(unittest.TestCase):
 

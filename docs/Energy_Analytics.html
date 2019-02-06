@@ -98,7 +98,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#id4">Authors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#energy-analytics-wrapper-module">Energy_Analytics.Wrapper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Energy_Analytics.Wrapper">Energy_Analytics.Wrapper module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">To Do</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Authors</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1389,8 +1393,367 @@ e.g. df[col^2] = pow(df[col], degree) where degree=2.</p>
 
 </div>
 </div>
-<div class="section" id="energy-analytics-wrapper-module">
-<h2>Energy_Analytics.Wrapper module<a class="headerlink" href="#energy-analytics-wrapper-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-Energy_Analytics.Wrapper">
+<span id="energy-analytics-wrapper-module"></span><h2>Energy_Analytics.Wrapper module<a class="headerlink" href="#module-Energy_Analytics.Wrapper" title="Permalink to this headline">¶</a></h2>
+<p>This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Last modified: Feb 4 2019</p>
+<ol class="last arabic simple">
+<li>For MAPE, all rows with 0 are dropped in baseline_out.</li>
+<li>df.loc[(slice(None, None, None)), …] is equivalent to “df.loc[:,…]”</li>
+<li>df.resample(freq=’h’).mean() drops all non-float/non-int columns</li>
+<li>os._exit(1) exits the program without calling cleanup handlers.</li>
+</ol>
+</div>
+<div class="section" id="id5">
+<h3>To Do<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><dl class="first docutils">
+<dt>Import</dt>
+<dd><ol class="first last arabic">
+<li>Check if file_name or folder_name is of type unicode -&gt; convert to string.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Clean</dt>
+<dd><ol class="first last arabic">
+<li>Clean each column differently.</li>
+<li>Test all functions from TS_Util.py</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Model</dt>
+<dd><ol class="first last arabic">
+<li>Add param_dict parameter.</li>
+<li>For baseline/projection period, if no start/end date, use first/last row.</li>
+<li>Save best model.</li>
+<li>Add SVR, ANN.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Wrapper</dt>
+<dd><ol class="first last arabic">
+<li>Give user the option to run specific models.</li>
+<li>Change search()</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>All</dt>
+<dd><ol class="first last arabic">
+<li>Update sphinx documentation.</li>
+<li>Add new section for user documentation.</li>
+<li>Look into adding other plots.</li>
+<li>Add plot_data in documentation.</li>
+<li>Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)</li>
+<li>Fix imports.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Cleanup</dt>
+<dd><ol class="first last arabic">
+<li>Pylint.</li>
+<li>Documentation.</li>
+<li>Unit Tests.</li>
+<li>Docker.</li>
+<li>Update Energy_Analytics, XBOS_Data_Analytics, XBOS.</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="id6">
+<h3>Authors<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Pranav Gupta &lt;<a class="reference external" href="mailto:phgupta&#37;&#52;&#48;ucdavis&#46;edu">phgupta<span>&#64;</span>ucdavis<span>&#46;</span>edu</a>&gt;</li>
+</ul>
+<dl class="class">
+<dt id="Energy_Analytics.Wrapper.Wrapper">
+<em class="property">class </em><code class="descclassname">Energy_Analytics.Wrapper.</code><code class="descname">Wrapper</code><span class="sig-paren">(</span><em>results_folder_name='results'</em>, <em>site_name='Undefined'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.</p>
+<dl class="attribute">
+<dt id="Energy_Analytics.Wrapper.Wrapper.figure_count">
+<code class="descname">figure_count</code><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.figure_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keeps track of the number of iterations when searching for optimal model. Primarily used in search function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.add_comments">
+<code class="descname">add_comments</code><span class="sig-paren">(</span><em>dic</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.add_comments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.add_comments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add comments to results json file.</p>
+<dl class="docutils">
+<dt>dic <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>Dictionary of key,value pairs added to result</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.clean_data">
+<code class="descname">clean_data</code><span class="sig-paren">(</span><em>data</em>, <em>rename_col=None</em>, <em>drop_col=None</em>, <em>resample=True</em>, <em>freq='h'</em>, <em>resampler='mean'</em>, <em>interpolate=True</em>, <em>limit=1</em>, <em>method='linear'</em>, <em>remove_na=True</em>, <em>remove_na_how='any'</em>, <em>remove_outliers=True</em>, <em>sd_val=3</em>, <em>remove_out_of_bounds=True</em>, <em>low_bound=0</em>, <em>high_bound=inf</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.clean_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.clean_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleans dataframe according to user specifications and stores result in self.cleaned_data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to be cleaned.</li>
+<li><strong>rename_col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of new column names.</li>
+<li><strong>drop_col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Columns to be dropped.</li>
+<li><strong>resample</strong> (<em>bool</em>) – Indicates whether to resample data or not.</li>
+<li><strong>freq</strong> (<em>str</em>) – Resampling frequency i.e. d, h, 15T…</li>
+<li><strong>resampler</strong> (<em>str</em>) – Resampling type i.e. mean, max.</li>
+<li><strong>interpolate</strong> (<em>bool</em>) – Indicates whether to interpolate data or not.</li>
+<li><strong>limit</strong> (<em>int</em>) – Interpolation limit.</li>
+<li><strong>method</strong> (<em>str</em>) – Interpolation method.</li>
+<li><strong>remove_na</strong> (<em>bool</em>) – Indicates whether to remove NAs or not.</li>
+<li><strong>remove_na_how</strong> (<em>str</em>) – Specificies how to remove NA i.e. all, any…</li>
+<li><strong>remove_outliers</strong> (<em>bool</em>) – Indicates whether to remove outliers or not.</li>
+<li><strong>sd_val</strong> (<em>int</em>) – Standard Deviation Value (specifices how many SDs away is a point considered an outlier)</li>
+<li><strong>remove_out_of_bounds</strong> (<em>bool</em>) – Indicates whether to remove out of bounds datapoints or not.</li>
+<li><strong>low_bound</strong> (<em>int</em>) – Low bound of the data.</li>
+<li><strong>high_bound</strong> (<em>int</em>) – High bound of the data.</li>
+<li><strong>save_file</strong> (<em>bool</em>) – Specifies whether to save file or not. Defaults to True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing cleaned data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.get_global_count">
+<code class="descname">get_global_count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.get_global_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.get_global_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return global count (used for naming of .json and .png files)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Global count</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Energy_Analytics.Wrapper.Wrapper.global_count">
+<code class="descname">global_count</code><em class="property"> = 1</em><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.global_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.import_data">
+<code class="descname">import_data</code><span class="sig-paren">(</span><em>file_name='*'</em>, <em>folder_name='.'</em>, <em>head_row=0</em>, <em>index_col=0</em>, <em>convert_col=True</em>, <em>concat_files=False</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.import_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.import_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports csv file(s) and stores the result in self.imported_data.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
+<li>If folder exists out of current directory, folder_name should contain correct regex</li>
+<li>Assuming there’s no file called “*.csv”</li>
+</ol>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_name</strong> (<em>str</em>) – CSV file to be imported. Defaults to ‘*’ - all csv files in the folder.</li>
+<li><strong>folder_name</strong> (<em>str</em>) – Folder where file resides. Defaults to ‘.’ - current directory.</li>
+<li><strong>head_row</strong> (<em>int</em>) – Skips all rows from 0 to head_row-1</li>
+<li><strong>index_col</strong> (<em>int</em>) – Skips all columns from 0 to index_col-1</li>
+<li><strong>convert_col</strong> (<em>bool</em>) – Convert columns to numeric type</li>
+<li><strong>concat_files</strong> (<em>bool</em>) – Appends data from files to result dataframe</li>
+<li><strong>save_file</strong> (<em>bool</em>) – Specifies whether to save file or not. Defaults to True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing imported data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.model">
+<code class="descname">model</code><span class="sig-paren">(</span><em>data, ind_col=None, dep_col=None, project_ind_col=None, baseline_period=[None, None], projection_period=None, exclude_time_period=None, alphas=array([1.00000000e-04, 1.48735211e-04, 2.21221629e-04, 3.29034456e-04,        4.89390092e-04, 7.27895384e-04, 1.08263673e-03, 1.61026203e-03,        2.39502662e-03, 3.56224789e-03, 5.29831691e-03, 7.88046282e-03,        1.17210230e-02, 1.74332882e-02, 2.59294380e-02, 3.85662042e-02,        5.73615251e-02, 8.53167852e-02, 1.26896100e-01, 1.88739182e-01,        2.80721620e-01, 4.17531894e-01, 6.21016942e-01, 9.23670857e-01,        1.37382380e+00, 2.04335972e+00, 3.03919538e+00, 4.52035366e+00,        6.72335754e+00, 1.00000000e+01]), cv=3, plot=True, figsize=None, custom_model_func=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split data into baseline and projection periods, run models on them and display metrics &amp; plots.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to model.</li>
+<li><strong>ind_col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Independent column(s) of dataframe. Defaults to all columns except the last.</li>
+<li><strong>dep_col</strong> (<em>str</em>) – Dependent column of dataframe.</li>
+<li><strong>project_ind_col</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Independent column(s) to use for projection. If none, use ind_col.</li>
+<li><strong>baseline_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to split the data into baseline periods. It needs to have a start and an end date.</li>
+<li><strong>projection_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to split the data into projection periods. It needs to have a start and an end date.</li>
+<li><strong>exclude_time_period</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of time periods to exclude for modeling.</li>
+<li><strong>alphas</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – List of alphas to run regression on.</li>
+<li><strong>cv</strong> (<em>int</em>) – Number of folds for cross-validation.</li>
+<li><strong>plot</strong> (<em>bool</em>) – Specifies whether to save plots or not.</li>
+<li><strong>figsize</strong> (<em>tuple</em>) – Size of the plots.</li>
+<li><strong>custom_model_func</strong> (<em>function</em>) – Model with specific hyper-parameters provided by user.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Metrics of the optimal/best model.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.preprocess_data">
+<code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>data</em>, <em>hdh_cpoint=65</em>, <em>cdh_cpoint=65</em>, <em>col_hdh_cdh=None</em>, <em>col_degree=None</em>, <em>degree=None</em>, <em>standardize=False</em>, <em>normalize=False</em>, <em>year=False</em>, <em>month=False</em>, <em>week=False</em>, <em>tod=False</em>, <em>dow=False</em>, <em>save_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.preprocess_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.preprocess_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preprocesses dataframe according to user specifications and stores result in self.preprocessed_data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Dataframe to be preprocessed.</li>
+<li><strong>hdh_cpoint</strong> (<em>int</em>) – Heating degree hours. Defaults to 65.</li>
+<li><strong>cdh_cpoint</strong> (<em>int</em>) – Cooling degree hours. Defaults to 65.</li>
+<li><strong>col_hdh_cdh</strong> (<em>str</em>) – Column name which contains the outdoor air temperature.</li>
+<li><strong>col_degree</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Column to exponentiate.</li>
+<li><strong>degree</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Exponentiation degree.</li>
+<li><strong>standardize</strong> (<em>bool</em>) – Standardize data.</li>
+<li><strong>normalize</strong> (<em>bool</em>) – Normalize data.</li>
+<li><strong>year</strong> (<em>bool</em>) – Year.</li>
+<li><strong>month</strong> (<em>bool</em>) – Month.</li>
+<li><strong>week</strong> (<em>bool</em>) – Week.</li>
+<li><strong>tod</strong> (<em>bool</em>) – Time of Day.</li>
+<li><strong>dow</strong> (<em>bool</em>) – Day of Week.</li>
+<li><strong>save_file</strong> (<em>bool</em>) – Specifies whether to save file or not. Defaults to True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataframe containing preprocessed data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pd.DataFrame()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.read_json">
+<code class="descname">read_json</code><span class="sig-paren">(</span><em>file_name=None</em>, <em>input_json=None</em>, <em>imported_data=Empty DataFrame Columns: [] Index: []</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.read_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.read_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read input json file.</p>
+<p class="rubric">Notes</p>
+<p>The input json file should include ALL parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_name</strong> (<em>str</em>) – Filename to be read.</li>
+<li><strong>input_json</strong> (<em>dict</em>) – JSON object to be read.</li>
+<li><strong>imported_data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Pandas Dataframe containing data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.search">
+<code class="descname">search</code><span class="sig-paren">(</span><em>file_name</em>, <em>imported_data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run models on different data configurations.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The input json file should include ALL parameters.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_name</strong> (<em>str</em>) – Optional json file to read parameters.</li>
+<li><strong>imported_data</strong> (<em>pd.DataFrame</em><em>(</em><em>)</em>) – Pandas Dataframe containing data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.site_analysis">
+<code class="descname">site_analysis</code><span class="sig-paren">(</span><em>folder_name</em>, <em>site_install_mapping</em>, <em>end_date</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.site_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.site_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summarize site data into a single table.</p>
+<dl class="docutils">
+<dt>folder_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Folder where all site data resides.</dd>
+<dt>site_event_mapping <span class="classifier-delimiter">:</span> <span class="classifier">dic</span></dt>
+<dd>Dictionary of site name to date of installation.</dd>
+<dt>end_date <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>End date of data collected.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.uncertainity_equation">
+<code class="descname">uncertainity_equation</code><span class="sig-paren">(</span><em>model_data_obj</em>, <em>E_measured</em>, <em>E_predicted</em>, <em>confidence_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.uncertainity_equation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.uncertainity_equation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>model_data_obj <span class="classifier-delimiter">:</span> <span class="classifier">Model_Data()</span></dt>
+<dd>An instance of Model_Data() which is a user defined class.</dd>
+<dt>E_measured <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series()</span></dt>
+<dd>Actual values of energy in the post-retrofit period.</dd>
+<dt>E_predicted <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series()</span></dt>
+<dd>Predicted values of energy in the post-retrofit period.</dd>
+<dt>confidence_level <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Confidence level of uncertainity in decimal, i.e. 90% = 0.9</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Energy_Analytics.Wrapper.Wrapper.write_json">
+<code class="descname">write_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Energy_Analytics/Wrapper.html#Wrapper.write_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Energy_Analytics.Wrapper.Wrapper.write_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump data into json file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 </div>
 
