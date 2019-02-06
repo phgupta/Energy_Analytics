@@ -1,28 +1,17 @@
 #!/usr/bin/env bash
 
 # Build docs
-cd docs
+cd docs/sphinx/
+mkdir _static # Gives error if _static is not present
 make clean
 make html
+
+# Delete previous html files in docs/
 cd ..
+ls -a | grep -v "sphinx" ".nojekyll" | xargs rm -rf
 
-# Commit and push
-git add -A
-git commit -m "building and publishing docs"
-git push origin master
+# Copy updated html files to docs/
+cp -r sphinx/build/html/* .
 
-# Switch branch and pull data
-git checkout gh-pages
-rm -rf *
-touch .nojekyll
-git checkout master docs/_build/html
-mv ./docs/_build/html/* ./
-rm -rf ./docs
-
-# Commit and push
-git add -A
-git commit -m "publishing updated docs..."
-git push origin gh-pages
-
-# Switch back to master
-git checkout master
+# Check if docs is updated
+# open index.html
