@@ -1,45 +1,48 @@
 """ This script is a wrapper class around all the other modules - importing, cleaning, preprocessing and modeling the data.
 
-Last modified: Feb 4 2019
-
 Note
 ----
+Last modified: Feb 4 2019
+
 1. For MAPE, all rows with 0 are dropped in baseline_out.
 2. df.loc[(slice(None, None, None)), ...] is equivalent to "df.loc[:,...]"
 3. df.resample(freq='h').mean() drops all non-float/non-int columns
 4. os._exit(1) exits the program without calling cleanup handlers.
 
-To Do \n
-1. Import \n
-    \t 1. Check if file_name or folder_name is of type unicode -> convert to string.
-2. Clean \n
-    \t 1. Clean each column differently.
-    \t 2. Test all functions from TS_Util.py
-3. Model \n
-    \t 1. Add param_dict parameter.
-    \t 2. For baseline/projection period, if no start/end date, use first/last row.
-    \t 3. Save best model.
-    \t 4. Add SVR, ANN.
-4. Wrapper \n
-    \t 1. Give user the option to run specific models.
-    \t 2. Change search()
-5. All \n
-    \t 1. Update sphinx documentation.
-    \t 2. Add new section for user documentation.
-    \t 3. Look into adding other plots.
-    \t 4. Write documentation from user's perspective.
-    \t 5. Add plot_data in documentation.
-    \t 6. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
-    \t 7. Fix imports - "from Energy_Analytics import Import_Data" v/s "from Import_Data import *"
-6. Cleanup \n
-    \t 1. Pylint. 
-    \t 2. Documentation.
-    \t 3. Unit Tests.
-    \t 4. Docker.
-    \t 5. Update Energy_Analytics, XBOS_Data_Analytics, XBOS.
 
-Authors \n
-@author Pranav Gupta <phgupta@ucdavis.edu>
+To Do
+-----
+1. Import
+    1. Check if file_name or folder_name is of type unicode -> convert to string.
+2. Clean
+    1. Clean each column differently.
+    2. Test all functions from TS_Util.py
+3. Model
+    1. Add param_dict parameter.
+    2. For baseline/projection period, if no start/end date, use first/last row.
+    3. Save best model.
+    4. Add SVR, ANN.
+4. Wrapper
+    1. Give user the option to run specific models.
+    2. Change search()
+5. All
+    1. Update sphinx documentation.
+    2. Add new section for user documentation.
+    3. Look into adding other plots.
+    4. Add plot_data in documentation.
+    5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
+    6. Fix imports - "from Energy_Analytics import Import_Data" v/s "from Import_Data import *"
+6. Cleanup
+    1. Pylint.
+    2. Documentation.
+    3. Unit Tests.
+    4. Docker.
+    5. Update Energy_Analytics, XBOS_Data_Analytics, XBOS.
+
+
+Authors
+-------
+- Pranav Gupta <phgupta@ucdavis.edu>
 
 """
 

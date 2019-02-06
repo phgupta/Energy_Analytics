@@ -1,9 +1,13 @@
 """ This script splits the data into baseline and projection periods, runs ML models on them and displays the metrics & plots.
 
+Note
+----
 Last modified: Feb 4 2019
 
-Authors \n
-@author Pranav Gupta <phgupta@ucdavis.edu>
+
+Authors
+-------
+- Pranav Gupta <phgupta@ucdavis.edu>
 
 """
 

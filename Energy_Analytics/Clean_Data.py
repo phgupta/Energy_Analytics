@@ -1,15 +1,21 @@
 """ This script cleans a dataframe according to user specifications.
 
-Last modified: Feb 3 2019
+Note
+----
+Last modified: Feb 4 2019
 
-To Do \n
-    \t 1. For remove_outlier() - may need a different boundary for each column.
-    \t 2. remove_start_NaN() - issues with multi-column df.
-    \t 3. Figure out parameter/return types of functions (do a search on "???")
 
-Authors \n
-@author Marco Pritoni <marco.pritoni@gmail.com>
-@author Pranav Gupta <phgupta@ucdavis.edu>
+To Do
+-----
+    1. For remove_outlier() - may need a different boundary for each column.
+    2. remove_start_NaN() - issues with multi-column df.
+    3. Figure out parameter/return types of functions (do a search on "???")
+
+
+Authors
+-------
+- Marco Pritoni <marco.pritoni@gmail.com>
+- Pranav Gupta <phgupta@ucdavis.edu>
 
 """
 

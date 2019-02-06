@@ -2,21 +2,25 @@
 
 Note
 ----
-1. CSV - If only folder is specified and no filename, all csv's will be read in sorted order by name. \n
-2. CSV - Doesn't handle cases when user provides \n
-    \t 1. file_name of type str and folder_name of type list(str) \n
-    \t 2. file_name and folder_name both of type list(str)
+Last modified: Feb 4 2019
 
-To Do \n
-    \t 1. Extract RAW data from MDAL.
-    \t 2. Figure out parameter/return types of functions (do a search on "???")
+1. CSV - If only folder is specified and no filename, all csv's will be read in sorted order by name.
+2. CSV - Doesn't handle cases when user provides
+    - file_name of type str and folder_name of type list(str)
+    - file_name and folder_name both of type list(str)
 
-Authors \n
-@author Marco Pritoni <marco.pritoni@gmail.com> \n
-@author Jacob Rodriguez  <jbrodriguez@ucdavis.edu> \n
-@author Pranav Gupta <phgupta@ucdavis.edu> \n
 
-Last modified: Feb 4 2019 \n
+To Do
+-----
+    1. Extract RAW data from MDAL.
+    2. Figure out parameter/return types of functions (do a search on "???")
+
+
+Authors
+-------
+- Marco Pritoni <marco.pritoni@gmail.com>
+- Jacob Rodriguez  <jbrodriguez@ucdavis.edu>
+- Pranav Gupta <phgupta@ucdavis.edu>
 
 """
 

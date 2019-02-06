@@ -1,10 +1,14 @@
 """ This script preprocesses a dataframe according to user specifications.
 
+Note
+----
 Last modified: Feb 4 2019
 
-Authors \n
-@author Marco Pritoni <marco.pritoni@gmail.com>
-@author Pranav Gupta <phgupta@ucdavis.edu>
+
+Authors
+-------
+- Marco Pritoni <marco.pritoni@gmail.com>
+- Pranav Gupta <phgupta@ucdavis.edu>
 
 """
 

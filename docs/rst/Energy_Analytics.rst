@@ -1,6 +1,9 @@
 Energy\_Analytics package
 =========================
 
+Submodules
+----------
+
 Energy\_Analytics.Clean\_Data module
 ------------------------------------
 
@@ -49,3 +52,11 @@ Energy\_Analytics.Wrapper module
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: Energy_Analytics
+    :members:
+    :undoc-members:
+    :show-inheritance:
