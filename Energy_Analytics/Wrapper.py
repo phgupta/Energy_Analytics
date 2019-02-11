@@ -26,12 +26,9 @@ To Do
     1. Give user the option to run specific models.
     2. Change search()
 5. All
-    1. Update sphinx documentation.
-    2. Add new section for user documentation.
-    3. Look into adding other plots.
-    4. Add plot_data in documentation.
-    5. Use environment markers to update requirements.txt (matplotlib 3.0.0 vs 2.2.3)
-    6. Fix imports.
+    1. Look into adding other plots.
+	2. Check if Python2.7 works.
+	3. Change conf.py's absolute path.
 6. Cleanup
     1. Pylint.
     2. Documentation.

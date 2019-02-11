@@ -277,6 +277,9 @@ class Clean_Data:
         self.cleaned_data = data
 
 
+    ############# Marco's code #############
+
+
     def _set_TS_index(self, data):
         """ Convert index to datetime and all other columns to numeric
 
@@ -941,3 +944,241 @@ class Clean_Data:
             return count/data.shape[0]*1.0*100
 
         return count
+
+
+    ############# Callie's code #############
+
+
+    def find_uuid(self, obj, column_name):
+        """ Find uuid.
+
+        Parameters
+        ----------
+        obj             : ???
+            ???
+        column_name     : str
+            ???
+
+        Returns
+        -------
+        ???
+            ???
+
+        """
+
+        keys = obj.context.keys()
+
+        for i in keys:
+            if column_name in obj.context[i]['?point']:
+                uuid = i
+
+        return i
+
+
+    def identify_missing(self, df, check_start=True):
+        """ Identify missing data.
+
+        Parameters
+        ----------
+        df              : pd.DataFrame()
+            Dataframe to check for missing data.
+        check_start     : bool
+            ???
+
+        Returns
+        -------
+        pd.DataFrame(), str
+            ???
+
+        """
+
+        # Check start changes the first value of df to 1, when the data stream is initially missing
+        # This allows the diff function to acknowledge the missing data
+        data_missing = df.isnull() * 1
+        col_name = str(data_missing.columns[0])
+
+        # When there is no data stream at the beginning we change it to 1
+        if check_start & data_missing[col_name][0] == 1:
+            data_missing[col_name][0] = 0
+
+        return data_missing, col_name
+
+
+    def diff_boolean(self, df, column_name=None, uuid=None, duration=True, min_event_filter='3 hours'):
+        """ ???
+
+        Parameters
+        ----------
+        df                  : pd.DataFrame()
+            Dataframe to check for missing data.
+        column_name         : str
+            ???
+        uuid                : ???
+            ???
+        duration            : bool
+            ???
+        min_event_filter    : str
+            ???
+
+        Returns
+        -------
+        pd.DataFrame()
+            ???
+
+        """
+
+        if uuid == None:
+            uuid = 'End'
+
+        data_gaps = df[(df.diff() == 1) | (df.diff() == -1)].dropna()
+        data_gaps["duration"] = abs(data_gaps.index.to_series().diff(periods=-1))
+
+        data_gaps[uuid] = data_gaps.index + (data_gaps["duration"])
+
+        data_gaps = data_gaps[data_gaps["duration"] > pd.Timedelta(min_event_filter)]
+        data_gaps = data_gaps[data_gaps[column_name] == 1]
+        data_gaps.pop(column_name)
+        if not duration:
+            data_gaps.pop('duration')
+        data_gaps.index = data_gaps.index.strftime(date_format="%Y-%m-%d %H:%M:%S")
+        data_gaps[uuid] = data_gaps[uuid].dt.strftime(date_format="%Y-%m-%d %H:%M:%S")
+
+        return data_gaps
+
+
+    def analyze_quality_table(self, obj, clean=False, low_bound=None, high_bound=None):
+        """ ???
+
+        To Do
+        -----
+        Need to make it specific for varying meters and label it for each type,
+        Either separate functions or make the function broader
+
+        Parameters
+        ----------
+        obj             : ???
+            ???
+        clean           : bool
+            ???
+        low_bound       : float
+            ???
+        high_bound      : float
+            ???
+
+        Returns
+        -------
+        pd.DataFrame()
+          ???
+
+        """
+
+        data = obj.df
+        N_rows = 3
+        N_cols = data.shape[1]
+        d = pd.DataFrame(np.zeros((N_rows, N_cols)),
+                         index=['% Missing', 'AVG Length Missing', 'Std dev. Missing'],
+                         columns=[data.columns])
+
+        if clean:
+            data = data.where((data > low_bound) & (data < high_bound))
+
+        for i in range(N_cols):
+
+            data_per_meter = data.iloc[:, [i]]
+
+            data_missing, meter = self.identify_missing(data_per_meter)
+            percentage = data_missing.sum() / (data.shape[0]) * 100
+            data_gaps = self.diff_boolean(data_missing, column_name=meter)
+
+            missing_mean = data_gaps.mean()
+            std_dev = data_gaps.std()
+            d.loc["% Missing", meter] = percentage[meter]
+            d.loc["AVG Length Missing", meter] = missing_mean['Duration']
+            d.loc["Std dev. Missing", meter] = std_dev['Duration']
+
+        return d
+
+
+    def analyze_quality_graph(self, obj):
+        """ ???
+
+        To Do
+        -----
+        Need to make it specific for varying meters and label it for each type,
+        Either separate functions or make the function broader
+
+        Parameters
+        ----------
+        obj             : ???
+            ???
+
+        """
+
+        data = obj.df
+
+        for i in range(data.shape[1]):
+
+            data_per_meter = data.iloc[:, [i]]  # need to make this work or change the structure
+
+            data_missing, meter = self.identify_missing(data_per_meter)
+            percentage = data_missing.sum() / (data.shape[0]) * 100
+
+            print('Percentage Missing of ' + meter + ' data: ' + str(int(percentage)) + '%')
+            data_missing.plot(figsize=(18, 5), x_compat=True, title=meter + " Missing Data over the Time interval")
+            data_gaps = self.diff_boolean(data_missing, column_name=meter)
+
+            data_missing['Hour'] = data_missing.index.hour
+            ymax = int(data_missing.groupby('Hour').sum().max() + 10)
+            data_missing.groupby('Hour').sum().plot(ylim=(0, ymax), figsize=(18, 5),
+                                                    title=meter + " Time of Day of Missing Data")
+
+            print(data_gaps)
+
+
+    def event_duration(self, obj, dictionary, clean=False, low_bound=None, high_bound=None):
+        """ ???
+
+        To Do
+        -----
+        Need to make it specific for varying meters and label it for each type,
+        Either separate functions or make the function broader
+
+        Parameters
+        ----------
+        obj             : ???
+         ???
+        dictionary      : dict
+            ???
+        clean           : bool
+         ???
+        low_bound       : float
+         ???
+        high_bound      : float
+         ???
+
+        Returns
+        -------
+        ???
+            ???
+
+        """
+
+        data = obj.df
+        N_cols = data.shape[1]
+
+        if clean:
+            data = data.where((data >= low_bound) & (data < high_bound))
+
+        for i in range(N_cols):
+
+            data_per_meter = data.iloc[:, [i]]
+
+            data_missing, meter = self.identify_missing(data_per_meter)
+            uuid = self.find_uuid(obj, column_name=meter)
+            data_gaps = self.diff_boolean(data_missing, meter, uuid)
+
+            dictionary_solo = data_gaps.to_dict()
+            dictionary[uuid] = dictionary_solo[uuid]
+            # dictionary[uuid]=data_gaps # uncomment to get a dictionary of dfs
+
+        return data_gaps
