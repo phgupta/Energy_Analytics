@@ -8,6 +8,7 @@ Last modified: Feb 4 2019
 2. df.loc[(slice(None, None, None)), ...] is equivalent to "df.loc[:,...]"
 3. df.resample(freq='h').mean() drops all non-float/non-int columns
 4. os._exit(1) exits the program without calling cleanup handlers.
+5. Add sys.path.append("..") in Jupyter notebooks for all the imports to work.
 
 
 To Do
@@ -27,8 +28,8 @@ To Do
     2. Change search()
 5. All
     1. Look into adding other plots.
-	2. Check if Python2.7 works.
-	3. Change conf.py's absolute path.
+    2. Check if Python2.7 works.
+    3. Change conf.py's absolute path.
 6. Cleanup
     1. Pylint.
     2. Documentation.
@@ -51,7 +52,7 @@ import pandas as pd
 from scipy import stats
 from datetime import date
 
-from Energy_Analytics.Import_Data import Import_Data
+from Energy_Analytics.Import_Data import Import_Data, Import_MDAL
 from Energy_Analytics.Clean_Data import Clean_Data
 from Energy_Analytics.Preprocess_Data import Preprocess_Data
 from Energy_Analytics.Model_Data import Model_Data

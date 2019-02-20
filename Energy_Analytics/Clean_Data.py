@@ -955,14 +955,14 @@ class Clean_Data:
         Parameters
         ----------
         obj             : ???
-            ???
+            the object returned by the MDAL Query
         column_name     : str
-            ???
+            input point returned from MDAL Query
 
         Returns
         -------
-        ???
-            ???
+        str 
+            the uuid that correlates with the data 
 
         """
 
@@ -983,12 +983,14 @@ class Clean_Data:
         df              : pd.DataFrame()
             Dataframe to check for missing data.
         check_start     : bool
-            ???
+            turns 0 to 1 for the first observation, to display the start of the data
+        as the beginning of the missing data event
 
         Returns
         -------
         pd.DataFrame(), str
-            ???
+            dataframe where 1 indicates missing data and 0 indicates reported data,
+        returns the column name generated from the MDAL Query
 
         """
 
@@ -1005,25 +1007,27 @@ class Clean_Data:
 
 
     def diff_boolean(self, df, column_name=None, uuid=None, duration=True, min_event_filter='3 hours'):
-        """ ???
+        """ takes the dataframe of missing values, and returns a dataframe that indicates the 
+        length of each event where data was continuously missing
 
         Parameters
         ----------
         df                  : pd.DataFrame()
-            Dataframe to check for missing data.
+            Dataframe to check for missing data (must be in boolean format where 1 indicates missing data. 
         column_name         : str
-            ???
-        uuid                : ???
-            ???
+            the original column name produced by MDAL Query
+        uuid                : str
+            the uuid associated with the meter, if known
         duration            : bool
-            ???
+            If True, the duration will be displayed in the results. If false the column will be dropped.
         min_event_filter    : str
-            ???
+            Filters out the events that are less than the given time period
 
         Returns
         -------
         pd.DataFrame()
-            ???
+            dataframe with the start time of the event (as the index),
+        end time of the event (first time when data is reported)
 
         """
 
@@ -1047,7 +1051,8 @@ class Clean_Data:
 
 
     def analyze_quality_table(self, obj, clean=False, low_bound=None, high_bound=None):
-        """ ???
+        """ Takes in an the object returned by the MDAL query, and analyzes the quality 
+        of the data for each column in the df. Returns a df of data quality metrics
 
         To Do
         -----
@@ -1057,18 +1062,19 @@ class Clean_Data:
         Parameters
         ----------
         obj             : ???
-            ???
+            the object returned by the MDAL Query
         clean           : bool
-            ???
+            If True, clean removes the data outside of the low_bound, and high_bound
         low_bound       : float
-            ???
+            all data equal to or below this value will be interpreted as missing data
         high_bound      : float
-            ???
+            all data above this value will be interpreted as missing
 
         Returns
         -------
         pd.DataFrame()
-          ???
+          returns data frame with % missing data, average duration of missing data 
+        event and standard deviation of that duration for each column of data
 
         """
 
@@ -1080,7 +1086,7 @@ class Clean_Data:
                          columns=[data.columns])
 
         if clean:
-            data = data.where((data > low_bound) & (data < high_bound))
+            data = data.where((data >= low_bound) & (data < high_bound))
 
         for i in range(N_cols):
 
@@ -1093,14 +1099,17 @@ class Clean_Data:
             missing_mean = data_gaps.mean()
             std_dev = data_gaps.std()
             d.loc["% Missing", meter] = percentage[meter]
-            d.loc["AVG Length Missing", meter] = missing_mean['Duration']
-            d.loc["Std dev. Missing", meter] = std_dev['Duration']
+            d.loc["AVG Length Missing", meter] = missing_mean['duration']
+            d.loc["Std dev. Missing", meter] = std_dev['duration']
 
         return d
 
 
     def analyze_quality_graph(self, obj):
-        """ ???
+        """ Takes in an the object returned by the MDAL query, and analyzes the quality 
+        of the data for each column in the df in the form of graphs. The Graphs returned
+        show missing data events over time, and missing data frequency during each hour
+        of the day
 
         To Do
         -----
@@ -1110,7 +1119,7 @@ class Clean_Data:
         Parameters
         ----------
         obj             : ???
-            ???
+            the object returned by the MDAL Query
 
         """
 
@@ -1136,7 +1145,8 @@ class Clean_Data:
 
 
     def event_duration(self, obj, dictionary, clean=False, low_bound=None, high_bound=None):
-        """ ???
+        """ Takes in an object and returns a dictionary with the missing data events (start and end)
+        for each column in the inputted object (will map to a uuid)
 
         To Do
         -----
@@ -1146,20 +1156,21 @@ class Clean_Data:
         Parameters
         ----------
         obj             : ???
-         ???
+            the object returned by the MDAL Query
         dictionary      : dict
-            ???
+            name of the dictionary
         clean           : bool
-         ???
+             True, allows a lower and upper bound to be applied
         low_bound       : float
-         ???
+             all data equal to or below this value will be interpreted as missing data
         high_bound      : float
-         ???
+             all data above this value will be interpreted as missing data
 
         Returns
         -------
-        ???
-            ???
+        dict
+            dictionary with the format:
+            {uuid:{start of event 1: end of event 1, start of event 2: end of event 2, ...}, uuid:{..}}
 
         """
 
@@ -1181,4 +1192,4 @@ class Clean_Data:
             dictionary[uuid] = dictionary_solo[uuid]
             # dictionary[uuid]=data_gaps # uncomment to get a dictionary of dfs
 
-        return data_gaps
+        return dictionary

@@ -28,6 +28,8 @@ import os
 import glob
 import numpy as np
 import pandas as pd
+from datetime import datetime
+from pytz import timezone
 
 
 class Import_Data:
@@ -184,8 +186,34 @@ class Import_MDAL(Import_Data):
         self.m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
 
 
+    @staticmethod
+    def convert_to_utc(time):
+        """ Convert time to UTC
+
+        Parameters
+        ----------
+        time    : str
+            Time to convert. Has to be of the format '2016-01-01T00:00:00-08:00'.
+
+        Returns
+        -------
+        str
+            UTC timestamp.
+
+        """
+
+        # time is already in UTC
+        if 'Z' in time:
+            return time
+        else:
+            time_formatted = time[:-3] + time[-2:]
+            dt = datetime.strptime(time_formatted, '%Y-%m-%dT%H:%M:%S%z')
+            dt = dt.astimezone(timezone('UTC'))
+            return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
     def get_meter(self, site, start, end, point_type='Green_Button_Meter',
-                    var="meter", agg='MEAN', window='24h', aligned=True, return_names=True):
+                  var="meter", agg='MEAN', window='24h', aligned=True, return_names=True):
         """ Get meter data from MDAL.
 
         Parameters
@@ -215,8 +243,13 @@ class Import_MDAL(Import_Data):
             ???
 
         """
+
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
     
-        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
+        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,
+                                        var=var, agg=agg, window=window, aligned=aligned)
         resp = self.m.query(request)
         
         if return_names:
@@ -257,7 +290,12 @@ class Import_MDAL(Import_Data):
 
         """
 
-        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
+
+        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,
+                                        var=var, agg=agg, window=window, aligned=aligned)
         resp = self.m.query(request)
 
         if return_names:
@@ -294,6 +332,10 @@ class Import_MDAL(Import_Data):
             ???
 
         """
+
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
     
         point_map = {
             "tstat_state" : "Thermostat_Status", 
@@ -307,7 +349,8 @@ class Import_MDAL(Import_Data):
         else:
             point_type = point_map[var] # single value using BRICK classes
         
-        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,  var=var, agg=agg, window=window, aligned=aligned)
+        request = self.compose_MDAL_dic(point_type=point_type, site=site, start=start, end=end,
+                                        var=var, agg=agg, window=window, aligned=aligned)
         resp = self.m.query(request)
         
         if return_names:
@@ -347,6 +390,10 @@ class Import_MDAL(Import_Data):
             ???
 
         """
+
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
     
         request = {} 
         
