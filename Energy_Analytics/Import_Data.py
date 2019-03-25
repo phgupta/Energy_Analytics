@@ -399,7 +399,7 @@ class Import_Mortar(Import_Data):
         return response['data_oat'], map_uuid_sitename
 
 
-    def get_tstat(self, site, start, end, agg=pymortar.MAX, window='1m', resample_minutes=60):
+    def get_tstat(self, site, start, end, agg=pymortar.MAX, window='1m'):
         """ Get tstat data from Mortar.
 
         Parameters
@@ -418,7 +418,8 @@ class Import_Mortar(Import_Data):
         
         Returns
         -------
-        ???
+        pd.DataFrame()
+            Dataframe containing tstat data for all sites.
 
         """
 
@@ -485,11 +486,14 @@ class Import_Mortar(Import_Data):
         # Fetch data from request
         response = self.client.fetch(request)
 
+        # Final dataframe containing all sites' data
+        df_result = pd.DataFrame()
+        
         tstat_df = response['data_tstat']
         tstats = [tstat[0] for tstat in response.query("select tstat from view_tstat")]
-
         error_df_list = []
-        for tstat in tstats:
+
+        for i, tstat in enumerate(tstats):
             
             q = """
                 SELECT state_uuid, temp_uuid, hsp_uuid, csp_uuid, room, zone, site
@@ -503,39 +507,15 @@ class Import_Mortar(Import_Data):
 
             state_col, iat_col, hsp_col, csp_col, room, zone, site = res[0]
             df = tstat_df[[state_col, iat_col, hsp_col, csp_col]]
-            df.columns = ['state',  'iat', 'hsp', 'csp']
             
-            df2 = pd.DataFrame()
-            resample_time = '{0}T'.format(resample_minutes)
-            df2['min_hsp'] = df['hsp'].resample(resample_time).min()
-            df2['min_csp'] = df['csp'].resample(resample_time).min()
-            df2['max_hsp'] = df['hsp'].resample(resample_time).max()
-            df2['max_csp'] = df['csp'].resample(resample_time).max()    
-
-            df2['heat_percent'] = df['state'].resample(resample_time).apply(lambda x: ((x==1).sum() + (x==4).sum())/resample_minutes*100)
-            df2['cool_percent'] = df['state'].resample(resample_time).apply(lambda x: ((x==2).sum() + (x==5).sum())/resample_minutes*100)
+            # A single site has many tstat points. Adding site+str(i) distinguishes each of them.
+            # CHECK: This can have a better naming scheme.
+            df.columns = [site+str(i)+'_state',  site+str(i)+'_iat', site+str(i)+'_hsp', site+str(i)+'_csp']
             
-            df2['tstat'] = tstat
-            df2['room'] = room.split('#')[1]
-            df2['zone'] = zone.split('#')[1]
-            df2['site'] = site
-                
-            df2['both_heat_cool'] = False
-            df2.loc[((df2.heat_percent > 0) & (df2.cool_percent > 0)), 'both_heat_cool'] = True
+            df_result = df_result.join(df, how='outer')
+
+        return df_result
             
-            if not df2[df2['both_heat_cool'] == True].empty:
-                error_df_list.append(df2[df2['both_heat_cool'] == True])
-
-        if len(error_df_list) > 0:
-            error_df = pd.concat(error_df_list, axis=0)[['site', 'zone', 'room', 'heat_percent', 'cool_percent', 'min_hsp', 'min_csp', 'max_hsp', 'max_csp']]
-            error_df.index.name = 'time'
-            error_msgs = error_df.apply(lambda x: self.get_error_message(x), axis=1).values
-            for msg in error_msgs:
-                print(msg)
-            return error_df
-        else:
-            return pd.DataFrame()
-
 
     def get_error_message(self, x, resample_minutes=60):
         """ Creates error message for a row of error_df (get_tstat())
