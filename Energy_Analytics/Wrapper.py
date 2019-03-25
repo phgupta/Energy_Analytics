@@ -52,7 +52,7 @@ import pandas as pd
 from scipy import stats
 from datetime import date
 
-from Energy_Analytics.Import_Data import Import_Data, Import_MDAL
+from Energy_Analytics.Import_Data import Import_Data, Import_MDAL, Import_Mortar
 from Energy_Analytics.Clean_Data import Clean_Data
 from Energy_Analytics.Preprocess_Data import Preprocess_Data
 from Energy_Analytics.Model_Data import Model_Data

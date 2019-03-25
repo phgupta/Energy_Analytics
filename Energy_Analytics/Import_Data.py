@@ -2,7 +2,7 @@
 
 Note
 ----
-Last modified: Feb 4 2019
+Last modified: March 25 2019
 
 1. CSV - If only folder is specified and no filename, all csv's will be read in sorted order by name.
 2. CSV - Doesn't handle cases when user provides
@@ -12,8 +12,7 @@ Last modified: Feb 4 2019
 
 To Do
 -----
-    1. Extract RAW data from MDAL.
-    2. Figure out parameter/return types of functions (do a search on "???")
+    1. Figure out parameter/return types of functions (do a search on "???")
 
 
 Authors
@@ -26,10 +25,12 @@ Authors
 
 import os
 import glob
+import pymortar
 import numpy as np
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
+from collections import defaultdict
 
 
 class Import_Data:
@@ -174,16 +175,28 @@ class Import_Data:
         return data
 
 
+class Import_Mortar(Import_Data):
 
-class Import_MDAL(Import_Data):
+    """ This class queries data from Mortar.
 
-    """ This class imports data from MDAL. """
+    Note
+    ----
+    Set the evironment variables - $MORTAR_API_USERNAME & $MORTAR_API_PASSWORD.
+
+    For Mac,
+    1. vi ~/.bash_profile
+    2. Add at the end of file,
+        1. export $MORTAR_API_USERNAME=username
+        2. export $MORTAR_API_PASSWORD=password
+    3. source ~/.bash_profile
+
+
+    """
 
     def __init__(self):
         """ Constructor. """
-        
-        import dataclient
-        self.m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
+
+        self.client = pymortar.Client({})
 
 
     @staticmethod
@@ -212,10 +225,394 @@ class Import_MDAL(Import_Data):
             return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
+    def get_meter(self, site, start, end, point_type="Green_Button_Meter", agg=pymortar.MEAN, window='15m'):
+        """ Get meter data from Mortar.
+
+        Parameters
+        ----------
+        site            : list(str)
+            List of sites.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        point_type      : str
+            Type of data, i.e. Green_Button_Meter, Building_Electric_Meter...
+        agg             : pymortar aggregation object
+            Values include pymortar.MEAN, pymortar.MAX, pymortar.MIN, 
+        pymortar.COUNT, pymortar.SUM, pymortar.RAW (the temporal window parameter is ignored)
+        window          : str
+            Size of the moving window.
+        
+        Returns
+        -------
+        pd.DataFrame(), defaultdict(list)
+            Meter data, dictionary that maps meter data's columns (uuid's) to sitenames.
+
+        """
+
+        # CHECK: Does Mortar take in UTC or local time? 
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
+
+        query_meter = "SELECT ?meter WHERE { ?meter rdf:type/rdfs:subClassOf* brick:" + point_type + " };"
+
+        # Get list of sites for meter data
+        resp_meter = self.client.qualify([query_meter])
+
+        if resp_meter.error:
+            raise RuntimeError(resp_meter.error)
+
+        # Define the view of meters (metadata)
+        meter = pymortar.View(
+            name="view_meter",
+            sites=site,
+            definition=query_meter
+        )
+
+        # Define the meter timeseries stream
+        data_view_meter = pymortar.DataFrame(
+            name="data_meter", # dataframe column name
+            aggregation=agg,
+            window=window,
+            timeseries=[
+                pymortar.Timeseries(
+                    view="view_meter",
+                    dataVars=["?meter"]
+                )
+            ]
+        )
+
+        # Define timeframe
+        time_params = pymortar.TimeParams(
+            start=start,
+            end=end
+        )
+
+        # Form the full request object
+        request = pymortar.FetchRequest(
+            sites=site,
+            views=[meter],
+            dataFrames=[data_view_meter],
+            time=time_params
+        )
+
+        # Fetch data from request
+        response = self.client.fetch(request)
+
+        # resp_meter = (url, uuid, sitename)
+        resp_meter = response.query('select * from view_meter')
+
+        # Map's uuid's to the site names
+        map_uuid_sitename = defaultdict(list)
+        for (url, uuid, sitename) in resp_meter:
+            map_uuid_sitename[uuid].append(sitename)
+
+        return response['data_meter'], map_uuid_sitename
+            
+
+    def get_weather(self, site, start, end, point_type='Weather_Temperature_Sensor', agg=pymortar.MEAN, window='15m'):
+        """ Get weather (OAT) data from Mortar.
+
+        Parameters
+        ----------
+        site            : list(str)
+            List of sites.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        point_type      : str
+            Type of point, i.e. Weather_Temperature_Sensor...
+        agg             : pymortar aggregation object
+            Values include pymortar.MEAN, pymortar.MAX, pymortar.MIN, 
+        pymortar.COUNT, pymortar.SUM, pymortar.RAW (the temporal window parameter is ignored)
+        window          : str
+            Size of the moving window.
+        
+        Returns
+        -------
+        pd.DataFrame(), defaultdict(list)
+            OAT data, dictionary that maps meter data's columns (uuid's) to sitenames.
+
+        """
+
+        # CHECK: Does Mortar take in UTC or local time? 
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
+
+        query_oat = "SELECT ?t WHERE { ?t rdf:type/rdfs:subClassOf* brick:" + point_type + " };"
+
+        # Get list of sites for OAT data
+        resp_oat = self.client.qualify([query_oat])
+
+        if resp_oat.error:
+            raise RuntimeError(resp_oat.error)
+
+        # Define the view of meters (metadata)
+        oat = pymortar.View(
+            name="view_oat",
+            sites=site,
+            definition=query_oat
+        )
+
+        # Define the meter timeseries stream
+        data_view_oat = pymortar.DataFrame(
+            name="data_oat", # dataframe column name
+            aggregation=agg,
+            window=window,
+            timeseries=[
+                pymortar.Timeseries(
+                    view="view_oat",
+                    dataVars=["?t"]
+                )
+            ]
+        )
+
+        # Define timeframe
+        time_params = pymortar.TimeParams(
+            start=start,
+            end=end
+        )
+
+        # Form the full request object
+        request = pymortar.FetchRequest(
+            sites=site,
+            views=[oat],
+            dataFrames=[data_view_oat],
+            time=time_params
+        )
+
+        # Fetch data from request
+        response = self.client.fetch(request)
+
+        # resp_meter = (url, uuid, sitename)
+        resp_oat = response.query('select * from view_oat')
+
+        # Map's uuid's to the site names
+        map_uuid_sitename = defaultdict(list)
+        for (url, uuid, sitename) in resp_oat:
+            map_uuid_sitename[uuid].append(sitename)
+
+        return response['data_oat'], map_uuid_sitename
+
+
+    def get_tstat(self, site, start, end, agg=pymortar.MAX, window='1m', resample_minutes=60):
+        """ Get tstat data from Mortar.
+
+        Parameters
+        ----------
+        site            : list(str)
+            List of sites.
+        start           : str
+            Start date - 'YYYY-MM-DDTHH:MM:SSZ'
+        end             : str
+            End date - 'YYYY-MM-DDTHH:MM:SSZ'
+        agg             : pymortar aggregation object
+            Values include pymortar.MEAN, pymortar.MAX, pymortar.MIN, 
+        pymortar.COUNT, pymortar.SUM, pymortar.RAW (the temporal window parameter is ignored)
+        window          : str
+            Size of the moving window.
+        
+        Returns
+        -------
+        ???
+
+        """
+
+        # CHECK: Does Mortar take in UTC or local time? 
+        # Convert time to UTC
+        start = self.convert_to_utc(start)
+        end = self.convert_to_utc(end)
+
+        query_tstat = "SELECT ?tstat ?room ?zone ?state ?temp ?hsp ?csp WHERE { \
+            ?tstat bf:hasLocation ?room . \
+            ?zone bf:hasPart ?room . \
+            ?tstat bf:hasPoint ?state . \
+            ?tstat bf:hasPoint ?temp . \
+            ?tstat bf:hasPoint ?hsp . \
+            ?tstat bf:hasPoint ?csp . \
+            ?zone rdf:type/rdfs:subClassOf* brick:Zone . \
+            ?tstat rdf:type/rdfs:subClassOf* brick:Thermostat . \
+            ?state rdf:type/rdfs:subClassOf* brick:Thermostat_Status . \
+            ?temp  rdf:type/rdfs:subClassOf* brick:Temperature_Sensor  . \
+            ?hsp   rdf:type/rdfs:subClassOf* brick:Supply_Air_Temperature_Heating_Setpoint . \
+            ?csp   rdf:type/rdfs:subClassOf* brick:Supply_Air_Temperature_Cooling_Setpoint . \
+        };"
+
+        # Get list of sites for tstat data
+        resp_tstat = self.client.qualify([query_tstat])
+
+        if resp_tstat.error:
+            raise RuntimeError(resp_tstat.error)
+
+        # Define the view of tstat (metadata)
+        tstat = pymortar.View(
+            name="view_tstat",
+            sites=site,
+            definition=query_tstat
+        )
+
+        # Define the meter timeseries stream
+        data_view_tstat = pymortar.DataFrame(
+            name="data_tstat", # dataframe column name
+            aggregation=agg,
+            window=window,
+            timeseries=[
+                pymortar.Timeseries(
+                    view="view_tstat",
+                    dataVars=["?state", "?temp", "?hsp", "?csp"]
+                )
+            ]
+        )
+
+        # Define timeframe
+        time_params = pymortar.TimeParams(
+            start=start,
+            end=end
+        )
+
+        # Form the full request object
+        request = pymortar.FetchRequest(
+            sites=site,
+            views=[tstat],
+            dataFrames=[data_view_tstat],
+            time=time_params
+        )
+
+        # Fetch data from request
+        response = self.client.fetch(request)
+
+        tstat_df = response['data_tstat']
+        tstats = [tstat[0] for tstat in response.query("select tstat from view_tstat")]
+
+        error_df_list = []
+        for tstat in tstats:
+            
+            q = """
+                SELECT state_uuid, temp_uuid, hsp_uuid, csp_uuid, room, zone, site
+                FROM view_tstat
+                WHERE tstat = "{0}";
+            """.format(tstat)
+        
+            res = response.query(q)
+            if not res:
+                continue
+
+            state_col, iat_col, hsp_col, csp_col, room, zone, site = res[0]
+            df = tstat_df[[state_col, iat_col, hsp_col, csp_col]]
+            df.columns = ['state',  'iat', 'hsp', 'csp']
+            
+            df2 = pd.DataFrame()
+            resample_time = '{0}T'.format(resample_minutes)
+            df2['min_hsp'] = df['hsp'].resample(resample_time).min()
+            df2['min_csp'] = df['csp'].resample(resample_time).min()
+            df2['max_hsp'] = df['hsp'].resample(resample_time).max()
+            df2['max_csp'] = df['csp'].resample(resample_time).max()    
+
+            df2['heat_percent'] = df['state'].resample(resample_time).apply(lambda x: ((x==1).sum() + (x==4).sum())/resample_minutes*100)
+            df2['cool_percent'] = df['state'].resample(resample_time).apply(lambda x: ((x==2).sum() + (x==5).sum())/resample_minutes*100)
+            
+            df2['tstat'] = tstat
+            df2['room'] = room.split('#')[1]
+            df2['zone'] = zone.split('#')[1]
+            df2['site'] = site
+                
+            df2['both_heat_cool'] = False
+            df2.loc[((df2.heat_percent > 0) & (df2.cool_percent > 0)), 'both_heat_cool'] = True
+            
+            if not df2[df2['both_heat_cool'] == True].empty:
+                error_df_list.append(df2[df2['both_heat_cool'] == True])
+
+        if len(error_df_list) > 0:
+            error_df = pd.concat(error_df_list, axis=0)[['site', 'zone', 'room', 'heat_percent', 'cool_percent', 'min_hsp', 'min_csp', 'max_hsp', 'max_csp']]
+            error_df.index.name = 'time'
+            error_msgs = error_df.apply(lambda x: self.get_error_message(x), axis=1).values
+            for msg in error_msgs:
+                print(msg)
+            return error_df
+        else:
+            return pd.DataFrame()
+
+
+    def get_error_message(self, x, resample_minutes=60):
+        """ Creates error message for a row of error_df (get_tstat())
+
+        Parameters
+        ----------
+        x                   : row of pd.DataFrame()
+            Pandas row.
+        resample_minutes    : int
+            Resampling minutes.
+        
+        Returns
+        -------
+        str
+            Error message.
+
+        """
+        
+        dt_format = "%Y-%m-%d %H:%M:%S"
+        st = x.name
+        st_str = st.strftime(dt_format)
+        et_str = (st + timedelta(minutes=resample_minutes)).strftime(dt_format)
+        site = x.site
+        room = x.room
+        zone = x.zone
+        heat_percent = round(x.heat_percent, 2)
+        cool_percent = round(x.cool_percent, 2)
+        msg = "From {0} to {1}, zone: \'{2}\' in room: \'{3}\' at site: \'{4}\', was heating for {5}% of the time and cooling for {6}% of the time".format(
+            st_str,
+            et_str,
+            zone,
+            room,
+            site,
+            heat_percent,
+            cool_percent
+        )
+
+        return msg
+ 
+
+class Import_MDAL(Import_Data):
+
+    """ This class imports data from MDAL. """
+
+    def __init__(self):
+        """ Constructor. """
+        
+        import dataclient
+        self.m = dataclient.MDALClient("corbusier.cs.berkeley.edu:8088")
+
+
+    @staticmethod
+    def convert_to_utc(time):
+        """ Convert time to UTC
+        Parameters
+        ----------
+        time    : str
+            Time to convert. Has to be of the format '2016-01-01T00:00:00-08:00'.
+        Returns
+        -------
+        str
+            UTC timestamp.
+        """
+
+        # time is already in UTC
+        if 'Z' in time:
+            return time
+        else:
+            time_formatted = time[:-3] + time[-2:]
+            dt = datetime.strptime(time_formatted, '%Y-%m-%dT%H:%M:%S%z')
+            dt = dt.astimezone(timezone('UTC'))
+            return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
     def get_meter(self, site, start, end, point_type='Green_Button_Meter',
                   var="meter", agg='MEAN', window='24h', aligned=True, return_names=True):
         """ Get meter data from MDAL.
-
         Parameters
         ----------
         site            : str
@@ -236,12 +633,10 @@ class Import_MDAL(Import_Data):
             ???
         return_names    : bool
             ???
-
         Returns
         -------
         (df, mapping, context)
             ???
-
         """
 
         # Convert time to UTC
@@ -261,7 +656,6 @@ class Import_MDAL(Import_Data):
     def get_weather(self, site, start, end, point_type='Weather_Temperature_Sensor', 
                     var="weather", agg='MEAN', window='24h', aligned=True, return_names=True):
         """ Get weather data from MDAL.
-
         Parameters
         ----------
         site            : str
@@ -282,12 +676,10 @@ class Import_MDAL(Import_Data):
             ???
         return_names    : bool
             ???
-
         Returns
         -------
         (df, mapping, context)
             ???
-
         """
 
         # Convert time to UTC
@@ -306,7 +698,6 @@ class Import_MDAL(Import_Data):
 
     def get_tstat(self, site, start, end, var="tstat_temp", agg='MEAN', window='24h', aligned=True, return_names=True):
         """ Get thermostat data from MDAL.
-
         Parameters
         ----------
         site            : str
@@ -325,12 +716,10 @@ class Import_MDAL(Import_Data):
             ???
         return_names    : bool
             ???
-
         Returns
         -------
         (df, mapping, context)
             ???
-
         """
 
         # Convert time to UTC
@@ -362,7 +751,6 @@ class Import_MDAL(Import_Data):
     def compose_MDAL_dic(self, site, point_type, 
                         start, end,  var, agg, window, aligned, points=None, return_names=False):
         """ Create dictionary for MDAL request.
-
         Parameters
         ----------
         site            : str
@@ -383,12 +771,10 @@ class Import_MDAL(Import_Data):
             ???
         return_names    : bool
             ???
-
         Returns
         -------
         (df, mapping, context)
             ???
-
         """
 
         # Convert time to UTC
@@ -430,19 +816,16 @@ class Import_MDAL(Import_Data):
 
     def compose_BRICK_query(self, point_type, site):
         """ Compose the BRICK query.
-
         Parameters
         ----------
         site            : str
             Building name.
         point_type      : str
             Type of data, i.e. Green_Button_Meter, Building_Electric_Meter...
-
         Returns
         -------
         dict
             BRICK query.
-
         """
     
         if point_type == "Green_Button_Meter" or point_type == 'Building_Electric_Meter':
@@ -473,17 +856,14 @@ class Import_MDAL(Import_Data):
 
     def parse_context(self, context):
         """ Parse context.
-
         Parameters
         ----------
         context     : ???
             ???
-
         Returns
         -------
         pd.DataFrame()
             Pandas dataframe containing metadata.
-
         """
     
         metadata_table = pd.DataFrame(context).T
@@ -492,34 +872,28 @@ class Import_MDAL(Import_Data):
 
     def strip_point_name(self, col):
         """ Strip point name.
-
         Parameters
         ----------
         col     : ???
             ???
-
         Returns
         -------
         ???
             ???
-
         """
         return col.str.split("#", expand=True)[1]
 
 
     def get_point_name(self, context):
         """ Get point name.
-
         Parameters
         ----------
         context     : ???
             ???
-
         Returns
         -------
         ???
             ???
-
         """
         
         metadata_table = self.parse_context(context)
@@ -528,17 +902,14 @@ class Import_MDAL(Import_Data):
 
     def replace_uuid_w_names(self, resp):
         """ Replace the uuid's with names.
-
         Parameters
         ----------
         resp     : ???
             ???
-
         Returns
         -------
         ???
             ???
-
         """
         
         col_mapper = self.get_point_name(resp.context)["?point"].to_dict()
